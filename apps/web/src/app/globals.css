@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@source "../../../../packages/ui/src/**/*.{js,ts,jsx,tsx}";
+
+:root {
+  --background: #FDFBF7; /* luxury cream */
+  --foreground: #111111; /* luxury dark */
+}
+
+@theme {
+  /* Premium Theme Variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-luxury-gold: #C5A880;
+  --color-luxury-dark: #111111;
+  --color-luxury-cream: #FDFBF7;
+  --color-luxury-charcoal: #1A1A1A;
+  --color-luxury-silver: #E5E5E5;
+
+  --font-sans: var(--font-sans), "Outfit", "Inter", sans-serif;
+  --font-serif: var(--font-serif), "Playfair Display", serif;
+
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+
+  --letter-spacing-luxury: 0.15em;
+  --letter-spacing-widest: 0.25em;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+button{
+  cursor: pointer;
+}
