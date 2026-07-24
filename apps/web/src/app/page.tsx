@@ -8,6 +8,7 @@ import {
   ProductCard,
   Button,
   Input,
+  RecommendationSlider,
 } from "@repo/ui";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -79,6 +80,63 @@ const LOOKBOOK_IMAGES = [
   { src: "/images/models/modules11.jpeg", caption: "Sartorial Contrast", size: "col-span-1 aspect-[3/4]" },
 ];
 
+const RECOMMENDED_PRODUCTS = [
+  {
+    id: "rec-1",
+    name: "Classic Beige Linen Suit",
+    brand: "POLO RALPH LAUREN",
+    price: 18900,
+    originalPrice: 27000,
+    discount: "30% off",
+    imageUrl: "/images/models/modules5.jpeg",
+  },
+  {
+    id: "rec-2",
+    name: "Navy Solid Classic Fit Short Sleeve Polo",
+    brand: "HACKETT LONDON",
+    price: 9600,
+    originalPrice: 16000,
+    discount: "40% off",
+    imageUrl: "/images/models/modules6.jpeg",
+  },
+  {
+    id: "rec-3",
+    name: "Sand Linen Casual Jacket",
+    brand: "POLO RALPH LAUREN",
+    price: 14400,
+    originalPrice: 24000,
+    discount: "40% off",
+    imageUrl: "/images/models/modules7.jpeg",
+  },
+  {
+    id: "rec-4",
+    name: "Tan Double-Breasted Editorial Suit",
+    brand: "POLO RALPH LAUREN",
+    price: 23400,
+    originalPrice: 39000,
+    discount: "40% off",
+    imageUrl: "/images/models/modules8.jpeg",
+  },
+  {
+    id: "rec-5",
+    name: "Knitted Polo Cardigan",
+    brand: "FRED PERRY",
+    price: 8600,
+    originalPrice: 12000,
+    discount: "28% off",
+    imageUrl: "/images/models/modules9.jpeg",
+  },
+  {
+    id: "rec-6",
+    name: "Trench Coat Coat Trimmed",
+    brand: "KARL LAGERFELD",
+    price: 27900,
+    originalPrice: 45000,
+    discount: "38% off",
+    imageUrl: "/images/models/modules10.jpeg",
+  },
+];
+
 export default function Home() {
   const [currentHeroIdx, setCurrentHeroIdx] = useState(0);
   const [cartCount, setCartCount] = useState(0);
@@ -127,7 +185,7 @@ export default function Home() {
       <main className="flex-1 flex flex-col">
         
         {/* Editorial Hero Slider Section */}
-        <section className="relative w-full h-[calc(100vh-80px)] flex items-center justify-center bg-[#E5E5E5] overflow-hidden">
+        <section className="relative w-full h-[calc(100vh-110px)] flex items-center justify-center bg-[#E5E5E5] overflow-hidden">
           
           {/* Slides */}
           <div className="absolute inset-0 z-0">
@@ -137,7 +195,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 1.02 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+                transition={{ duration: 0.1, ease: [0.25, 1, 0.5, 1] }}
                 className="relative w-full h-full"
               >
                 <Image
@@ -227,6 +285,14 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        {/* Styles Recommended For You Section */}
+        <AnimatedReveal direction="up" delay={0.1}>
+          <RecommendationSlider
+            products={RECOMMENDED_PRODUCTS}
+            onProductClick={(id) => alert(`Product clicked: ${id}`)}
+          />
+        </AnimatedReveal>
 
         {/* Editorial Narrative Section */}
         <section className="max-w-7xl mx-auto px-6 py-16 w-full border-t border-luxury-silver/30">
