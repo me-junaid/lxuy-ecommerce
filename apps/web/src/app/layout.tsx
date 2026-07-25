@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "../context/AuthContext";
 
 const sansFont = Outfit({
   variable: "--font-sans",
@@ -15,7 +16,7 @@ const serifFont = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "LXUY - Premium Storefront",
+  title: "LXUY - Premium",
   description: "Apple-quality experience, Gucci-inspired premium design.",
 };
 
@@ -29,7 +30,9 @@ export default function RootLayout({
       lang="en"
       className={`${sansFont.variable} ${serifFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

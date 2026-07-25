@@ -90,7 +90,14 @@ Issues a new short-lived access token using the httpOnly refresh token.
   * **Body:**
     ```json
     {
-      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "user": {
+        "id": "60d0fe4f5311236168a109ca",
+        "email": "customer@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "role": "customer"
+      }
     }
     ```
 * **Error Responses:**
@@ -113,3 +120,27 @@ Invalidates the current session and clears the refresh token cookie.
       "message": "Logged out successfully"
     }
     ```
+
+---
+
+### 5. Get Current User Profile
+Retrieves details of the currently authenticated user.
+
+* **Endpoint:** `GET /api/v1/auth/me`
+* **Headers:**
+  * `Authorization: Bearer <accessToken>`
+* **Success Response (`200 OK`):**
+  * **Body:**
+    ```json
+    {
+      "_id": "60d0fe4f5311236168a109ca",
+      "email": "customer@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "role": "customer",
+      "isActive": true,
+      "createdAt": "2026-07-23T23:44:36Z"
+    }
+    ```
+* **Error Responses:**
+  * `401 Unauthorized` (Invalid, missing, or expired access token).

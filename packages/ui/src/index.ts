@@ -6,3 +6,5 @@ export * from './components/Header';
 export * from './components/Footer';
 export * from './components/AnimatedReveal';
 export * from './components/RecommendationSlider';
+export * from './components/SearchFlyout';
+

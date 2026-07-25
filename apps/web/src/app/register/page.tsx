@@ -1,0 +1,234 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { Input, Button, Header, Footer } from "@repo/ui";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function RegisterPage() {
+  const { register, login, user, isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Only redirect once session restore has resolved.
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.replace("/profile");
+    }
+  }, [isAuthenticated, loading, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
+      setError("All fields are required.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (password.length > 72) {
+      setError("Password must be at most 72 characters long.");
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      // 1. Create the account.
+      await register({
+        email: email.trim().toLowerCase(),
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+      });
+
+      // 2. Immediately sign the user in — this sets the httpOnly cookie and
+      //    stores the access token in memory, so /profile loads authenticated.
+      await login({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      router.replace("/profile");
+    } catch (err: unknown) {
+      const apiErr = err as { data?: { message?: string }; message?: string };
+      setError(
+        apiErr?.data?.message ||
+          apiErr?.message ||
+          "Registration failed. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Show loading skeleton while session is being restored.
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FDFBF7]">
+        <motion.div
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="text-sm uppercase tracking-[0.25em] text-luxury-gold"
+        >
+          LXUY Maison...
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      <Header
+        brandName="LXUY"
+        cartCount={0}
+        user={user}
+        onLogoClick={() => router.push("/")}
+        onCartClick={() => router.push("/cart")}
+        onProfileClick={() => router.push(isAuthenticated ? "/profile" : "/login")}
+        onSearchClick={() => {}}
+      />
+
+      <main className="flex-1 grid grid-cols-1 md:grid-cols-2 min-h-[calc(100vh-110px)]">
+        {/* Left Side: Luxury Editorial Image (Hidden on Mobile) */}
+        <div className="relative hidden md:block bg-luxury-charcoal overflow-hidden group">
+          <Image
+            src="/images/models/modules6.jpeg"
+            alt="LXUY Editorial Model"
+            fill
+            priority
+            sizes="50vw"
+            className="object-cover object-center grayscale contrast-110 transition-transform duration-10000 ease-out group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-black/30 transition-opacity duration-700" />
+          <div className="absolute inset-0 flex flex-col justify-end p-16 z-10 text-[#FDFBF7]">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="max-w-md"
+            >
+              <span className="text-xs uppercase tracking-[0.25em] text-luxury-gold mb-3 block">
+                LXUY Maison
+              </span>
+              <h2 className="text-4xl font-serif tracking-normal leading-tight mb-4">
+                &ldquo;The expression of modern tailoring.&rdquo;
+              </h2>
+              <p className="text-sm font-light text-neutral-300 tracking-wide">
+                Join our universe of curated elegance. Create an account to receive
+                tailored recommendations, manage orders, and enjoy faster checkouts.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Right Side: Registration Form */}
+        <div className="flex items-center justify-center p-8 md:p-16 bg-[#FDFBF7]">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="w-full max-w-md"
+          >
+            <div className="mb-10 text-center md:text-left">
+              <h1 className="text-3xl font-serif tracking-normal mb-2 text-luxury-dark">
+                Create Account
+              </h1>
+              <p className="text-sm text-neutral-500 font-light tracking-wide">
+                Join us to experience personal luxury shopping.
+              </p>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-6 p-4 bg-red-50 text-red-600 text-xs tracking-wider uppercase font-medium border-l border-red-500"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="First Name"
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  autoComplete="given-name"
+                  required
+                />
+                <Input
+                  label="Last Name"
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  autoComplete="family-name"
+                  required
+                />
+              </div>
+
+              <Input
+                label="Email Address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
+
+              <Input
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+                required
+              />
+
+              <div className="pt-4">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="w-full py-3.5"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Creating Account…" : "Create Account"}
+                </Button>
+              </div>
+            </form>
+
+            <div className="mt-8 text-center text-xs tracking-wider uppercase font-medium text-neutral-500">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-luxury-dark hover:text-luxury-gold transition-colors font-bold underline underline-offset-4"
+              >
+                Sign In
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}

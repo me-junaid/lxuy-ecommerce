@@ -43,7 +43,7 @@ export const Footer: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-luxury-charcoal/50 flex flex-col md:flex-row items-center justify-between text-[10px] uppercase tracking-luxury text-neutral-500">
-        <p>&copy; {new Date().getFullYear()} LXUY Storefront. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} LXUY. All rights reserved.</p>
         <div className="flex space-x-6 mt-4 md:mt-0">
           <a href="#" className="hover:text-luxury-cream transition-colors duration-300">Privacy Policy</a>
           <a href="#" className="hover:text-luxury-cream transition-colors duration-300">Terms of Service</a>

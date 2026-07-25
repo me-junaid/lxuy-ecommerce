@@ -11,6 +11,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   imports: [
     UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    // JwtModule is registered without a default secret because each
+    // sign / verify call specifies its own secret via options. This
+    // prevents accidentally using the wrong secret for the wrong token type.
     JwtModule.register({}),
     ConfigModule,
   ],

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 import {
   Header,
   Footer,
@@ -138,6 +140,8 @@ const RECOMMENDED_PRODUCTS = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [currentHeroIdx, setCurrentHeroIdx] = useState(0);
   const [cartCount, setCartCount] = useState(0);
   const [email, setEmail] = useState("");
@@ -177,9 +181,11 @@ export default function Home() {
       <Header
         brandName="LXUY"
         cartCount={cartCount}
-        onCartClick={() => alert("Cart clicked!")}
-        onProfileClick={() => alert("Profile clicked!")}
-        onSearchClick={() => alert("Search clicked!")}
+        user={user}
+        onLogoClick={() => router.push("/")}
+        onCartClick={() => router.push("/cart")}
+        onProfileClick={() => router.push(user ? "/profile" : "/login")}
+        onSearchClick={() => {}}
       />
 
       <main className="flex-1 flex flex-col">
