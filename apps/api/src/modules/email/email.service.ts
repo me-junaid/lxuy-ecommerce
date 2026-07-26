@@ -13,12 +13,12 @@ export class EmailService {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     const isDev = this.configService.get<string>('NODE_ENV') !== 'production';
 
-    if (!apiKey || apiKey.startsWith('re_placeholder')) {
+    if (!apiKey) {
       if (isDev) {
         this.logger.warn(
-          'RESEND_API_KEY is not set or is a placeholder. ' +
+          'RESEND_API_KEY is not set. ' +
           'Emails will not be sent in development. ' +
-          'Set a real key in .env to test email sending.',
+          'Set your Resend API key in .env to enable email sending.',
         );
       } else {
         throw new InternalServerErrorException(
@@ -27,9 +27,7 @@ export class EmailService {
       }
     }
 
-    // In dev without a key, Resend is initialised with a dummy value.
-    // sendVerificationEmail will gracefully handle the error.
-    this.resend = new Resend(apiKey ?? 're_dev_placeholder');
+    this.resend = new Resend(apiKey ?? 're_dev_noop');
     this.fromAddress =
       this.configService.get<string>('EMAIL_FROM') ?? 'LXUY <noreply@lxuy.com>';
     this.frontendUrl =
