@@ -167,7 +167,7 @@ export class UsersService {
         passwordResetExpires: { $gt: new Date() },
         isActive: true,
       })
-      .select('+passwordResetToken')
+      .select('+passwordResetToken +password')
       .exec();
   }
 
