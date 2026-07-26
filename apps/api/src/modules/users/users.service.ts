@@ -1,7 +1,7 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserDocument } from './user.schema';
+import { User, UserDocument, UserSession } from './user.schema';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -47,47 +47,90 @@ export class UsersService {
    * This prevents deleted / banned accounts from accessing protected routes.
    */
   async findById(id: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ _id: id, isActive: true }).exec();
+    return this.userModel.findOne({ _id: id, isActive: true }).select('+sessions').exec();
   }
 
   /**
-   * Single-query variant used by the refresh token flow.
-   * Fetches the user by ID together with BOTH hashed refresh tokens
-   * (current + previous) in one round-trip.
+   * Fetches user with the sessions array.
    */
-  async findByIdWithRefreshHash(id: string): Promise<UserDocument | null> {
+  async findByIdWithSessions(id: string): Promise<UserDocument | null> {
     return this.userModel
       .findOne({ _id: id, isActive: true })
-      .select('+refreshTokenHash +prevRefreshTokenHash')
+      .select('+sessions')
       .exec();
   }
 
-  async updateRefreshToken(
+  /**
+   * Appends a session to the user's active sessions list.
+   * Evicts the oldest session if total active sessions exceed 5.
+   */
+  async addSession(
     userId: string,
-    refreshToken: string | null,
-    prevHash?: string | null,
-    updateLastLogin: boolean = false,
+    session: UserSession,
   ): Promise<void> {
-    let refreshTokenHash: string | null = null;
-    if (refreshToken) {
-      const salt = await bcrypt.genSalt(12);
-      refreshTokenHash = await bcrypt.hash(refreshToken, salt);
+    const user = await this.findByIdWithSessions(userId);
+    if (!user) return;
+
+    if (!user.sessions) {
+      user.sessions = [];
     }
 
-    const update: Record<string, any> = { refreshTokenHash };
-    // When rotating, carry the old hash forward into prevRefreshTokenHash
-    // so the grace-window check in AuthService can accept the old token
-    // during near-simultaneous page loads.
-    if (prevHash !== undefined) {
-      update['prevRefreshTokenHash'] = prevHash ?? null;
+    user.sessions.push(session);
+
+    // Limit to max 5 sessions. Evict oldest by lastActive if exceeded.
+    if (user.sessions.length > 5) {
+      user.sessions.sort((a, b) => a.lastActive.getTime() - b.lastActive.getTime());
+      user.sessions.shift(); // Evict oldest
     }
 
-    if (updateLastLogin) {
-      update['lastLoginAt'] = new Date();
-    }
+    user.lastLoginAt = new Date();
+    await user.save();
+  }
 
+  /**
+   * Updates an existing session by its tokenId.
+   */
+  async updateSession(
+    userId: string,
+    tokenId: string,
+    update: Partial<UserSession>,
+  ): Promise<void> {
+    const user = await this.findByIdWithSessions(userId);
+    if (!user) return;
+
+    const sessionIndex = user.sessions?.findIndex(s => s.tokenId === tokenId);
+    if (sessionIndex !== undefined && sessionIndex !== -1 && user.sessions) {
+      const currentSession = user.sessions[sessionIndex];
+      user.sessions[sessionIndex] = {
+        ...currentSession,
+        ...update,
+        lastActive: new Date(),
+      } as UserSession;
+      await user.save();
+    }
+  }
+
+  /**
+   * Removes a session by its tokenId (Logout current device).
+   */
+  async removeSession(userId: string, tokenId: string): Promise<void> {
     await this.userModel
-      .findByIdAndUpdate(userId, update)
+      .updateOne(
+        { _id: userId },
+        { $pull: { sessions: { tokenId } } },
+      )
+      .exec();
+  }
+
+  /**
+   * Clears all sessions (Logout all devices).
+   */
+  async clearAllSessions(userId: string): Promise<void> {
+    await this.userModel
+      .updateOne(
+        { _id: userId },
+        { $set: { sessions: [] } },
+      )
       .exec();
   }
 

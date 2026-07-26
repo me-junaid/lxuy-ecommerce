@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 export default function ProfilePage() {
-  const { user, loading, isAuthenticated, logout } = useAuth();
+  const { user, loading, isAuthenticated, logout, logoutAllDevices } = useAuth();
   const router = useRouter();
 
   // Don't redirect until we know for sure the session is gone.
@@ -84,11 +84,18 @@ export default function ProfilePage() {
                 Welcome, {user.firstName}
               </h1>
             </div>
-            <div>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                variant="outline"
+                onClick={logoutAllDevices}
+                className="px-5 py-2.5 text-xs border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors"
+              >
+                Sign Out of All Devices
+              </Button>
               <Button
                 variant="outline"
                 onClick={logout}
-                className="px-6 py-2.5 text-xs"
+                className="px-5 py-2.5 text-xs"
               >
                 Sign Out
               </Button>

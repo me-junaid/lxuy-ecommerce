@@ -119,15 +119,21 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = this.generateTokens(user);
+    // Concurrent Sessions: Create a unique session ID
+    const tokenId = crypto.randomUUID();
+    const tokens = this.generateTokens(user, tokenId);
 
-    // Persist refresh token and update last login in a single database write.
-    await this.usersService.updateRefreshToken(
-      user._id.toString(),
-      tokens.refreshToken,
-      null,
-      true,
-    );
+    // Hash the refresh token to persist securely
+    const salt = await bcrypt.genSalt(12);
+    const refreshTokenHash = await bcrypt.hash(tokens.refreshToken, salt);
+
+    // Add session to user record
+    await this.usersService.addSession(user._id.toString(), {
+      tokenId,
+      refreshTokenHash,
+      lastActive: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    });
 
     return {
       accessToken: tokens.accessToken,
@@ -137,46 +143,77 @@ export class AuthService {
   }
 
   async refreshTokens(userId: string, refreshToken: string) {
-    // Single DB query: fetch the user + both token hashes simultaneously.
-    const user = await this.usersService.findByIdWithRefreshHash(userId);
-
-    if (!user) {
+    let payload: { tokenId?: string };
+    try {
+      payload = this.jwtService.verify(refreshToken, {
+        secret: this.jwtRefreshSecret,
+      });
+    } catch {
       throw new UnauthorizedException('Access denied');
+    }
+
+    const tokenId = payload.tokenId;
+    if (!tokenId) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    // Fetch user with sessions list
+    const user = await this.usersService.findByIdWithSessions(userId);
+    if (!user || !user.sessions) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    // Locate the specific session
+    const session = user.sessions.find(s => s.tokenId === tokenId);
+    if (!session) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    // Check expiration
+    if (new Date() > session.expiresAt) {
+      // Clean up expired session
+      await this.usersService.removeSession(userId, tokenId);
+      throw new UnauthorizedException('Session has expired. Please sign in again.');
     }
 
     // Check the current hash first (normal case).
     let isValid = false;
     let matchedPrev = false;
 
-    if (user.refreshTokenHash) {
-      isValid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
+    if (session.refreshTokenHash) {
+      isValid = await bcrypt.compare(refreshToken, session.refreshTokenHash);
     }
 
-    // If current hash didn't match, check the PREVIOUS hash.
-    // This handles the race condition where two near-simultaneous page reloads
-    // both call /refresh — the first call rotates the token so the second
-    // call arrives with the "old" token. We allow it once via prevRefreshTokenHash.
-    if (!isValid && user.prevRefreshTokenHash) {
-      isValid = await bcrypt.compare(refreshToken, user.prevRefreshTokenHash);
-      if (isValid) matchedPrev = true;
+    // Grace-window check for parallel refresh requests
+    if (!isValid && session.prevRefreshTokenHash && session.prevTokenExpiresAt) {
+      const isGraceWindowActive = new Date() < new Date(session.prevTokenExpiresAt);
+      if (isGraceWindowActive) {
+        isValid = await bcrypt.compare(refreshToken, session.prevRefreshTokenHash);
+        if (isValid) matchedPrev = true;
+      }
     }
 
     if (!isValid) {
+      // Invalidate the session immediately (potential token reuse attack)
+      await this.usersService.removeSession(userId, tokenId);
       throw new UnauthorizedException('Access denied');
     }
 
-    const tokens = this.generateTokens(user);
+    const tokens = this.generateTokens(user, tokenId);
 
-    // Rotate: the old current hash becomes the new previous hash (grace window).
-    // If the request matched the prev hash (second rapid reload), we don't
-    // re-rotate — we just re-issue tokens using the current valid state.
-    const oldCurrentHash = matchedPrev ? null : user.refreshTokenHash ?? null;
+    // Rotate token hash
+    const salt = await bcrypt.genSalt(12);
+    const newHash = await bcrypt.hash(tokens.refreshToken, salt);
 
-    await this.usersService.updateRefreshToken(
-      user._id.toString(),
-      tokens.refreshToken,
-      oldCurrentHash, // becomes prevRefreshTokenHash in the DB
-    );
+    const oldHash = matchedPrev ? null : session.refreshTokenHash;
+    const prevExpires = matchedPrev ? null : new Date(Date.now() + 10000); // 10s grace window
+
+    await this.usersService.updateSession(userId, tokenId, {
+      refreshTokenHash: newHash,
+      prevRefreshTokenHash: oldHash,
+      prevTokenExpiresAt: prevExpires,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Refresh expiry
+    });
 
     return {
       accessToken: tokens.accessToken,
@@ -185,9 +222,20 @@ export class AuthService {
     };
   }
 
-  async logout(userId: string) {
-    // Invalidate the stored refresh token hash so the cookie is useless.
-    await this.usersService.updateRefreshToken(userId, null);
+  /**
+   * Log out of the current device.
+   */
+  async logout(userId: string, tokenId?: string) {
+    if (tokenId) {
+      await this.usersService.removeSession(userId, tokenId);
+    }
+  }
+
+  /**
+   * Log out of all active devices.
+   */
+  async logoutAll(userId: string) {
+    await this.usersService.clearAllSessions(userId);
   }
 
   async getCurrentUser(userId: string) {
@@ -198,12 +246,13 @@ export class AuthService {
     return user.toJSON() as Record<string, unknown>;
   }
 
-  private generateTokens(user: UserDocument) {
+  private generateTokens(user: UserDocument, tokenId: string) {
     const payload = {
       sub: user._id.toString(),
       email: user.email,
       role: user.role,
       isEmailVerified: user.isEmailVerified,
+      tokenId,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -389,15 +438,20 @@ export class AuthService {
       });
     }
 
-    const tokens = this.generateTokens(user);
+    const tokenId = crypto.randomUUID();
+    const tokens = this.generateTokens(user, tokenId);
+
+    // Hash the refresh token to persist securely
+    const salt = await bcrypt.genSalt(12);
+    const refreshTokenHash = await bcrypt.hash(tokens.refreshToken, salt);
 
     // Save refresh token and update audit trail
-    await this.usersService.updateRefreshToken(
-      user._id.toString(),
-      tokens.refreshToken,
-      null,
-      true,
-    );
+    await this.usersService.addSession(user._id.toString(), {
+      tokenId,
+      refreshTokenHash,
+      lastActive: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    });
 
     return {
       tokens,
@@ -487,12 +541,7 @@ export class AuthService {
     await this.usersService.clearPasswordResetToken(user._id.toString());
 
     // Invalidate all active sessions across all devices (AUTH-075)
-    await this.usersService.updateRefreshToken(
-      user._id.toString(),
-      null,
-      null,
-      false,
-    );
+    await this.usersService.clearAllSessions(user._id.toString());
 
     return {
       message: 'Your password has been successfully reset. Please sign in with your new password.',

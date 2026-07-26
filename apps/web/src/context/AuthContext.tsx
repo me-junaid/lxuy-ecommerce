@@ -55,6 +55,7 @@ interface AuthContextType {
    * email verification) so the UI reflects the latest DB values immediately.
    */
   refreshUser: () => Promise<void>;
+  logoutAllDevices: () => Promise<void>;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -223,6 +224,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // ── Logout All Devices ─────────────────────────────────────────────────────
+  const logoutAllDevices = async (): Promise<void> => {
+    try {
+      await api.post("/api/v1/auth/logout-all");
+    } catch {
+      // Even if the server call fails, fully clear client state.
+    } finally {
+      setAccessToken(null);
+      setUser(null);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(LS_KEY);
+      }
+      router.push("/");
+    }
+  };
+
   // ── Refresh User ──────────────────────────────────────────────────────────
   // Calls /refresh which reads fresh DB data and issues updated tokens.
   // Silently no-ops if called while unauthenticated.
@@ -255,6 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         refreshUser,
+        logoutAllDevices,
       }}
     >
       {children}

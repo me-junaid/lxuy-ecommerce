@@ -8,15 +8,44 @@ export enum UserRole {
   ADMIN = 'admin',
 }
 
+@Schema({ _id: false })
+export class UserSession {
+  @Prop({ required: true })
+  tokenId!: string;
+
+  @Prop({ required: true })
+  refreshTokenHash!: string;
+
+  @Prop({ type: String, default: null })
+  prevRefreshTokenHash?: string | null;
+
+  @Prop({ type: Date, default: null })
+  prevTokenExpiresAt?: Date | null;
+
+  @Prop({ type: String })
+  userAgent?: string;
+
+  @Prop({ type: String })
+  ipAddress?: string;
+
+  @Prop({ type: Date, required: true, default: Date.now })
+  lastActive!: Date;
+
+  @Prop({ type: Date, required: true })
+  expiresAt!: Date;
+}
+
+export const UserSessionSchema = SchemaFactory.createForClass(UserSession);
+
 @Schema({
   timestamps: true,
   toJSON: {
     transform: (doc, ret: Record<string, unknown>) => {
       delete ret['password'];
-      delete ret['refreshTokenHash'];
       delete ret['passwordChangedAt'];
       delete ret['emailVerificationToken'];
       delete ret['passwordResetToken'];
+      delete ret['sessions'];
       ret['id'] = (ret['_id'] as { toString?: () => string })?.toString?.();
       delete ret['_id'];
       delete ret['__v'];
@@ -85,18 +114,9 @@ export class User extends Document {
   @Prop({ type: Date, default: null })
   passwordResetExpires?: Date | null;
 
-  /** The current valid refresh token hash. Nulled out on logout. */
-  @Prop({ type: String, select: false, default: null })
-  refreshTokenHash?: string | null;
-
-  /**
-   * The PREVIOUS refresh token hash, kept for a short grace window (10s).
-   * This allows two near-simultaneous page reloads to both succeed even
-   * though token rotation means the first load's response hasn't settled
-   * into the browser's cookie jar before the second load fires its request.
-   */
-  @Prop({ type: String, select: false, default: null })
-  prevRefreshTokenHash?: string | null;
+  /** Active sessions for concurrent multi-device logins. */
+  @Prop({ type: [UserSessionSchema], default: [], select: false })
+  sessions?: UserSession[];
 
   /**
    * Updated on every successful login. Used for auditing.

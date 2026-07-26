@@ -160,10 +160,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(
     @CurrentUser('id') userId: string,
+    @CurrentUser('tokenId') tokenId: string,
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.authService.logout(userId);
+    await this.authService.logout(userId, tokenId);
 
     // Expire the cookie immediately with maxAge: 0.
     response.cookie('lxuy_refresh_token', '', {
@@ -172,6 +173,27 @@ export class AuthController {
     });
 
     return { message: 'Logged out successfully' };
+  }
+
+  /** Protected — requires a valid access token. Skips throttler. */
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard)
+  @Post('logout-all')
+  @HttpCode(HttpStatus.OK)
+  async logoutAll(
+    @CurrentUser('id') userId: string,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.logoutAll(userId);
+
+    // Expire the cookie immediately with maxAge: 0.
+    response.cookie('lxuy_refresh_token', '', {
+      ...this.getCookieOptions(request),
+      maxAge: 0,
+    });
+
+    return { message: 'Logged out of all devices successfully' };
   }
 
   /**

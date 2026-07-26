@@ -8,6 +8,7 @@ interface JwtPayload {
   sub: string;
   email: string;
   role: string;
+  tokenId: string;
   iat: number;
 }
 
@@ -53,6 +54,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException('Account not found or deactivated');
     }
 
+    // Verify session is active (AUTH-088, AUTH-089, AUTH-090 immediate invalidation)
+    if (payload.tokenId && user.sessions) {
+      const isSessionActive = user.sessions.some(s => s.tokenId === payload.tokenId);
+      if (!isSessionActive) {
+        throw new UnauthorizedException('Session has been terminated');
+      }
+    }
+
     // If the user has changed their password, reject tokens issued before
     // the change so old sessions are immediately invalidated.
     if (user.passwordChangedAt) {
@@ -69,6 +78,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       id: payload.sub,
       email: payload.email,
       role: payload.role,
+      tokenId: payload.tokenId,
     };
   }
 }
