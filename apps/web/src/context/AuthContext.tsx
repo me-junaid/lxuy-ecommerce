@@ -157,8 +157,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === LS_KEY) {
+        if (event.newValue !== "true") {
+          // Logged out in another tab
+          setUser(null);
+          setAccessToken(null);
+          router.push("/");
+        } else if (event.newValue === "true") {
+          // Logged in in another tab - reload to restore session
+          window.location.reload();
+        }
+      }
+    };
+
     window.addEventListener("auth-logout", handleGlobalLogout);
-    return () => window.removeEventListener("auth-logout", handleGlobalLogout);
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("auth-logout", handleGlobalLogout);
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   // ── Login ──────────────────────────────────────────────────────────────────
