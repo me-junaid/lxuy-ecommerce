@@ -18,6 +18,8 @@ function LoginPageContent() {
   const [infoMessage, setInfoMessage] = useState("");
   const [infoType, setInfoType] = useState<"success" | "error" | "info" | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [capsLockActive, setCapsLockActive] = useState(false);
 
   // Set message based on verification query params or social login query params
   useEffect(() => {
@@ -250,14 +252,37 @@ function LoginPageContent() {
                 required
               />
 
-              <Input
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-              />
+              <div className="relative">
+                <Input
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyUp={(e) => {
+                    const active = e.getModifierState("CapsLock");
+                    setCapsLockActive(active);
+                  }}
+                  onKeyDown={(e) => {
+                    const active = e.getModifierState("CapsLock");
+                    setCapsLockActive(active);
+                  }}
+                  autoComplete="current-password"
+                  className="pr-16"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-2.5 text-[10px] uppercase tracking-widest text-neutral-400 hover:text-luxury-gold transition-colors font-semibold"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+                {capsLockActive && (
+                  <p className="absolute bottom-[-16px] left-0.5 text-[9px] text-amber-600 uppercase tracking-widest font-semibold">
+                    ⚠️ Caps Lock is active
+                  </p>
+                )}
+              </div>
 
               <div className="flex items-center justify-between text-xs tracking-wider uppercase font-medium text-neutral-500 py-1">
                 <Link
@@ -275,7 +300,17 @@ function LoginPageContent() {
                   className="w-full py-3.5"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Signing In…" : "Sign In"}
+                  {isSubmitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin h-3.5 w-3.5 text-luxury-gold" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Signing In…
+                    </span>
+                  ) : (
+                    "Sign In"
+                  )}
                 </Button>
               </div>
             </form>
