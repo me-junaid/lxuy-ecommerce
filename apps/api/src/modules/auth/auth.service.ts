@@ -2,13 +2,17 @@ import {
   Injectable,
   UnauthorizedException,
   InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
 import { RegisterDto, LoginDto } from './auth.dto';
 import { UserDocument } from '../users/user.schema';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +25,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {
     // Resolve secrets at construction time so a missing value throws
     // immediately at startup rather than silently at runtime.
@@ -48,7 +53,27 @@ export class AuthService {
 
   async register(registerDto: RegisterDto) {
     const user = await this.usersService.create(registerDto);
-    // Return the sanitised public JSON, not the raw Mongoose document.
+
+    // Generate a cryptographically secure 32-byte random token.
+    // Only the SHA-256 hash is persisted; the raw token goes in the email link.
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await this.usersService.setEmailVerificationToken(
+      user._id.toString(),
+      hashedToken,
+      expires,
+    );
+
+    // Send the verification email — fire and don't block registration response.
+    // Errors are logged inside EmailService but not surfaced to the client.
+    this.emailService
+      .sendVerificationEmail(user.email, user.firstName, rawToken)
+      .catch(() => {
+        // Intentional no-op: email failure must not fail registration.
+      });
+
     return user.toJSON() as Record<string, unknown>;
   }
 
@@ -155,6 +180,7 @@ export class AuthService {
       sub: user._id.toString(),
       email: user.email,
       role: user.role,
+      isEmailVerified: user.isEmailVerified,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -168,5 +194,62 @@ export class AuthService {
     } as unknown as JwtSignOptions);
 
     return { accessToken, refreshToken };
+  }
+
+  /**
+   * Verifies the raw token from the email link (AUTH-018–021, AUTH-025).
+   * Looks up the user by the SHA-256 hash; errors if token is invalid/expired/already used.
+   */
+  async verifyEmail(rawToken: string): Promise<{ message: string }> {
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    const user = await this.usersService.findByEmailVerificationToken(hashedToken);
+
+    if (!user) {
+      // Token not found or expired. Check if maybe the email is already verified
+      // to give a friendlier message for the double-click case (AUTH-021).
+      throw new BadRequestException(
+        'This verification link is invalid or has expired. Please request a new one.',
+      );
+    }
+
+    if (user.isEmailVerified) {
+      // Already verified — idempotent response (AUTH-021).
+      return { message: 'Your email address is already verified. You can log in.' };
+    }
+
+    await this.usersService.markEmailVerified(user._id.toString());
+    return { message: 'Email verified successfully. You can now log in.' };
+  }
+
+  /**
+   * Resends the verification email (AUTH-023, AUTH-024).
+   * Rate limiting is enforced at the controller level via @Throttle.
+   */
+  async resendVerification(email: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      // Don't reveal whether the email exists — prevents user enumeration.
+      return { message: 'If this email is registered, a new verification link has been sent.' };
+    }
+
+    if (user.isEmailVerified) {
+      throw new BadRequestException('This email address is already verified.');
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await this.usersService.setEmailVerificationToken(
+      user._id.toString(),
+      hashedToken,
+      expires,
+    );
+
+    await this.emailService.sendVerificationEmail(user.email, user.firstName, rawToken);
+
+    return { message: 'If this email is registered, a new verification link has been sent.' };
   }
 }

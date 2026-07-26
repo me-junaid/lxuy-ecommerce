@@ -15,6 +15,7 @@ export enum UserRole {
       delete ret['password'];
       delete ret['refreshTokenHash'];
       delete ret['passwordChangedAt'];
+      delete ret['emailVerificationToken'];
       ret['id'] = (ret['_id'] as { toString?: () => string })?.toString?.();
       delete ret['_id'];
       delete ret['__v'];
@@ -59,6 +60,21 @@ export class User extends Document {
 
   @Prop({ default: true, index: true })
   isActive!: boolean;
+
+  /** Whether the user has verified their email address. */
+  @Prop({ default: false, index: true })
+  isEmailVerified!: boolean;
+
+  /**
+   * SHA-256 hash of the raw email verification token.
+   * The plain token is only ever sent in the email link — never stored.
+   */
+  @Prop({ type: String, select: false, default: null })
+  emailVerificationToken?: string | null;
+
+  /** Timestamp after which the verification token is no longer valid (24 h). */
+  @Prop({ type: Date, default: null })
+  emailVerificationExpires?: Date | null;
 
   /** The current valid refresh token hash. Nulled out on logout. */
   @Prop({ type: String, select: false, default: null })

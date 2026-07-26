@@ -5,8 +5,10 @@ import {
   Body,
   Req,
   Res,
+  Query,
   UseGuards,
   UnauthorizedException,
+  BadRequestException,
   HttpCode,
   HttpStatus,
   Logger,
@@ -15,7 +17,7 @@ import type { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './auth.dto';
+import { RegisterDto, LoginDto, VerifyEmailDto, ResendVerificationDto } from './auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
@@ -161,5 +163,28 @@ export class AuthController {
     });
 
     return { message: 'Logged out successfully' };
+  }
+
+  /**
+   * Email verification — follows the link sent to the user's inbox.
+   * AUTH-018 (valid), AUTH-019 (expired), AUTH-020 (invalid), AUTH-021 (double-click), AUTH-025 (deleted account).
+   */
+  @SkipThrottle()
+  @Get('verify-email')
+  async verifyEmail(@Query() query: VerifyEmailDto) {
+    if (!query.token) {
+      throw new BadRequestException('Verification token is required');
+    }
+    return this.authService.verifyEmail(query.token);
+  }
+
+  /**
+   * Resend verification email — stricter rate limit: 3 per 10 minutes per IP (AUTH-023, AUTH-024).
+   */
+  @Throttle({ default: { limit: 3, ttl: 600000 } })
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.authService.resendVerification(dto.email);
   }
 }

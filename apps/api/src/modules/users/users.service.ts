@@ -90,4 +90,52 @@ export class UsersService {
       .findByIdAndUpdate(userId, update)
       .exec();
   }
+
+  /**
+   * Persists the SHA-256-hashed verification token and its expiry.
+   * Called immediately after user creation and on every resend.
+   */
+  async setEmailVerificationToken(
+    userId: string,
+    hashedToken: string,
+    expires: Date,
+  ): Promise<void> {
+    await this.userModel
+      .findByIdAndUpdate(userId, {
+        emailVerificationToken: hashedToken,
+        emailVerificationExpires: expires,
+      })
+      .exec();
+  }
+
+  /**
+   * Looks up the user whose hashed token matches AND whose token hasn't expired.
+   * Returns null when no match is found (invalid or expired token).
+   */
+  async findByEmailVerificationToken(
+    hashedToken: string,
+  ): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({
+        emailVerificationToken: hashedToken,
+        emailVerificationExpires: { $gt: new Date() },
+        isActive: true,
+      })
+      .select('+emailVerificationToken')
+      .exec();
+  }
+
+  /**
+   * Marks the user's email as verified and clears the token fields.
+   * Safe to call multiple times (idempotent).
+   */
+  async markEmailVerified(userId: string): Promise<void> {
+    await this.userModel
+      .findByIdAndUpdate(userId, {
+        isEmailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpires: null,
+      })
+      .exec();
+  }
 }

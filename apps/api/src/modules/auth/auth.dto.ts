@@ -75,3 +75,17 @@ export class LoginDto {
   @MaxLength(72, { message: 'Password must be at most 72 characters long' })
   password!: string;
 }
+
+export class VerifyEmailDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Verification token is required' })
+  token!: string;
+}
+
+export class ResendVerificationDto {
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.toLowerCase().trim() : value,
+  )
+  @IsEmail({}, { message: 'Please provide a valid email address' })
+  email!: string;
+}

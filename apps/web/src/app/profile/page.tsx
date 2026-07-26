@@ -53,6 +53,21 @@ export default function ProfilePage() {
         onSearchClick={() => {}}
       />
 
+      {/* Email verification banner — shown until the user verifies their address */}
+      {!user.isEmailVerified && (
+        <div className="bg-amber-50 border-b border-amber-200 px-6 py-3">
+          <p className="text-center text-xs text-amber-800 tracking-wide font-medium">
+            Your email address is not verified.{" "}
+            <a
+              href="/verify-email/resend"
+              className="underline underline-offset-2 hover:text-amber-900 font-semibold transition-colors"
+            >
+              Resend verification email
+            </a>
+          </p>
+        </div>
+      )}
+
       <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-16 md:py-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

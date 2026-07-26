@@ -21,6 +21,8 @@ export interface User {
   lastName: string;
   role: string;
   isActive: boolean;
+  isEmailVerified: boolean;
+  phoneNumber?: string;
   lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -36,6 +38,7 @@ export interface RegisterData {
   password: string;
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
 }
 
 interface AuthContextType {
