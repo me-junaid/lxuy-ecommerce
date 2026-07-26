@@ -216,4 +216,56 @@ export class AuthController {
   async resendVerification(@Body() dto: ResendVerificationDto) {
     return this.authService.resendVerification(dto.email);
   }
+
+  /**
+   * Google login redirect endpoint.
+   * Redirects user to Google OAuth consent page.
+   */
+  @SkipThrottle()
+  @Get('google')
+  async googleLogin(@Res() response: Response) {
+    const authUrl = this.authService.getGoogleAuthUrl();
+    return response.redirect(authUrl);
+  }
+
+  /**
+   * Google OAuth Callback endpoint.
+   * Google redirects users here after authorization.
+   */
+  @SkipThrottle()
+  @Get('google/callback')
+  async googleCallback(
+    @Query('code') code: string,
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+
+    if (!code) {
+      this.logger.warn('Google authorization code is missing from callback query.');
+      return response.redirect(
+        `${frontendUrl}/login?social_login=error&reason=missing_code`,
+      );
+    }
+
+    try {
+      const result = await this.authService.handleGoogleCallback(code);
+      response.cookie(
+        'lxuy_refresh_token',
+        result.tokens.refreshToken,
+        this.getCookieOptions(request),
+      );
+      return response.redirect(`${frontendUrl}/login?social_login=success`);
+    } catch (err: unknown) {
+      this.logger.error(
+        `Google callback processing failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      return response.redirect(
+        `${frontendUrl}/login?social_login=error&reason=processing_failed`,
+      );
+    }
+  }
 }

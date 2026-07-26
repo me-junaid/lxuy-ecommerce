@@ -199,6 +199,29 @@ export default function RegisterPage() {
               </p>
             </div>
 
+            {/* Google OAuth Quick Sign In */}
+            <div className="mb-6">
+              <a
+                href="/api/v1/auth/google"
+                className="flex items-center justify-center gap-3 w-full border border-neutral-200 bg-white hover:bg-neutral-50 px-4 py-3.5 text-xs uppercase tracking-[0.2em] font-medium text-neutral-700 transition-colors"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path
+                    fill="#EA4335"
+                    d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.99 5.99 0 0 1 8.01 12.5a5.99 5.99 0 0 1 5.981-6.014c1.55 0 2.902.59 3.93 1.567l3.076-3.076C19.167 3.2 16.71 2 13.99 2 8.47 2 4 6.47 4 12s4.47 10 9.99 10c5.77 0 9.87-4.06 9.87-10 0-.68-.06-1.33-.17-1.715H12.24Z"
+                  />
+                </svg>
+                Continue with Google
+              </a>
+            </div>
+
+            <div className="flex items-center my-6">
+              <div className="flex-1 border-t border-neutral-100"></div>
+              <span className="px-3 text-[10px] uppercase tracking-[0.2em] text-neutral-400">or continue with email</span>
+              <div className="flex-1 border-t border-neutral-100"></div>
+            </div>
+
+
             <AnimatePresence mode="wait">
               {error && (
                 <motion.div

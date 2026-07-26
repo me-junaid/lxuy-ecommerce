@@ -33,8 +33,8 @@ export class User extends Document {
   })
   email!: string;
 
-  @Prop({ required: true, select: false })
-  password!: string;
+  @Prop({ required: false, select: false })
+  password?: string;
 
   @Prop({ required: true, trim: true, minlength: 2, maxlength: 50 })
   firstName!: string;
@@ -102,6 +102,9 @@ export class User extends Document {
    */
   @Prop({ type: Date, select: false, default: null })
   passwordChangedAt?: Date | null;
+
+  @Prop({ required: false, unique: true, sparse: true, index: true })
+  googleId?: string;
 }
 
 export type UserDocument = User & Document;
@@ -112,7 +115,7 @@ UserSchema.index({ email: 1, isActive: 1 });
 
 // Hash password before saving (only when it has been modified).
 UserSchema.pre<UserDocument>('save', async function () {
-  if (!this.isModified('password')) {
+  if (!this.isModified('password') || !this.password) {
     return;
   }
 

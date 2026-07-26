@@ -21,6 +21,9 @@ export class AuthService {
   private readonly jwtRefreshSecret: string;
   private readonly jwtExpiration: string;
   private readonly jwtRefreshExpiration: string;
+  private readonly googleClientId: string;
+  private readonly googleClientSecret: string;
+  private readonly backendUrl: string;
 
   constructor(
     private readonly usersService: UsersService,
@@ -50,6 +53,16 @@ export class AuthService {
       this.configService.get<string>('JWT_EXPIRATION') || '15m';
     this.jwtRefreshExpiration =
       this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d';
+
+    this.googleClientId = this.configService.get<string>('GOOGLE_CLIENT_ID') ?? '';
+    this.googleClientSecret = this.configService.get<string>('GOOGLE_CLIENT_SECRET') ?? '';
+    this.backendUrl = this.configService.get<string>('BACKEND_URL') ?? 'http://localhost:3001';
+
+    if (!this.googleClientId || !this.googleClientSecret) {
+      this.logger.warn(
+        'GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing. Google OAuth logins will not function.',
+      );
+    }
   }
 
   async register(registerDto: RegisterDto) {
@@ -90,6 +103,11 @@ export class AuthService {
     );
     if (!user) {
       // Use a generic message to avoid username enumeration.
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.password) {
+      // User registered with Google and has no password set.
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -256,5 +274,134 @@ export class AuthService {
     await this.emailService.sendVerificationEmail(user.email, user.firstName, rawToken);
 
     return { message: 'If this email is registered, a new verification link has been sent.' };
+  }
+
+  /**
+   * Generates the Google OAuth2.0 consent URL for authentication.
+   */
+  getGoogleAuthUrl(): string {
+    if (!this.googleClientId) {
+      throw new BadRequestException('Google Client ID is not configured on the server.');
+    }
+    const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+    const options = {
+      redirect_uri: `${this.backendUrl}/api/v1/auth/google/callback`,
+      client_id: this.googleClientId,
+      access_type: 'offline',
+      response_type: 'code',
+      prompt: 'consent',
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/userinfo.email',
+      ].join(' '),
+    };
+
+    const qs = new URLSearchParams(options).toString();
+    return `${rootUrl}?${qs}`;
+  }
+
+  /**
+   * Handles exchange of Google callback authorization code.
+   * Exchanges code, retrieves Google user details, registers/syncs the user,
+   * and generates access + refresh tokens.
+   */
+  async handleGoogleCallback(code: string) {
+    if (!this.googleClientId || !this.googleClientSecret) {
+      throw new InternalServerErrorException('Google OAuth configurations are missing on the server.');
+    }
+
+    let tokenData: { access_token: string };
+    try {
+      const response = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          code,
+          client_id: this.googleClientId,
+          client_secret: this.googleClientSecret,
+          redirect_uri: `${this.backendUrl}/api/v1/auth/google/callback`,
+          grant_type: 'authorization_code',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.logger.error(`Google token exchange failed: ${errorText}`);
+        throw new BadRequestException('Failed to exchange authorization code for tokens.');
+      }
+
+      tokenData = (await response.json()) as { access_token: string };
+    } catch (err: unknown) {
+      this.logger.error(`Error during Google token exchange: ${err instanceof Error ? err.message : String(err)}`);
+      throw new BadRequestException('Token exchange failed.');
+    }
+
+    let googleProfile: {
+      id: string;
+      email: string;
+      verified_email: boolean;
+      given_name: string;
+      family_name: string;
+    };
+
+    try {
+      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to retrieve user profile information from Google.');
+      }
+
+      googleProfile = (await response.json()) as typeof googleProfile;
+    } catch (err: unknown) {
+      this.logger.error(`Error fetching Google user profile: ${err instanceof Error ? err.message : String(err)}`);
+      throw new BadRequestException('Failed to retrieve user profile.');
+    }
+
+    if (!googleProfile.verified_email) {
+      throw new BadRequestException('Your Google account email is not verified.');
+    }
+
+    // Sign in / sync the user
+    const email = googleProfile.email.toLowerCase().trim();
+    let user = await this.usersService.findByEmail(email);
+
+    if (user) {
+      // User exists. Update googleId if not linked yet.
+      if (!user.googleId) {
+        user.googleId = googleProfile.id;
+        // Since Google verified the email, we also mark it verified in our DB
+        if (!user.isEmailVerified) {
+          user.isEmailVerified = true;
+        }
+        await user.save();
+      }
+    } else {
+      // User doesn't exist. Create a new Google OAuth account.
+      user = await this.usersService.create({
+        email,
+        googleId: googleProfile.id,
+        firstName: googleProfile.given_name || 'Google',
+        lastName: googleProfile.family_name || 'User',
+        isEmailVerified: true, // Google verifies user emails
+        isActive: true,
+      });
+    }
+
+    const tokens = this.generateTokens(user);
+
+    // Save refresh token and update audit trail
+    await this.usersService.updateRefreshToken(
+      user._id.toString(),
+      tokens.refreshToken,
+      null,
+      true,
+    );
+
+    return {
+      tokens,
+      user: user.toJSON() as Record<string, unknown>,
+    };
   }
 }
