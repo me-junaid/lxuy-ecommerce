@@ -3,7 +3,7 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
   BadRequestException,
-  NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -16,6 +16,7 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly jwtSecret: string;
   private readonly jwtRefreshSecret: string;
   private readonly jwtExpiration: string;
@@ -66,12 +67,16 @@ export class AuthService {
       expires,
     );
 
-    // Send the verification email — fire and don't block registration response.
-    // Errors are logged inside EmailService but not surfaced to the client.
+    // Fire-and-forget: email failure must never block registration.
+    // Log the error so it is visible in the NestJS console for debugging.
     this.emailService
       .sendVerificationEmail(user.email, user.firstName, rawToken)
-      .catch(() => {
-        // Intentional no-op: email failure must not fail registration.
+      .catch((err: unknown) => {
+        this.logger.error(
+          `Failed to send verification email to ${user.email}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
       });
 
     return user.toJSON() as Record<string, unknown>;
