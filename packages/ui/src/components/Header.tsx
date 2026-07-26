@@ -32,27 +32,27 @@ export const Header: React.FC<HeaderProps> = ({
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);
 
-  const activeMenImage = hoveredMenuItem?.menuKey === 'men' 
-    ? hoveredMenuItem.imageUrl 
+  const activeMenImage = hoveredMenuItem?.menuKey === 'men'
+    ? hoveredMenuItem.imageUrl
     : '/images/models/modules8.jpeg';
-  const activeMenTitle = hoveredMenuItem?.menuKey === 'men' 
-    ? hoveredMenuItem.title 
+  const activeMenTitle = hoveredMenuItem?.menuKey === 'men'
+    ? hoveredMenuItem.title
     : "Men's Tailoring";
 
-  const activeWomenImage = hoveredMenuItem?.menuKey === 'women' 
-    ? hoveredMenuItem.imageUrl 
+  const activeWomenImage = hoveredMenuItem?.menuKey === 'women'
+    ? hoveredMenuItem.imageUrl
     : '/images/models/modules11.jpeg';
-  const activeWomenTitle = hoveredMenuItem?.menuKey === 'women' 
-    ? hoveredMenuItem.title 
+  const activeWomenTitle = hoveredMenuItem?.menuKey === 'women'
+    ? hoveredMenuItem.title
     : "Women's Silhouette Edit";
 
-  const activeNewImage = hoveredMenuItem?.menuKey === 'new-arrivals' 
-    ? hoveredMenuItem.imageUrl 
+  const activeNewImage = hoveredMenuItem?.menuKey === 'new-arrivals'
+    ? hoveredMenuItem.imageUrl
     : '/images/models/modules5.jpeg';
 
   const renderMobileSubmenuLink = (
-    label: string, 
-    menuKey: string, 
+    label: string,
+    menuKey: string,
     imageUrl: string
   ) => {
     const isSelected = hoveredMenuItem?.menuKey === menuKey && hoveredMenuItem?.title === label;
@@ -70,9 +70,8 @@ export const Header: React.FC<HeaderProps> = ({
           <a
             href="#"
             onClick={() => setIsMobileMenuOpen(false)}
-            className={`text-[11px] text-neutral-700 font-medium transition-all duration-300 ${
-              isSelected ? 'text-luxury-gold font-bold translate-x-1' : ''
-            }`}
+            className={`text-[11px] text-neutral-700 font-medium transition-all duration-300 ${isSelected ? 'text-luxury-gold font-bold translate-x-1' : ''
+              }`}
           >
             {label}
           </a>
@@ -100,10 +99,10 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <header className="fixed top-0 left-0 w-full z-45 border-b border-luxury-silver/30 bg-[#FDFBF7] transition-all duration-300">
-        
+
         {/* Row 1: Top Bar (Logo & Actions) */}
         <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between relative">
-          
+
           {/* Left: Support Links (Desktop Only) */}
           <div className="hidden md:flex md:flex-1 md:items-center">
             <div className="flex space-x-6 text-[10px] uppercase tracking-luxury font-medium text-neutral-500">
@@ -221,11 +220,10 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <a
                   href={cat.href}
-                  className={`text-xs uppercase tracking-widest font-medium py-2.5 transition-colors duration-300 relative ${
-                    cat.isSale
+                  className={`text-xs uppercase tracking-widest font-medium py-2.5 transition-colors duration-300 relative ${cat.isSale
                       ? 'text-red-600 hover:text-red-700 font-semibold'
                       : 'text-neutral-700 hover:text-luxury-gold'
-                  }`}
+                    }`}
                 >
                   {cat.label}
                   {activeMenu === cat.menuKey && (
@@ -261,7 +259,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Fred Perry</a>
                                 <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Karl Lagerfeld</a>
                                 <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Giuseppe Zanotti</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Maison Kitsuné</a>
+                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"> Kitsuné</a>
                                 <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Casablanca</a>
                               </div>
                               {/* Col 3: Brands */}
@@ -299,32 +297,32 @@ export const Header: React.FC<HeaderProps> = ({
                               {/* Col 1: Categories */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Clothing</h4>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules2.jpeg', title: 'Jackets & Coats' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Jackets & Coats
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Casual Shirts' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Casual Shirts
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules12.jpeg', title: 'Knitwear' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Knitwear
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Trousers' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -335,52 +333,52 @@ export const Header: React.FC<HeaderProps> = ({
                               {/* Col 2: Brands */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Featured Brands</h4>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules8.jpeg', title: 'Polo Ralph Lauren' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Polo Ralph Lauren
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Fred Perry' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Fred Perry
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules2.jpeg', title: 'Hackett London' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Hackett London
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
-                                  onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules8.jpeg', title: 'Maison Kitsuné' })}
+                                  onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules8.jpeg', title: ' Kitsuné' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
-                                  Maison Kitsuné
+                                  Kitsuné
                                 </a>
                               </div>
                               {/* Col 3: Promo */}
                               <div className="col-span-6 grid grid-cols-2 gap-4">
                                 <div className="relative aspect-[16/10] overflow-hidden bg-luxury-silver/10 col-span-2">
                                   <AnimatePresence mode="wait">
-                                    <motion.img 
+                                    <motion.img
                                       key={activeMenImage}
-                                      src={activeMenImage} 
-                                      alt={activeMenTitle} 
+                                      src={activeMenImage}
+                                      alt={activeMenTitle}
                                       initial={{ opacity: 0 }}
                                       animate={{ opacity: 1 }}
                                       exit={{ opacity: 0 }}
                                       transition={{ duration: 0.25 }}
-                                      className="w-full h-full object-cover absolute inset-0" 
+                                      className="w-full h-full object-cover absolute inset-0"
                                     />
                                   </AnimatePresence>
                                   <div className="absolute inset-0 bg-black/20 flex flex-col justify-end p-4 z-10 pointer-events-none">
@@ -397,32 +395,32 @@ export const Header: React.FC<HeaderProps> = ({
                               {/* Col 1: Categories */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Clothing</h4>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules1.jpeg', title: 'Dresses & Jumpsuits' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Dresses & Jumpsuits
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules4.jpeg', title: 'Blouses & Tops' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Blouses & Tops
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules2.jpeg', title: 'Coats & Trenchcoats' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Coats & Trenchcoats
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules6.jpeg', title: 'Trousers & Skirts' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -433,32 +431,32 @@ export const Header: React.FC<HeaderProps> = ({
                               {/* Col 2: Brands */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Featured Brands</h4>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules1.jpeg', title: 'Vivienne Westwood' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Vivienne Westwood
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules5.jpeg', title: 'Marc Jacobs' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Marc Jacobs
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules11.jpeg', title: 'Coccinelle' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Coccinelle
                                 </a>
-                                <a 
-                                  href="#" 
+                                <a
+                                  href="#"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules2.jpeg', title: 'LXUY Signature' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -470,15 +468,15 @@ export const Header: React.FC<HeaderProps> = ({
                               <div className="col-span-6 grid grid-cols-2 gap-4">
                                 <div className="relative aspect-[16/10] overflow-hidden bg-luxury-silver/10 col-span-2">
                                   <AnimatePresence mode="wait">
-                                    <motion.img 
+                                    <motion.img
                                       key={activeWomenImage}
-                                      src={activeWomenImage} 
-                                      alt={activeWomenTitle} 
+                                      src={activeWomenImage}
+                                      alt={activeWomenTitle}
                                       initial={{ opacity: 0 }}
                                       animate={{ opacity: 1 }}
                                       exit={{ opacity: 0 }}
                                       transition={{ duration: 0.25 }}
-                                      className="w-full h-full object-cover absolute inset-0" 
+                                      className="w-full h-full object-cover absolute inset-0"
                                     />
                                   </AnimatePresence>
                                   <div className="absolute inset-0 bg-black/20 flex flex-col justify-end p-4 z-10 pointer-events-none">
@@ -584,9 +582,8 @@ export const Header: React.FC<HeaderProps> = ({
                         <a
                           href={link.href}
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className={`block text-sm uppercase tracking-widest font-semibold py-1.5 ${
-                            link.isSale ? 'text-red-600' : 'text-luxury-dark'
-                          }`}
+                          className={`block text-sm uppercase tracking-widest font-semibold py-1.5 ${link.isSale ? 'text-red-600' : 'text-luxury-dark'
+                            }`}
                         >
                           {link.label}
                         </a>
@@ -596,38 +593,38 @@ export const Header: React.FC<HeaderProps> = ({
                       {hasSubmenu && isExpanded && (
                         <div className="mt-3 pl-4 space-y-5">
                           {link.menuKey === 'new-arrivals' && (
-  <div className="space-y-4">
-    <div className="space-y-2">
-      <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/10 pb-1 block">
-        New In
-      </span>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/10 pb-1 block">
+                                  New In
+                                </span>
 
-      <div className="flex flex-col space-y-1.5 pl-1 text-[11px] text-neutral-700 font-medium">
-        <a
-          href="/new-arrivals?category=women"
-          className="transition-colors hover:text-black"
-        >
-          Women
-        </a>
+                                <div className="flex flex-col space-y-1.5 pl-1 text-[11px] text-neutral-700 font-medium">
+                                  <a
+                                    href="/new-arrivals?category=women"
+                                    className="transition-colors hover:text-black"
+                                  >
+                                    Women
+                                  </a>
 
-        <a
-          href="/new-arrivals?category=men"
-          className="transition-colors hover:text-black"
-        >
-          Men
-        </a>
-      </div>
-    </div>
+                                  <a
+                                    href="/new-arrivals?category=men"
+                                    className="transition-colors hover:text-black"
+                                  >
+                                    Men
+                                  </a>
+                                </div>
+                              </div>
 
-    {/* <div className="relative aspect-[16/10] overflow-hidden bg-luxury-silver/5 rounded-sm mt-3 shadow-sm">
+                              {/* <div className="relative aspect-[16/10] overflow-hidden bg-luxury-silver/5 rounded-sm mt-3 shadow-sm">
       <img
         src="/images/models/modules5.jpeg"
         alt="New Arrivals"
         className="w-full h-full object-cover"
       />
     </div> */}
-  </div>
-)}
+                            </div>
+                          )}
 
                           {link.menuKey === 'men' && (
                             <div className="space-y-4">
@@ -646,7 +643,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   {renderMobileSubmenuLink('Polo Ralph Lauren', 'men', '/images/models/modules8.jpeg')}
                                   {renderMobileSubmenuLink('Fred Perry', 'men', '/images/models/modules6.jpeg')}
                                   {renderMobileSubmenuLink('Hackett London', 'men', '/images/models/modules2.jpeg')}
-                                  {renderMobileSubmenuLink('Maison Kitsuné', 'men', '/images/models/modules8.jpeg')}
+                                  {renderMobileSubmenuLink(' Kitsuné', 'men', '/images/models/modules8.jpeg')}
                                 </div>
                               </div>
                               {/* <div className="relative aspect-[16/10] overflow-hidden bg-luxury-silver/5 rounded-sm mt-3 shadow-sm">

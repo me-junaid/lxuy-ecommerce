@@ -131,7 +131,7 @@ export default function RegisterPage() {
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           className="text-sm uppercase tracking-[0.25em] text-luxury-gold"
         >
-          LXUY Maison...
+          LXUY ...
         </motion.div>
       </div>
     );
@@ -146,7 +146,7 @@ export default function RegisterPage() {
         onLogoClick={() => router.push("/")}
         onCartClick={() => router.push("/cart")}
         onProfileClick={() => router.push(isAuthenticated ? "/profile" : "/login")}
-        onSearchClick={() => {}}
+        onSearchClick={() => { }}
       />
 
       <main className="flex-1 grid grid-cols-1 md:grid-cols-2 min-h-[calc(100vh-110px)]">
@@ -169,7 +169,7 @@ export default function RegisterPage() {
               className="max-w-md"
             >
               <span className="text-xs uppercase tracking-[0.25em] text-luxury-gold mb-3 block">
-                LXUY Maison
+                LXUY
               </span>
               <h2 className="text-4xl font-serif tracking-normal leading-tight mb-4">
                 &ldquo;The expression of modern tailoring.&rdquo;

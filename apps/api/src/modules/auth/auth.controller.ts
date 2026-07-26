@@ -171,12 +171,41 @@ export class AuthController {
    */
   @SkipThrottle()
   @Get('verify-email')
-  async verifyEmail(@Query() query: VerifyEmailDto) {
+  async verifyEmail(
+    @Query() query: VerifyEmailDto,
+    @Res() response: Response,
+  ) {
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+
     if (!query.token) {
-      throw new BadRequestException('Verification token is required');
+      return response.redirect(
+        `${frontendUrl}/login?verified=false&reason=missing_token`,
+      );
     }
-    return this.authService.verifyEmail(query.token);
+
+    try {
+      const result = await this.authService.verifyEmail(query.token);
+      if (result.message.toLowerCase().includes('already')) {
+        return response.redirect(
+          `${frontendUrl}/login?verified=false&reason=already_verified`,
+        );
+      }
+      return response.redirect(`${frontendUrl}/login?verified=true`);
+    } catch (err: unknown) {
+      let reason = 'invalid_token';
+      if (err instanceof BadRequestException) {
+        const msg = err.message.toLowerCase();
+        if (msg.includes('expired')) {
+          reason = 'expired';
+        }
+      }
+      return response.redirect(
+        `${frontendUrl}/login?verified=false&reason=${reason}`,
+      );
+    }
   }
+
 
   /**
    * Resend verification email — stricter rate limit: 3 per 10 minutes per IP (AUTH-023, AUTH-024).

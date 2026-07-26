@@ -7,7 +7,7 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly resend: Resend;
   private readonly fromAddress: string;
-  private readonly frontendUrl: string;
+  private readonly backendUrl: string;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
@@ -30,8 +30,8 @@ export class EmailService {
     this.resend = new Resend(apiKey ?? 're_dev_noop');
     this.fromAddress =
       this.configService.get<string>('EMAIL_FROM') ?? 'LXUY <noreply@lxuy.com>';
-    this.frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+    this.backendUrl =
+      this.configService.get<string>('BACKEND_URL') ?? 'http://localhost:3001';
   }
 
   /**
@@ -43,7 +43,7 @@ export class EmailService {
     firstName: string,
     rawToken: string,
   ): Promise<void> {
-    const verifyUrl = this.frontendUrl + '/verify-email?token=' + rawToken;
+    const verifyUrl = this.backendUrl + '/api/v1/auth/verify-email?token=' + rawToken;
     const year = new Date().getFullYear();
 
     const body = [
@@ -56,7 +56,7 @@ export class EmailService {
       '<table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #e8e1d4;">',
       '<tr><td style="background:#1a1a1a;padding:32px 48px;text-align:center;">',
       '<p style="margin:0;font-size:22px;letter-spacing:0.4em;color:#c9a96e;text-transform:uppercase;">LXUY</p>',
-      '<p style="margin:6px 0 0;font-size:10px;letter-spacing:0.25em;color:#888;text-transform:uppercase;">Maison</p>',
+      '<p style="margin:6px 0 0;font-size:10px;letter-spacing:0.25em;color:#888;text-transform:uppercase;"></p>',
       '</td></tr>',
       '<tr><td style="padding:48px;">',
       '<p style="margin:0 0 8px;font-size:11px;letter-spacing:0.2em;color:#c9a96e;text-transform:uppercase;">Welcome</p>',
@@ -71,7 +71,7 @@ export class EmailService {
       '<p style="margin:24px 0 0;font-size:11px;color:#bbb;word-break:break-all;">' + verifyUrl + '</p>',
       '</td></tr>',
       '<tr><td style="padding:24px 48px;border-top:1px solid #e8e1d4;text-align:center;">',
-      '<p style="margin:0;font-size:11px;color:#bbb;">&copy; ' + year + ' LXUY Maison. All rights reserved.</p>',
+      '<p style="margin:0;font-size:11px;color:#bbb;">&copy; ' + year + ' LXUY . All rights reserved.</p>',
       '</td></tr>',
       '</table></td></tr></table></body></html>',
     ].join('\n');

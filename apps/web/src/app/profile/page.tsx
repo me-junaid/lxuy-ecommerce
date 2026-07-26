@@ -26,7 +26,7 @@ export default function ProfilePage() {
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           className="text-sm uppercase tracking-[0.25em] text-luxury-gold"
         >
-          LXUY Maison...
+          LXUY ...
         </motion.div>
       </div>
     );
@@ -50,7 +50,7 @@ export default function ProfilePage() {
         onLogoClick={() => router.push("/")}
         onCartClick={() => router.push("/cart")}
         onProfileClick={() => router.push("/profile")}
-        onSearchClick={() => {}}
+        onSearchClick={() => { }}
       />
 
       {/* Email verification banner — shown until the user verifies their address */}
@@ -78,7 +78,7 @@ export default function ProfilePage() {
           <div className="border-b border-luxury-silver pb-8 mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <span className="text-xs uppercase tracking-[0.25em] text-luxury-gold mb-2 block">
-                Maison Account
+                Account
               </span>
               <h1 className="text-4xl font-serif tracking-normal text-luxury-dark">
                 Welcome, {user.firstName}

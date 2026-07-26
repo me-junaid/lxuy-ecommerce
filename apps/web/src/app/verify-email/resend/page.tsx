@@ -37,7 +37,7 @@ export default function ResendVerificationPage() {
         <div className="mb-12 text-center">
           <Link href="/" className="inline-block">
             <p className="text-2xl tracking-[0.4em] text-luxury-dark font-serif uppercase">LXUY</p>
-            <p className="text-[9px] tracking-[0.3em] text-neutral-400 uppercase mt-0.5">Maison</p>
+            <p className="text-[9px] tracking-[0.3em] text-neutral-400 uppercase mt-0.5"></p>
           </Link>
         </div>
 

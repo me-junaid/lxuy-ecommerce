@@ -1,20 +1,48 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Input, Button, Header, Footer } from "@repo/ui";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const { login, user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
+  const [infoType, setInfoType] = useState<"success" | "error" | "info" | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Set message based on verification query params from direct backend redirect
+  useEffect(() => {
+    const verified = searchParams.get("verified");
+    const reason = searchParams.get("reason");
+
+    if (verified === "true") {
+      setInfoType("success");
+      setInfoMessage("Your email address has been verified successfully. Please sign in.");
+    } else if (verified === "false") {
+      if (reason === "expired") {
+        setInfoType("error");
+        setInfoMessage("This verification link has expired. Please sign in and request a new link.");
+      } else if (reason === "already_verified") {
+        setInfoType("info");
+        setInfoMessage("Your email address is already verified. You can sign in.");
+      } else if (reason === "missing_token") {
+        setInfoType("error");
+        setInfoMessage("The email verification link is missing the token.");
+      } else {
+        setInfoType("error");
+        setInfoMessage("This verification link is invalid or unrecognized.");
+      }
+    }
+  }, [searchParams]);
 
   // Wait until session restore is done before deciding to redirect.
   // Without the !loading guard, isAuthenticated is briefly false on every
@@ -42,8 +70,8 @@ export default function LoginPage() {
       const apiErr = err as { data?: { message?: string }; message?: string };
       setError(
         apiErr?.data?.message ||
-          apiErr?.message ||
-          "Invalid credentials. Please try again."
+        apiErr?.message ||
+        "Invalid credentials. Please try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -60,7 +88,7 @@ export default function LoginPage() {
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           className="text-sm uppercase tracking-[0.25em] text-luxury-gold"
         >
-          LXUY Maison...
+          LXUY ...
         </motion.div>
       </div>
     );
@@ -75,7 +103,7 @@ export default function LoginPage() {
         onLogoClick={() => router.push("/")}
         onCartClick={() => router.push("/cart")}
         onProfileClick={() => router.push(isAuthenticated ? "/profile" : "/login")}
-        onSearchClick={() => {}}
+        onSearchClick={() => { }}
       />
 
       <main className="flex-1 grid grid-cols-1 md:grid-cols-2 min-h-[calc(100vh-110px)]">
@@ -98,7 +126,7 @@ export default function LoginPage() {
               className="max-w-md"
             >
               <span className="text-xs uppercase tracking-[0.25em] text-luxury-gold mb-3 block">
-                LXUY Maison
+                LXUY
               </span>
               <h2 className="text-4xl font-serif tracking-normal leading-tight mb-4">
                 &ldquo;Simplicity is the ultimate sophistication.&rdquo;
@@ -129,6 +157,24 @@ export default function LoginPage() {
             </div>
 
             <AnimatePresence mode="wait">
+              {infoMessage && (
+                <motion.div
+                  key="info"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className={`mb-6 p-4 text-xs tracking-wider uppercase font-medium border-l ${
+                    infoType === "success"
+                      ? "bg-green-50 text-green-700 border-green-500"
+                      : infoType === "info"
+                      ? "bg-blue-50 text-blue-700 border-blue-500"
+                      : "bg-red-50 text-red-600 border-red-500"
+                  }`}
+                >
+                  {infoMessage}
+                </motion.div>
+              )}
+
               {error && (
                 <motion.div
                   key="error"
@@ -197,5 +243,21 @@ export default function LoginPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#FDFBF7]">
+          <div className="text-sm uppercase tracking-[0.25em] text-luxury-gold">
+            LXUY ...
+          </div>
+        </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }
