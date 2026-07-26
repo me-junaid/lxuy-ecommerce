@@ -101,11 +101,7 @@ export class UsersService {
     const sessionIndex = user.sessions?.findIndex(s => s.tokenId === tokenId);
     if (sessionIndex !== undefined && sessionIndex !== -1 && user.sessions) {
       const currentSession = user.sessions[sessionIndex];
-      user.sessions[sessionIndex] = {
-        ...currentSession,
-        ...update,
-        lastActive: new Date(),
-      } as UserSession;
+      Object.assign(currentSession, update, { lastActive: new Date() });
       await user.save();
     }
   }
