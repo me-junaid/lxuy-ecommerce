@@ -26,6 +26,8 @@ import {
   ResetPasswordDto,
 } from './auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { Roles } from './decorators/roles.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
@@ -335,5 +337,33 @@ export class AuthController {
       throw new BadRequestException('Passwords do not match.');
     }
     return this.authService.resetPassword(dto.token, dto.password);
+  }
+
+  /**
+   * Dummy endpoint to test customer access (AUTH-079, AUTH-080).
+   */
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('customer')
+  @Get('test/customer')
+  testCustomer() {
+    return {
+      status: 'success',
+      message: 'Access granted to customer route',
+    };
+  }
+
+  /**
+   * Dummy endpoint to test admin access (AUTH-077, AUTH-078, AUTH-079, AUTH-080).
+   */
+  @SkipThrottle()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Get('test/admin')
+  testAdmin() {
+    return {
+      status: 'success',
+      message: 'Access granted to admin route',
+    };
   }
 }
