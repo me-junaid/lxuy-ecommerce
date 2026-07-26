@@ -4,12 +4,14 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext";
 
 type Status = "loading" | "success" | "already_verified" | "error";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const [status, setStatus] = useState<Status>("loading");
   const [message, setMessage] = useState("");
 
@@ -23,13 +25,17 @@ function VerifyEmailContent() {
 
     api
       .get<{ message: string }>("/api/v1/auth/verify-email?token=" + encodeURIComponent(token))
-      .then((res) => {
+      .then(async (res) => {
         if (res.message.toLowerCase().includes("already")) {
           setStatus("already_verified");
         } else {
           setStatus("success");
         }
         setMessage(res.message);
+        // Refresh the in-memory session so isEmailVerified flips to true
+        // immediately — this removes the banner on the profile page without
+        // requiring the user to reload the browser.
+        await refreshUser();
       })
       .catch((err: unknown) => {
         setStatus("error");

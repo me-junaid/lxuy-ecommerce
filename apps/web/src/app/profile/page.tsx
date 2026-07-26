@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 export default function ProfilePage() {
-  const { user, loading, isAuthenticated, logout } = useAuth();
+  const { user, loading, isAuthenticated, logout, refreshUser } = useAuth();
   const router = useRouter();
 
   // Don't redirect until we know for sure the session is gone.
@@ -64,6 +64,13 @@ export default function ProfilePage() {
             >
               Resend verification email
             </a>
+            {" · "}
+            <button
+              onClick={() => refreshUser()}
+              className="underline underline-offset-2 hover:text-amber-900 font-semibold transition-colors bg-transparent border-0 p-0 cursor-pointer"
+            >
+              Already verified? Refresh
+            </button>
           </p>
         </div>
       )}

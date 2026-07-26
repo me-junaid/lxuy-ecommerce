@@ -49,6 +49,12 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<User>;
   register: (data: RegisterData) => Promise<unknown>;
   logout: () => Promise<void>;
+  /**
+   * Fetches a fresh session from the server and updates the in-memory user.
+   * Call this after any action that changes server-side user state (e.g. after
+   * email verification) so the UI reflects the latest DB values immediately.
+   */
+  refreshUser: () => Promise<void>;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -217,6 +223,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // ── Refresh User ──────────────────────────────────────────────────────────
+  // Calls /refresh which reads fresh DB data and issues updated tokens.
+  // Silently no-ops if called while unauthenticated.
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const response = await fetch("/api/v1/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      if (!response.ok) return;
+      const data = (await response.json()) as {
+        accessToken: string;
+        user: User;
+      };
+      setAccessToken(data.accessToken);
+      setUser(data.user);
+    } catch {
+      // Best-effort — never throw from refreshUser.
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -226,6 +254,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        refreshUser,
       }}
     >
       {children}
