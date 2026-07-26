@@ -15,6 +15,15 @@ export class UsersService {
     if (existingUser) {
       throw new ConflictException('Email already registered');
     }
+    if (userData.phoneNumber) {
+      const existingPhone = await this.userModel.findOne({
+        phoneNumber: userData.phoneNumber,
+        isActive: true,
+      }).exec();
+      if (existingPhone) {
+        throw new ConflictException('Phone number already registered');
+      }
+    }
     const newUser = new this.userModel(userData);
     return newUser.save();
   }

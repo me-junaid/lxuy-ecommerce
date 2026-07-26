@@ -16,6 +16,9 @@ export default function RegisterPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,16 +32,63 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
+    // 1. Mandatory Fields Check
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password || !confirmPassword) {
       setError("All fields are required.");
       return;
     }
+
+    // 2. Name Character Policy Check (No numbers/emojis, letters only)
+    const nameRegex = /^[a-zA-ZÀ-ÿ\s'-]+$/;
+    if (!nameRegex.test(firstName.trim())) {
+      setError("First name can only contain letters, spaces, hyphens, and apostrophes.");
+      return;
+    }
+    if (!nameRegex.test(lastName.trim())) {
+      setError("Last name can only contain letters, spaces, hyphens, and apostrophes.");
+      return;
+    }
+
+    // 3. Email Format Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // 4. Password Policy & Complexity Validation
     if (password.length < 8) {
       setError("Password must be at least 8 characters long.");
       return;
     }
     if (password.length > 72) {
       setError("Password must be at most 72 characters long.");
+      return;
+    }
+    const passwordRegex = /((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
+    if (!passwordRegex.test(password)) {
+      setError("Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number or special character.");
+      return;
+    }
+
+    // 5. Password Confirmation Check
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    // 6. Optional E.164 Phone Format Check
+    if (phoneNumber.trim()) {
+      const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+      if (!phoneRegex.test(phoneNumber.trim())) {
+        setError("Please enter a valid phone number in E.164 format (e.g., +1234567890).");
+        return;
+      }
+    }
+
+    // 7. Terms of Service Acceptance Check
+    if (!acceptTerms) {
+      setError("You must accept the Terms of Service and Privacy Policy.");
       return;
     }
 
@@ -52,10 +102,10 @@ export default function RegisterPage() {
         password,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
+        phoneNumber: phoneNumber.trim() || undefined,
       });
 
-      // 2. Immediately sign the user in — this sets the httpOnly cookie and
-      //    stores the access token in memory, so /profile loads authenticated.
+      // 2. Immediately sign the user in
       await login({
         email: email.trim().toLowerCase(),
         password,
@@ -63,12 +113,10 @@ export default function RegisterPage() {
 
       router.replace("/profile");
     } catch (err: unknown) {
-      const apiErr = err as { data?: { message?: string }; message?: string };
-      setError(
-        apiErr?.data?.message ||
-          apiErr?.message ||
-          "Registration failed. Please try again."
-      );
+      const apiErr = err as { data?: { message?: string | string[] }; message?: string };
+      const rawMsg = apiErr?.data?.message || apiErr?.message || "Registration failed. Please try again.";
+      const displayMsg = Array.isArray(rawMsg) ? rawMsg[0] : rawMsg;
+      setError(displayMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -194,14 +242,57 @@ export default function RegisterPage() {
                 required
               />
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+                <Input
+                  label="Confirm Password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+
               <Input
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                required
+                label="Phone Number (Optional)"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                autoComplete="tel"
+                placeholder="+1234567890"
               />
+
+              <div className="flex items-start space-x-3 pt-2">
+                <input
+                  type="checkbox"
+                  id="acceptTerms"
+                  checked={acceptTerms}
+                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-luxury-gold cursor-pointer"
+                  required
+                />
+                <label
+                  htmlFor="acceptTerms"
+                  className="text-xs text-neutral-500 font-light tracking-wide leading-relaxed select-none cursor-pointer"
+                >
+                  I agree to the{" "}
+                  <a href="#" className="underline text-neutral-700 hover:text-luxury-gold transition-colors">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" className="underline text-neutral-700 hover:text-luxury-gold transition-colors">
+                    Privacy Policy
+                  </a>.
+                </label>
+              </div>
 
               <div className="pt-4">
                 <Button

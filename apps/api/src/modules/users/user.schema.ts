@@ -42,6 +42,15 @@ export class User extends Document {
   lastName!: string;
 
   @Prop({
+    required: false,
+    unique: true,
+    sparse: true,
+    trim: true,
+    index: true,
+  })
+  phoneNumber?: string;
+
+  @Prop({
     required: true,
     enum: Object.values(UserRole),
     default: UserRole.CUSTOMER,

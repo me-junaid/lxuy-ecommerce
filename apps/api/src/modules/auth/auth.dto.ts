@@ -5,6 +5,7 @@ import {
   MinLength,
   MaxLength,
   Matches,
+  IsOptional,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -37,13 +38,26 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'First name is required' })
   @MinLength(2, { message: 'First name must be at least 2 characters long' })
   @MaxLength(50, { message: 'First name must be at most 50 characters long' })
+  @Matches(/^[a-zA-ZÀ-ÿ\s'-]+$/, {
+    message: 'First name can only contain letters, spaces, hyphens, and apostrophes (no emojis or numbers)',
+  })
   firstName!: string;
 
   @IsString()
   @IsNotEmpty({ message: 'Last name is required' })
   @MinLength(2, { message: 'Last name must be at least 2 characters long' })
   @MaxLength(50, { message: 'Last name must be at most 50 characters long' })
+  @Matches(/^[a-zA-ZÀ-ÿ\s'-]+$/, {
+    message: 'Last name can only contain letters, spaces, hyphens, and apostrophes (no emojis or numbers)',
+  })
   lastName!: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\+?[1-9]\d{1,14}$/, {
+    message: 'Please provide a valid phone number in E.164 format (e.g. +1234567890)',
+  })
+  phoneNumber?: string;
 }
 
 export class LoginDto {
