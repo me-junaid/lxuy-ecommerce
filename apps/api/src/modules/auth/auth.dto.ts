@@ -89,3 +89,31 @@ export class ResendVerificationDto {
   @IsEmail({}, { message: 'Please provide a valid email address' })
   email!: string;
 }
+
+export class ForgotPasswordDto {
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.toLowerCase().trim() : value,
+  )
+  @IsEmail({}, { message: 'Please provide a valid email address' })
+  email!: string;
+}
+
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Reset token is required' })
+  token!: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters long' })
+  @MaxLength(72, { message: 'Password must be at most 72 characters long' })
+  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+    message:
+      'Password is too weak. Must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number or special character.',
+  })
+  password!: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Confirm password is required' })
+  confirmPassword!: string;
+}
+

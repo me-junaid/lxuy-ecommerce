@@ -58,6 +58,19 @@ function LoginPageContent() {
         setInfoType("error");
         setInfoMessage("This verification link is invalid or unrecognized.");
       }
+    } else if (searchParams.get("reset_status") === "success") {
+      setInfoType("success");
+      setInfoMessage("Your password has been successfully reset. Please sign in with your new password.");
+    } else if (searchParams.get("reset_status") === "error") {
+      const resetReason = searchParams.get("reason");
+      setInfoType("error");
+      if (resetReason === "expired" || resetReason === "invalid_token") {
+        setInfoMessage("The password reset link is invalid or has expired. Please request a new one.");
+      } else if (resetReason === "missing_token") {
+        setInfoMessage("The password reset link is missing the required token.");
+      } else {
+        setInfoMessage("Failed to reset password. Please try requesting a new link.");
+      }
     }
   }, [searchParams, router, refreshUser]);
 

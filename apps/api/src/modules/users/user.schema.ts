@@ -16,6 +16,7 @@ export enum UserRole {
       delete ret['refreshTokenHash'];
       delete ret['passwordChangedAt'];
       delete ret['emailVerificationToken'];
+      delete ret['passwordResetToken'];
       ret['id'] = (ret['_id'] as { toString?: () => string })?.toString?.();
       delete ret['_id'];
       delete ret['__v'];
@@ -75,6 +76,14 @@ export class User extends Document {
   /** Timestamp after which the verification token is no longer valid (24 h). */
   @Prop({ type: Date, default: null })
   emailVerificationExpires?: Date | null;
+
+  /** SHA-256 hash of the password reset token. */
+  @Prop({ type: String, select: false, default: null })
+  passwordResetToken?: string | null;
+
+  /** Timestamp after which the password reset token expires (1 h). */
+  @Prop({ type: Date, default: null })
+  passwordResetExpires?: Date | null;
 
   /** The current valid refresh token hash. Nulled out on logout. */
   @Prop({ type: String, select: false, default: null })

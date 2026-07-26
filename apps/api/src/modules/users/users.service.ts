@@ -138,4 +138,48 @@ export class UsersService {
       })
       .exec();
   }
+
+  /**
+   * Sets the password reset token hash and expiry for the user.
+   */
+  async setPasswordResetToken(
+    userId: string,
+    hashedToken: string,
+    expires: Date,
+  ): Promise<void> {
+    await this.userModel
+      .findByIdAndUpdate(userId, {
+        passwordResetToken: hashedToken,
+        passwordResetExpires: expires,
+      })
+      .exec();
+  }
+
+  /**
+   * Finds the active user with matching non-expired password reset token hash.
+   */
+  async findByPasswordResetToken(
+    hashedToken: string,
+  ): Promise<UserDocument | null> {
+    return this.userModel
+      .findOne({
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { $gt: new Date() },
+        isActive: true,
+      })
+      .select('+passwordResetToken')
+      .exec();
+  }
+
+  /**
+   * Clears the password reset token fields from the user.
+   */
+  async clearPasswordResetToken(userId: string): Promise<void> {
+    await this.userModel
+      .findByIdAndUpdate(userId, {
+        passwordResetToken: null,
+        passwordResetExpires: null,
+      })
+      .exec();
+  }
 }

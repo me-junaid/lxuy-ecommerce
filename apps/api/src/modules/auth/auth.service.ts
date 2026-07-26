@@ -404,4 +404,98 @@ export class AuthService {
       user: user.toJSON() as Record<string, unknown>,
     };
   }
+
+  /**
+   * Triggers the forgot password process.
+   * Generates token, stores hash in DB, and fires the email link.
+   * Fulfills AUTH-068 and AUTH-069.
+   */
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      // Return generic message to prevent user enumeration (AUTH-069)
+      return {
+        message: 'If this email is registered, a password reset link has been sent.',
+      };
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await this.usersService.setPasswordResetToken(
+      user._id.toString(),
+      hashedToken,
+      expires,
+    );
+
+    // Send email fire-and-forget
+    this.emailService
+      .sendPasswordResetEmail(user.email, user.firstName, rawToken)
+      .catch((err: unknown) => {
+        this.logger.error(
+          `Failed to send password reset email to ${user.email}: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      });
+
+    return {
+      message: 'If this email is registered, a password reset link has been sent.',
+    };
+  }
+
+  /**
+   * Verifies if a password reset token exists and is valid (not expired).
+   */
+  async verifyResetToken(token: string): Promise<boolean> {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await this.usersService.findByPasswordResetToken(hashedToken);
+    return !!user;
+  }
+
+  /**
+   * Completes the password reset process.
+   * Fulfills AUTH-070 to AUTH-076.
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await this.usersService.findByPasswordResetToken(hashedToken);
+
+    if (!user) {
+      // Token not found or expired (AUTH-070, AUTH-071, AUTH-072)
+      throw new BadRequestException(
+        'This password reset link is invalid or has expired. Please request a new one.',
+      );
+    }
+
+    // Prevent resetting to the same password (AUTH-074)
+    if (user.password) {
+      const isSame = await bcrypt.compare(newPassword, user.password);
+      if (isSame) {
+        throw new BadRequestException(
+          'Your new password cannot be the same as your current password.',
+        );
+      }
+    }
+
+    // Save password (auto-hashes in pre-save hook) and clear reset token
+    user.password = newPassword;
+    await user.save();
+
+    await this.usersService.clearPasswordResetToken(user._id.toString());
+
+    // Invalidate all active sessions across all devices (AUTH-075)
+    await this.usersService.updateRefreshToken(
+      user._id.toString(),
+      null,
+      null,
+      false,
+    );
+
+    return {
+      message: 'Your password has been successfully reset. Please sign in with your new password.',
+    };
+  }
 }

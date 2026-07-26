@@ -17,7 +17,14 @@ import type { Response, Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, VerifyEmailDto, ResendVerificationDto } from './auth.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  VerifyEmailDto,
+  ResendVerificationDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
@@ -267,5 +274,66 @@ export class AuthController {
         `${frontendUrl}/login?social_login=error&reason=processing_failed`,
       );
     }
+  }
+
+  /**
+   * Request password reset link (Forgot Password).
+   * Rate limited: 3 requests per 10 minutes (600,000 ms) per IP.
+   */
+  @Throttle({ default: { limit: 3, ttl: 600000 } })
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  /**
+   * Verify password reset token (GET redirect handler).
+   * Validates the token and redirects the browser to the frontend reset page.
+   */
+  @SkipThrottle()
+  @Get('reset-password')
+  async verifyResetToken(
+    @Query('token') token: string,
+    @Res() response: Response,
+  ) {
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
+
+    if (!token) {
+      return response.redirect(
+        `${frontendUrl}/login?reset_status=error&reason=missing_token`,
+      );
+    }
+
+    try {
+      const isValid = await this.authService.verifyResetToken(token);
+      if (!isValid) {
+        return response.redirect(
+          `${frontendUrl}/login?reset_status=error&reason=expired`,
+        );
+      }
+      // Token is valid. Redirect to frontend reset form page, passing the raw token
+      return response.redirect(`${frontendUrl}/reset-password?token=${token}`);
+    } catch (err: unknown) {
+      this.logger.error(`Reset token validation failed: ${err instanceof Error ? err.message : String(err)}`);
+      return response.redirect(
+        `${frontendUrl}/login?reset_status=error&reason=invalid_token`,
+      );
+    }
+  }
+
+  /**
+   * Complete password reset.
+   * Receives token and new password, completes reset in DB, and revokes active sessions.
+   */
+  @SkipThrottle()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    if (dto.password !== dto.confirmPassword) {
+      throw new BadRequestException('Passwords do not match.');
+    }
+    return this.authService.resetPassword(dto.token, dto.password);
   }
 }
