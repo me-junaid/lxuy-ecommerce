@@ -14,6 +14,8 @@ export interface HeaderProps {
   onSearchSubmit?: (query: string) => void;
   onProductClick?: (slug: string) => void;
   user?: { firstName: string; lastName: string } | null;
+  isHomePage?: boolean;
+  isScrolled?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,6 +28,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchSubmit,
   onProductClick,
   user = null,
+  isHomePage = false,
+  isScrolled = false,
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -104,45 +108,63 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-45 border-b border-luxury-silver/30 bg-[#FDFBF7] transition-all duration-300">
+      <header
+        className={`fixed top-0 left-0 w-full z-45 transition-all duration-500 ${
+          isHomePage && !isScrolled
+            ? 'bg-transparent border-b border-transparent'
+            : 'bg-[#FDFBF7] border-b border-luxury-silver/30'
+        }`}
+      >
 
         {/* Row 1: Top Bar (Logo & Actions) */}
         <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between relative">
 
           {/* Left: Support Links (Desktop Only) */}
           <div className="hidden md:flex md:flex-1 md:items-center">
-            <div className="flex space-x-6 text-[10px] uppercase tracking-luxury font-medium text-neutral-500">
+            <div
+              className={`flex space-x-6 text-[10px] uppercase tracking-luxury font-medium transition-colors duration-500 ${
+                isHomePage && !isScrolled ? 'text-white/80' : 'text-neutral-500'
+              }`}
+            >
               <a href="#" className="hover:text-luxury-gold transition-colors">Stores</a>
-              <span className="text-neutral-300">|</span>
+              <span className={isHomePage && !isScrolled ? 'text-white/20' : 'text-neutral-300'}>|</span>
               <a href="#" className="hover:text-luxury-gold transition-colors">Support</a>
             </div>
           </div>
 
           {/* Center: Logo (Left-aligned on mobile, absolute-centered on desktop) */}
-          <div className="flex-shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2 text-left md:text-center">
-            {onLogoClick ? (
-              <button
-                onClick={onLogoClick}
-                className="flex items-center justify-center hover:opacity-85 transition-opacity bg-transparent border-none p-0 cursor-pointer focus:outline-none"
-                aria-label="Go to homepage"
-              >
-                <img
-                  src="/images/LOGO/lxuy-logo.png"
-                  alt={brandName}
-                  className="h-10 w-auto object-contain"
-                />
-              </button>
-            ) : (
-              <a
-                href="/"
-                className="inline-flex items-center justify-center hover:opacity-85 transition-opacity"
-              >
-                <img
-                  src="/images/LOGO/lxuy-logo.jpeg"
-                  alt={brandName}
-                  className="h-10 w-auto object-contain"
-                />
-              </a>
+          <div className="flex-shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2 text-left md:text-center min-w-[80px] min-h-[40px] flex items-center justify-center">
+            {(!isHomePage || isScrolled) && (
+              <>
+                {onLogoClick ? (
+                  <button
+                    onClick={onLogoClick}
+                    className="flex items-center justify-center hover:opacity-85 transition-opacity bg-transparent border-none p-0 cursor-pointer focus:outline-none"
+                    aria-label="Go to homepage"
+                  >
+                    <motion.img
+                      layoutId="main-logo"
+                      transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+                      src="/images/LOGO/lxuy-logo.png"
+                      alt={brandName}
+                      className="h-10 w-auto object-contain"
+                    />
+                  </button>
+                ) : (
+                  <a
+                    href="/"
+                    className="inline-flex items-center justify-center hover:opacity-85 transition-opacity"
+                  >
+                    <motion.img
+                      layoutId="main-logo"
+                      transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+                      src="/images/LOGO/lxuy-logo.png"
+                      alt={brandName}
+                      className="h-10 w-auto object-contain"
+                    />
+                  </a>
+                )}
+              </>
             )}
           </div>
 
@@ -154,7 +176,11 @@ export const Header: React.FC<HeaderProps> = ({
                 setIsSearchOpen(true);
                 if (onSearchClick) onSearchClick();
               }}
-              className="text-luxury-dark hover:text-luxury-gold p-1 outline-none transition-colors duration-300"
+              className={`p-1 outline-none transition-colors duration-500 ${
+                isHomePage && !isScrolled
+                  ? 'text-white hover:text-luxury-gold'
+                  : 'text-luxury-dark hover:text-luxury-gold'
+              }`}
               aria-label="Search"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -166,7 +192,11 @@ export const Header: React.FC<HeaderProps> = ({
             {user ? (
               <button
                 onClick={onProfileClick}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-luxury-gold/15 text-luxury-dark border border-luxury-gold/30 hover:border-luxury-gold hover:bg-luxury-gold/20 transition-all duration-300 text-xs font-semibold tracking-wider"
+                className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 text-xs font-semibold tracking-wider ${
+                  isHomePage && !isScrolled
+                    ? 'bg-white/15 text-white border border-white/30 hover:border-white hover:bg-white/20'
+                    : 'bg-luxury-gold/15 text-luxury-dark border border-luxury-gold/30 hover:border-luxury-gold hover:bg-luxury-gold/20'
+                }`}
                 title={`${user.firstName} ${user.lastName}`}
               >
                 {user.firstName[0]?.toUpperCase()}{user.lastName[0]?.toUpperCase()}
@@ -174,7 +204,11 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 onClick={onProfileClick}
-                className="text-luxury-dark hover:text-luxury-gold p-1 outline-none transition-colors duration-300"
+                className={`p-1 outline-none transition-colors duration-500 ${
+                  isHomePage && !isScrolled
+                    ? 'text-white hover:text-luxury-gold'
+                    : 'text-luxury-dark hover:text-luxury-gold'
+                }`}
                 aria-label="Account"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -185,7 +219,11 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Wishlist */}
             <button
-              className="text-luxury-dark hover:text-luxury-gold p-1 outline-none transition-colors duration-300 hidden md:inline-block"
+              className={`p-1 outline-none transition-colors duration-500 hidden md:inline-block ${
+                isHomePage && !isScrolled
+                  ? 'text-white hover:text-luxury-gold'
+                  : 'text-luxury-dark hover:text-luxury-gold'
+              }`}
               aria-label="Wishlist"
             >
               <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -196,7 +234,11 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Cart */}
             <button
               onClick={onCartClick}
-              className="relative text-luxury-dark hover:text-luxury-gold p-1 outline-none transition-colors duration-300"
+              className={`relative p-1 outline-none transition-colors duration-500 ${
+                isHomePage && !isScrolled
+                  ? 'text-white hover:text-luxury-gold'
+                  : 'text-luxury-dark hover:text-luxury-gold'
+              }`}
               aria-label="Shopping Cart"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -212,7 +254,11 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile Menu Toggle (Positioned on the far right on mobile viewports) */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden text-luxury-dark p-1 outline-none ml-1"
+              className={`md:hidden p-1 outline-none ml-1 transition-colors duration-500 ${
+                isHomePage && !isScrolled
+                  ? 'text-white hover:text-luxury-gold'
+                  : 'text-luxury-dark hover:text-luxury-gold'
+              }`}
               aria-label="Open Mobile Menu"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -223,7 +269,13 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Row 2: Desktop Navigation Bar */}
-        <div className="hidden md:block w-full border-t border-luxury-silver/20 bg-[#FDFBF7]">
+        <div
+          className={`hidden md:block w-full transition-all duration-500 ${
+            isHomePage && !isScrolled
+              ? 'border-t border-transparent bg-transparent'
+              : 'border-t border-luxury-silver/20 bg-[#FDFBF7]'
+          }`}
+        >
           <div className="max-w-7xl mx-auto flex justify-center space-x-12 h-12 items-center">
             {categories.map((cat) => (
               <div
@@ -234,10 +286,13 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <a
                   href={cat.href}
-                  className={`text-xs uppercase tracking-widest font-medium py-2.5 transition-colors duration-300 relative ${cat.isSale
+                  className={`text-xs uppercase tracking-widest font-medium py-2.5 transition-colors duration-500 relative ${
+                    cat.isSale
                       ? 'text-red-600 hover:text-red-700 font-semibold'
+                      : isHomePage && !isScrolled
+                      ? 'text-white/90 hover:text-luxury-gold'
                       : 'text-neutral-700 hover:text-luxury-gold'
-                    }`}
+                  }`}
                 >
                   {cat.label}
                   {activeMenu === cat.menuKey && (
@@ -533,7 +588,9 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </header>
-      <div className="h-16 md:h-[128px] w-full flex-shrink-0" />
+      {!isHomePage && (
+        <div className="h-16 md:h-[128px] w-full flex-shrink-0" />
+      )}
 
       {/* Mobile Drawer Menu (Slide out from left) */}
       <AnimatePresence>

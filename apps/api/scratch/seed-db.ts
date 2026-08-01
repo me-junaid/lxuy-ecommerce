@@ -386,7 +386,10 @@ async function seed() {
       await ProductModel.deleteOne({ _id: doc._id });
       console.log(`Deleted existing product to refresh: ${prod.name}`);
     }
-    await ProductModel.create(prod);
+    await ProductModel.create({
+      ...prod,
+      status: prod.status as "published" | "draft" | "archived"
+    });
     console.log(`Seeded Product: ${prod.name}`);
   }
 

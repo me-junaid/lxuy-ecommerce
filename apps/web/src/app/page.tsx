@@ -13,6 +13,7 @@ import {
   RecommendationSlider,
 } from "@repo/ui";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Local Hero Images
@@ -148,6 +149,17 @@ export default function Home() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    // Initialize state on mount
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Auto-rotate hero slider fast (every 2.5 seconds)
   useEffect(() => {
@@ -188,13 +200,33 @@ export default function Home() {
         onSearchClick={() => {}}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
         onProductClick={(slug) => router.push(`/products/${slug}`)}
+        isHomePage={true}
+        isScrolled={isScrolled}
       />
 
       <main className="flex-1 flex flex-col">
         
         {/* Editorial Hero Slider Section */}
-        <section className="relative w-full h-[calc(100vh-110px)] flex items-center justify-center bg-[#E5E5E5] overflow-hidden">
+        <section className="relative w-full h-screen flex items-center justify-center bg-[#E5E5E5] overflow-hidden">
           
+          {/* Top Gradient Overlay for Header Readability */}
+          <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-black/45 via-black/10 to-transparent z-25 pointer-events-none" />
+
+          {/* Centered Logo with layoutId */}
+          {!isScrolled && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+              <Link href="/" className="inline-block hover:opacity-90 transition-opacity pointer-events-auto">
+                <motion.img
+                  layoutId="main-logo"
+                  transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                  src="/images/LOGO/lxuy-logo.png"
+                  alt="LXUY Logo"
+                  className="h-16 sm:h-24 md:h-32 w-auto object-contain brightness-0 invert"
+                />
+              </Link>
+            </div>
+          )}
+
           {/* Slides */}
           <div className="absolute inset-0 z-0">
             <AnimatePresence mode="wait">
@@ -223,7 +255,7 @@ export default function Home() {
           {/* Hero Content Container */}
           <div className="relative z-20 max-w-4xl mx-auto text-center px-6">
               <div
-                className="flex flex-col items-center h-[calc(100vh-240px)]"
+                className="flex flex-col items-center h-[calc(100vh-180px)]"
               >
                 {/* <span className="text-xs uppercase tracking-widest text-[#111111] font-bold mb-4 bg-white/70 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm">
                   {HERO_SLIDES[currentHeroIdx].subtitle}
@@ -238,11 +270,11 @@ export default function Home() {
                 </p>
                  */}
 
-<div className="mt-auto">
-                <Button variant="primary">
-                  Explore Shop
-                </Button>
-</ div>
+                <div className="mt-auto">
+                  <Button variant="primary">
+                    Explore Shop
+                  </Button>
+                </div>
               </div>
           </div>
         </section>
