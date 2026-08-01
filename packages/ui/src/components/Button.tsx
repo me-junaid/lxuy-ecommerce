@@ -4,7 +4,7 @@ export interface ButtonProps extends HTMLMotionProps<'button'> {
   variant?: 'primary' | 'secondary' | 'outline';
 }
 
-export const Button = ({ variant = 'primary', children, ...props }: ButtonProps) => {
+export const Button = ({ variant = 'primary', className = '', children, ...props }: ButtonProps) => {
   const baseStyles = 'px-8 py-3 text-sm font-medium tracking-[0.15em] uppercase transition-all duration-300 relative overflow-hidden';
   
   const variants = {
@@ -17,7 +17,7 @@ export const Button = ({ variant = 'primary', children, ...props }: ButtonProps)
     <motion.button
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`${baseStyles} ${variants[variant]}`}
+      className={`${baseStyles} ${variants[variant]} ${className}`}
       {...props}
     >
       {children}

@@ -136,6 +136,8 @@ function LoginPageContent() {
         onCartClick={() => router.push("/cart")}
         onProfileClick={() => router.push(isAuthenticated ? "/profile" : "/login")}
         onSearchClick={() => { }}
+        onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
+        onProductClick={(slug) => router.push(`/products/${slug}`)}
       />
 
       <main className="flex-1 grid grid-cols-1 md:grid-cols-2 min-h-[calc(100vh-110px)]">

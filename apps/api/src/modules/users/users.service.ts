@@ -95,15 +95,35 @@ export class UsersService {
     tokenId: string,
     update: Partial<UserSession>,
   ): Promise<void> {
-    const user = await this.findByIdWithSessions(userId);
-    if (!user) return;
+    const setFields: Record<string, any> = {
+      'sessions.$.lastActive': new Date(),
+    };
 
-    const sessionIndex = user.sessions?.findIndex(s => s.tokenId === tokenId);
-    if (sessionIndex !== undefined && sessionIndex !== -1 && user.sessions) {
-      const currentSession = user.sessions[sessionIndex];
-      Object.assign(currentSession, update, { lastActive: new Date() });
-      await user.save();
+    if (update.refreshTokenHash !== undefined) {
+      setFields['sessions.$.refreshTokenHash'] = update.refreshTokenHash;
     }
+    if (update.prevRefreshTokenHash !== undefined) {
+      setFields['sessions.$.prevRefreshTokenHash'] = update.prevRefreshTokenHash;
+    }
+    if (update.prevTokenExpiresAt !== undefined) {
+      setFields['sessions.$.prevTokenExpiresAt'] = update.prevTokenExpiresAt;
+    }
+    if (update.expiresAt !== undefined) {
+      setFields['sessions.$.expiresAt'] = update.expiresAt;
+    }
+    if (update.userAgent !== undefined) {
+      setFields['sessions.$.userAgent'] = update.userAgent;
+    }
+    if (update.ipAddress !== undefined) {
+      setFields['sessions.$.ipAddress'] = update.ipAddress;
+    }
+
+    await this.userModel
+      .updateOne(
+        { _id: userId, 'sessions.tokenId': tokenId },
+        { $set: setFields },
+      )
+      .exec();
   }
 
   /**

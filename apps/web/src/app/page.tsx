@@ -149,11 +149,11 @@ export default function Home() {
   const [error, setError] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  // Auto-rotate hero slider every 6 seconds
+  // Auto-rotate hero slider fast (every 2.5 seconds)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentHeroIdx((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 6000);
+    }, 2500);
     return () => clearInterval(timer);
   }, []);
 
@@ -186,6 +186,8 @@ export default function Home() {
         onCartClick={() => router.push("/cart")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
         onSearchClick={() => {}}
+        onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
+        onProductClick={(slug) => router.push(`/products/${slug}`)}
       />
 
       <main className="flex-1 flex flex-col">
@@ -243,19 +245,140 @@ export default function Home() {
 </ div>
               </div>
           </div>
+        </section>
 
-          {/* Hero Slider Dots Controls */}
-          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 flex space-x-3 bg-white/40 backdrop-blur-md px-4 py-2 rounded-full">
-            {HERO_SLIDES.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentHeroIdx(idx)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 outline-none ${
-                  currentHeroIdx === idx ? 'bg-luxury-dark scale-125' : 'bg-luxury-dark/40 hover:bg-luxury-dark/65'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
+        {/* Editorial Gender Collections Grid */}
+        <section className="w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 w-full">
+            {/* Men's Collection */}
+            <AnimatedReveal direction="up" duration={1} className="w-full">
+              <div className="relative group overflow-hidden h-[450px] md:h-[600px] bg-luxury-silver/10 shadow-sm flex items-end justify-center pb-12">
+                <div className="absolute inset-0 z-0 transition-transform duration-1000 ease-out group-hover:scale-105">
+                  <Image
+                    src="/images/models/modules8.jpeg"
+                    alt="Men's Collection"
+                    fill
+                    priority
+                    className="object-cover object-top"
+                  />
+                </div>
+                {/* Subtle Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10 pointer-events-none" />
+                
+                {/* Content */}
+                <div className="relative z-20 text-center flex flex-col items-center px-6">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-[#FDFBF7]/80 font-medium mb-2 block">
+                    The Tailored Silhouette
+                  </span>
+                  <h2 className="font-serif text-3xl md:text-4.5xl font-light text-[#FDFBF7] mb-6 tracking-wide drop-shadow-sm">
+                    Men&apos;s Collection
+                  </h2>
+                  <Button
+                    variant="secondary"
+                    onClick={() => router.push("/collections/men")}
+                  >
+                    Shop Men
+                  </Button>
+                </div>
+              </div>
+            </AnimatedReveal>
+
+            {/* Women's Collection */}
+            <AnimatedReveal direction="up" duration={1} delay={0.15} className="w-full">
+              <div className="relative group overflow-hidden h-[450px] md:h-[600px] bg-luxury-silver/10 shadow-sm flex items-end justify-center pb-12">
+                <div className="absolute inset-0 z-0 transition-transform duration-1000 ease-out group-hover:scale-105">
+                  <Image
+                    src="/images/models/modules1.jpeg"
+                    alt="Women's Collection"
+                    fill
+                    priority
+                    className="object-cover object-top"
+                  />
+                </div>
+                {/* Subtle Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10 pointer-events-none" />
+                
+                {/* Content */}
+                <div className="relative z-20 text-center flex flex-col items-center px-6">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-[#FDFBF7]/80 font-medium mb-2 block">
+                    The Fluid Silhouette
+                  </span>
+                  <h2 className="font-serif text-3xl md:text-4.5xl font-light text-[#FDFBF7] mb-6 tracking-wide drop-shadow-sm">
+                    Women&apos;s Collection
+                  </h2>
+                  <Button
+                    variant="secondary"
+                    onClick={() => router.push("/collections/women")}
+                  >
+                    Shop Women
+                  </Button>
+                </div>
+              </div>
+            </AnimatedReveal>
+          </div>
+        </section>
+
+        {/* Full-screen Video Section: Men */}
+        <section className="relative w-full h-[65vh] md:h-[85vh] bg-luxury-dark overflow-hidden">
+          <video
+            src="/videos/men-home-page.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-90 scale-[1.01]"
+          />
+          {/* Subtle Overlay to match brand aesthetic */}
+          <div className="absolute inset-0 bg-black/25 z-10 pointer-events-none" />
+          
+          {/* Text Overlay */}
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6">
+            <AnimatedReveal direction="up" duration={1.2}>
+              <span className="text-[10px] uppercase tracking-[0.4em] text-[#FDFBF7]/90 font-medium mb-3 block">
+                Editorial Motion
+              </span>
+              <h2 className="font-serif text-4xl md:text-6xl font-light text-[#FDFBF7] mb-8 tracking-wide drop-shadow-sm">
+                Men&apos;s Tailoring
+              </h2>
+              <Button
+                variant="secondary"
+                onClick={() => router.push("/collections/men")}
+              >
+                Discover Men
+              </Button>
+            </AnimatedReveal>
+          </div>
+        </section>
+
+        {/* Full-screen Video Section: Women */}
+        <section className="relative w-full h-[65vh] md:h-[85vh] bg-luxury-dark overflow-hidden">
+          <video
+            src="/videos/women-home-page.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-90 scale-[1.01]"
+          />
+          {/* Subtle Overlay */}
+          <div className="absolute inset-0 bg-black/25 z-10 pointer-events-none" />
+          
+          {/* Text Overlay */}
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6">
+            <AnimatedReveal direction="up" duration={1.2} delay={0.15}>
+              <span className="text-[10px] uppercase tracking-[0.4em] text-[#FDFBF7]/90 font-medium mb-3 block">
+                The Fluid Silhouette
+              </span>
+              <h2 className="font-serif text-4xl md:text-6xl font-light text-[#FDFBF7] mb-8 tracking-wide drop-shadow-sm">
+                Women&apos;s Silhouette
+              </h2>
+              <Button
+                variant="secondary"
+                onClick={() => router.push("/collections/women")}
+              >
+                Discover Women
+              </Button>
+            </AnimatedReveal>
           </div>
         </section>
 

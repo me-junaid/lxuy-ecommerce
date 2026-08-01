@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SearchFlyout } from './SearchFlyout';
@@ -9,6 +11,8 @@ export interface HeaderProps {
   onProfileClick?: () => void;
   onSearchClick?: () => void;
   onLogoClick?: () => void;
+  onSearchSubmit?: (query: string) => void;
+  onProductClick?: (slug: string) => void;
   user?: { firstName: string; lastName: string } | null;
 }
 
@@ -19,6 +23,8 @@ export const Header: React.FC<HeaderProps> = ({
   onProfileClick,
   onSearchClick,
   onLogoClick,
+  onSearchSubmit,
+  onProductClick,
   user = null,
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -711,6 +717,8 @@ export const Header: React.FC<HeaderProps> = ({
           <SearchFlyout
             isOpen={isSearchOpen}
             onClose={() => setIsSearchOpen(false)}
+            onSearchSubmit={onSearchSubmit}
+            onProductClick={onProductClick}
           />
         )}
       </AnimatePresence>
