@@ -123,17 +123,25 @@ export const Header: React.FC<HeaderProps> = ({
             {onLogoClick ? (
               <button
                 onClick={onLogoClick}
-                className="font-serif text-3xl md:text-3.5xl font-semibold tracking-[0.3em] text-luxury-dark hover:opacity-85 transition-opacity bg-transparent border-none p-0 cursor-pointer"
+                className="flex items-center justify-center hover:opacity-85 transition-opacity bg-transparent border-none p-0 cursor-pointer focus:outline-none"
                 aria-label="Go to homepage"
               >
-                {brandName}
+                <img
+                  src="/images/LOGO/lxuy-logo.png"
+                  alt={brandName}
+                  className="h-10 w-auto object-contain"
+                />
               </button>
             ) : (
               <a
                 href="/"
-                className="font-serif text-3xl md:text-3.5xl font-semibold tracking-[0.3em] text-luxury-dark hover:opacity-85 transition-opacity"
+                className="inline-flex items-center justify-center hover:opacity-85 transition-opacity"
               >
-                {brandName}
+                <img
+                  src="/images/LOGO/lxuy-logo.jpeg"
+                  alt={brandName}
+                  className="h-10 w-auto object-contain"
+                />
               </a>
             )}
           </div>
