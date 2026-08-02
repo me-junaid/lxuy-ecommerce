@@ -134,12 +134,8 @@ export const CartDrawer: React.FC = () => {
                     }).format(item.price);
 
                     return (
-                      <motion.div
+                      <div
                         key={`${item.product._id}-${item.sku}`}
-                        layout
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
                         className="flex items-start space-x-4 pt-4 first:pt-0"
                       >
                         {/* Image */}
@@ -179,6 +175,7 @@ export const CartDrawer: React.FC = () => {
                           <div className="flex items-center justify-between pt-3">
                             <div className="flex items-center border border-neutral-200 bg-white rounded-md overflow-hidden">
                               <button
+                                type="button"
                                 onClick={() => updateCartItemQuantity(item.product._id, item.sku, item.quantity - 1)}
                                 className="w-10 h-10 flex items-center justify-center text-sm font-light hover:bg-neutral-50 active:bg-neutral-100 transition-colors bg-transparent border-none cursor-pointer focus:outline-none"
                                 aria-label="Decrease quantity"
@@ -189,6 +186,7 @@ export const CartDrawer: React.FC = () => {
                                 {item.quantity}
                               </span>
                               <button
+                                type="button"
                                 onClick={() => updateCartItemQuantity(item.product._id, item.sku, item.quantity + 1)}
                                 className="w-10 h-10 flex items-center justify-center text-sm font-light hover:bg-neutral-50 active:bg-neutral-100 transition-colors bg-transparent border-none cursor-pointer focus:outline-none"
                                 aria-label="Increase quantity"
@@ -198,6 +196,7 @@ export const CartDrawer: React.FC = () => {
                             </div>
 
                             <button
+                              type="button"
                               onClick={() => removeItemFromCart(item.product._id, item.sku)}
                               className="text-[9px] uppercase tracking-luxury text-neutral-400 hover:text-red-500 font-semibold transition-colors bg-transparent border-none cursor-pointer"
                             >
@@ -205,7 +204,7 @@ export const CartDrawer: React.FC = () => {
                             </button>
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
