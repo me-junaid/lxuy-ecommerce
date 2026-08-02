@@ -46,37 +46,25 @@ export const CartDrawer: React.FC = () => {
   };
 
   return (
-    <AnimatePresence>
-      {isCartOpen && (
-        <motion.div
-          key="cart-drawer-container"
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          className="fixed inset-0 z-50 pointer-events-none"
-        >
-          {/* Backdrop Blur */}
-          <motion.div
-            onClick={handleClose}
-            variants={{
-              initial: { opacity: 0 },
-              animate: { opacity: 1 },
-              exit: { opacity: 0 }
-            }}
-            transition={{ duration: 0.3 }}
-            className="absolute inset-0 bg-black/30 backdrop-blur-[4px] pointer-events-auto cursor-pointer"
-          />
+    <div
+      className={`fixed inset-0 z-50 transition-all duration-500 ${
+        isCartOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
+      }`}
+    >
+      {/* Backdrop Blur */}
+      <div
+        onClick={handleClose}
+        className={`absolute inset-0 bg-black/30 backdrop-blur-[4px] transition-opacity duration-300 ${
+          isCartOpen ? 'opacity-100' : 'opacity-0'
+        } cursor-pointer`}
+      />
 
-          {/* Drawer Panel */}
-          <motion.div
-            variants={{
-              initial: { x: '100%' },
-              animate: { x: 0 },
-              exit: { x: '100%' }
-            }}
-            transition={{ type: 'tween', duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-            className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#FDFBF7] shadow-2xl border-l border-luxury-silver/20 flex flex-col h-full text-left pointer-events-auto z-10"
-          >
+      {/* Drawer Panel */}
+      <div
+        className={`absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#FDFBF7] shadow-2xl border-l border-luxury-silver/20 flex flex-col h-full text-left transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${
+          isCartOpen ? 'translate-x-0' : 'translate-x-full'
+        } z-10`}
+      >
             {/* Header */}
             <div className="px-6 py-6 border-b border-luxury-silver/30 flex items-center justify-between">
               <div>
@@ -189,19 +177,21 @@ export const CartDrawer: React.FC = () => {
 
                           {/* Quantity control & Remove */}
                           <div className="flex items-center justify-between pt-3">
-                            <div className="flex items-center border border-neutral-200 bg-transparent">
+                            <div className="flex items-center border border-neutral-200 bg-white rounded-md overflow-hidden">
                               <button
                                 onClick={() => updateCartItemQuantity(item.product._id, item.sku, item.quantity - 1)}
-                                className="px-2 py-1 text-xs hover:text-luxury-gold transition-colors bg-transparent border-none cursor-pointer"
+                                className="w-10 h-10 flex items-center justify-center text-sm font-light hover:bg-neutral-50 active:bg-neutral-100 transition-colors bg-transparent border-none cursor-pointer focus:outline-none"
+                                aria-label="Decrease quantity"
                               >
                                 —
                               </button>
-                              <span className="px-2 text-xs font-medium text-neutral-700 min-w-[20px] text-center">
+                              <span className="w-8 text-center text-xs font-semibold text-neutral-800">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => updateCartItemQuantity(item.product._id, item.sku, item.quantity + 1)}
-                                className="px-2 py-1 text-xs hover:text-luxury-gold transition-colors bg-transparent border-none cursor-pointer"
+                                className="w-10 h-10 flex items-center justify-center text-sm font-light hover:bg-neutral-50 active:bg-neutral-100 transition-colors bg-transparent border-none cursor-pointer focus:outline-none"
+                                aria-label="Increase quantity"
                               >
                                 +
                               </button>
@@ -251,9 +241,7 @@ export const CartDrawer: React.FC = () => {
                 </div>
               </div>
             )}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };

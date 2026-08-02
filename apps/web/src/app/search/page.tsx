@@ -212,9 +212,8 @@ function SearchPageContent() {
               <div className="flex flex-col space-y-2">
                 <button
                   onClick={() => updateUrl({ category: null })}
-                  className={`text-xs text-left transition-colors font-medium ${
-                    !initialCategory ? "text-luxury-gold font-bold" : "text-neutral-500 hover:text-luxury-dark"
-                  }`}
+                  className={`text-xs text-left transition-colors font-medium ${!initialCategory ? "text-luxury-gold font-bold" : "text-neutral-500 hover:text-luxury-dark"
+                    }`}
                 >
                   All Categories
                 </button>
@@ -222,9 +221,8 @@ function SearchPageContent() {
                   <button
                     key={cat._id}
                     onClick={() => updateUrl({ category: cat._id })}
-                    className={`text-xs text-left transition-colors ${
-                      initialCategory === cat._id ? "text-luxury-gold font-bold" : "text-neutral-500 hover:text-luxury-dark"
-                    }`}
+                    className={`text-xs text-left transition-colors ${initialCategory === cat._id ? "text-luxury-gold font-bold" : "text-neutral-500 hover:text-luxury-dark"
+                      }`}
                   >
                     {cat.name}
                   </button>
@@ -240,9 +238,8 @@ function SearchPageContent() {
               <div className="flex flex-col space-y-2">
                 <button
                   onClick={() => updateUrl({ brand: null })}
-                  className={`text-xs text-left transition-colors font-medium ${
-                    !initialBrand ? "text-luxury-gold font-bold" : "text-neutral-500 hover:text-luxury-dark"
-                  }`}
+                  className={`text-xs text-left transition-colors font-medium ${!initialBrand ? "text-luxury-gold font-bold" : "text-neutral-500 hover:text-luxury-dark"
+                    }`}
                 >
                   All Brands
                 </button>
@@ -250,9 +247,8 @@ function SearchPageContent() {
                   <button
                     key={br._id}
                     onClick={() => updateUrl({ brand: br._id })}
-                    className={`text-xs text-left transition-colors ${
-                      initialBrand === br._id ? "text-luxury-gold font-bold" : "text-neutral-500 hover:text-luxury-dark"
-                    }`}
+                    className={`text-xs text-left transition-colors ${initialBrand === br._id ? "text-luxury-gold font-bold" : "text-neutral-500 hover:text-luxury-dark"
+                      }`}
                   >
                     {br.name}
                   </button>
@@ -304,7 +300,7 @@ function SearchPageContent() {
 
           {/* Right Column: Catalog Grid & Sorting */}
           <section className="col-span-1 lg:col-span-3 space-y-4">
-            
+
             {/* Action Bar (Sorting & Mobile Filter Toggle) */}
             <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
               <button
@@ -438,99 +434,95 @@ function SearchPageContent() {
             transition={{ type: "tween", duration: 0.35, ease: "easeOut" }}
             className="fixed bottom-0 left-0 right-0 z-50 bg-[#FDFBF7] shadow-2xl p-6 rounded-t-2xl max-h-[85vh] overflow-y-auto space-y-6 lg:hidden text-left"
           >
-              <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
-                <h3 className="font-serif text-lg font-medium text-luxury-dark">Filters</h3>
+            <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
+              <h3 className="font-serif text-lg font-medium text-luxury-dark">Filters</h3>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="text-xs uppercase tracking-luxury text-neutral-400 font-bold hover:text-luxury-gold"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* Categories */}
+            <div className="space-y-2">
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Categories</h4>
+              <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setShowMobileFilters(false)}
-                  className="text-xs uppercase tracking-luxury text-neutral-400 font-bold hover:text-luxury-gold"
+                  onClick={() => { updateUrl({ category: null }); setShowMobileFilters(false); }}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${!initialCategory ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                    }`}
                 >
-                  Close
+                  All
                 </button>
-              </div>
-
-              {/* Categories */}
-              <div className="space-y-2">
-                <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Categories</h4>
-                <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
                   <button
-                    onClick={() => { updateUrl({ category: null }); setShowMobileFilters(false); }}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                      !initialCategory ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
-                    }`}
-                  >
-                    All
-                  </button>
-                  {categories.map((cat) => (
-                    <button
-                      key={cat._id}
-                      onClick={() => { updateUrl({ category: cat._id }); setShowMobileFilters(false); }}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                        initialCategory === cat._id ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                    key={cat._id}
+                    onClick={() => { updateUrl({ category: cat._id }); setShowMobileFilters(false); }}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${initialCategory === cat._id ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
                       }`}
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
+                  >
+                    {cat.name}
+                  </button>
+                ))}
               </div>
+            </div>
 
-              {/* Brands */}
-              <div className="space-y-2">
-                <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Brands</h4>
-                <div className="flex flex-wrap gap-2">
+            {/* Brands */}
+            <div className="space-y-2">
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Brands</h4>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => { updateUrl({ brand: null }); setShowMobileFilters(false); }}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${!initialBrand ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                    }`}
+                >
+                  All
+                </button>
+                {brands.map((br) => (
                   <button
-                    onClick={() => { updateUrl({ brand: null }); setShowMobileFilters(false); }}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                      !initialBrand ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
-                    }`}
-                  >
-                    All
-                  </button>
-                  {brands.map((br) => (
-                    <button
-                      key={br._id}
-                      onClick={() => { updateUrl({ brand: br._id }); setShowMobileFilters(false); }}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                        initialBrand === br._id ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                    key={br._id}
+                    onClick={() => { updateUrl({ brand: br._id }); setShowMobileFilters(false); }}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${initialBrand === br._id ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
                       }`}
-                    >
-                      {br.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price range */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Price Range</h4>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={minPriceInput}
-                    onChange={(e) => setMinPriceInput(e.target.value)}
-                    className="w-full bg-transparent border border-neutral-200 text-xs p-2 outline-none"
-                  />
-                  <span className="text-neutral-300">—</span>
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={maxPriceInput}
-                    onChange={(e) => setMaxPriceInput(e.target.value)}
-                    className="w-full bg-transparent border border-neutral-200 text-xs p-2 outline-none"
-                  />
-                </div>
-                <div className="flex space-x-2 pt-2">
-                  <Button
-                    onClick={() => { updateUrl({ minPrice: minPriceInput, maxPrice: maxPriceInput }); setShowMobileFilters(false); }}
-                    variant="primary"
-                    className="w-full py-2.5"
                   >
-                    Apply Price Filter
-                  </Button>
-                </div>
+                    {br.name}
+                  </button>
+                ))}
               </div>
-            </motion.div>
+            </div>
+
+            {/* Price range */}
+            <div className="space-y-3">
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Price Range</h4>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={minPriceInput}
+                  onChange={(e) => setMinPriceInput(e.target.value)}
+                  className="w-full bg-transparent border border-neutral-200 text-xs p-2 outline-none"
+                />
+                <span className="text-neutral-300">—</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={maxPriceInput}
+                  onChange={(e) => setMaxPriceInput(e.target.value)}
+                  className="w-full bg-transparent border border-neutral-200 text-xs p-2 outline-none"
+                />
+              </div>
+              <div className="flex space-x-2 pt-2">
+                <Button
+                  onClick={() => { updateUrl({ minPrice: minPriceInput, maxPrice: maxPriceInput }); setShowMobileFilters(false); }}
+                  variant="primary"
+                  className="w-full py-2.5"
+                >
+                  Apply Price Filter
+                </Button>
+              </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
