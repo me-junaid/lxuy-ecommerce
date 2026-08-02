@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense, use } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Header, Footer, ProductCard, Button } from "@repo/ui";
 import { useAuth } from "../../../context/AuthContext";
+import { useCart } from "../../../context/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Brand {
@@ -27,12 +28,14 @@ interface Product {
   brand: Brand | string;
   category: Category | string;
   images: string[];
+  variants?: any[];
 }
 
 function CollectionPageContent({ slug }: { slug: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
+  const { items, addItemToCart, setIsCartOpen } = useCart();
 
   // Read URL parameters for filters
   const initialBrand = searchParams.get("brand") || "";
@@ -145,7 +148,7 @@ function CollectionPageContent({ slug }: { slug: string }) {
     return (
       <div className="flex flex-col min-h-screen bg-[#FDFBF7] text-[#111111]">
         <Header brandName="LXUY" cartCount={0} user={user} onLogoClick={() => router.push("/")} />
-        <main className="flex-1 max-w-xl mx-auto px-6 py-24 text-center space-y-6">
+        <main className="flex-1 max-w-xl mx-auto px-6 pt-8 pb-24 text-center space-y-6">
           <h2 className="font-serif text-3xl font-light text-luxury-dark">Collection Not Found</h2>
           <p className="text-xs text-neutral-500">The collection you requested does not exist or has been archived.</p>
           <Button onClick={() => router.push("/")} variant="primary">Return Home</Button>
@@ -159,16 +162,16 @@ function CollectionPageContent({ slug }: { slug: string }) {
     <div className="flex flex-col min-h-screen bg-[#FDFBF7] text-[#111111]">
       <Header
         brandName="LXUY"
-        cartCount={0}
+        cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
         user={user}
         onLogoClick={() => router.push("/")}
-        onCartClick={() => router.push("/cart")}
+        onCartClick={() => setIsCartOpen(true)}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-12 md:py-16">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-6 pt-8 pb-16 md:pt-10 md:pb-20">
         {/* Title / Description */}
-        <div className="border-b border-luxury-silver/30 pb-8 mb-10 text-left">
+        <div className="border-b border-luxury-silver/30 pb-4 mb-6 text-left">
           <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2 block">
             Collection Edit
           </span>
@@ -185,7 +188,7 @@ function CollectionPageContent({ slug }: { slug: string }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
           
           {/* Left Column: Sidebar Filters (Desktop Only) */}
           <aside className="hidden lg:block space-y-8 text-left">
@@ -261,10 +264,10 @@ function CollectionPageContent({ slug }: { slug: string }) {
           </aside>
 
           {/* Right Column: Catalog Grid & Sorting */}
-          <section className="col-span-1 lg:col-span-3 space-y-6">
+          <section className="col-span-1 lg:col-span-3 space-y-4">
             
             {/* Action Bar (Sorting & Mobile Filter Toggle) */}
-            <div className="flex justify-between items-center border-b border-neutral-200 pb-4">
+            <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
               <button
                 onClick={() => setShowMobileFilters(true)}
                 className="lg:hidden flex items-center text-xs uppercase tracking-luxury font-bold text-neutral-700"
@@ -327,9 +330,13 @@ function CollectionPageContent({ slug }: { slug: string }) {
                       id={product._id}
                       name={product.name}
                       brand={brandName}
-                      price={product.price}
+                      price={product.variants && product.variants.length > 0 ? product.variants[0].price : 0}
                       imageUrl={image}
                       onClick={() => router.push(`/products/${product.slug}`)}
+                      onAddToCart={() => {
+                        const baseSku = product.variants?.[0]?.sku || `BASE-SKU-${product._id}`;
+                        addItemToCart(product, baseSku, 1);
+                      }}
                     />
                   );
                 })}
@@ -367,21 +374,24 @@ function CollectionPageContent({ slug }: { slug: string }) {
       {/* Mobile Drawer */}
       <AnimatePresence>
         {showMobileFilters && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowMobileFilters(false)}
-              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden"
-            />
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "tween", duration: 0.35, ease: "easeOut" }}
-              className="fixed bottom-0 left-0 right-0 z-50 bg-[#FDFBF7] shadow-2xl p-6 rounded-t-2xl max-h-[85vh] overflow-y-auto space-y-6 lg:hidden text-left"
-            >
+          <motion.div
+            key="mobile-filter-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowMobileFilters(false)}
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm lg:hidden"
+          />
+        )}
+        {showMobileFilters && (
+          <motion.div
+            key="mobile-filter-drawer"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "tween", duration: 0.35, ease: "easeOut" }}
+            className="fixed bottom-0 left-0 right-0 z-50 bg-[#FDFBF7] shadow-2xl p-6 rounded-t-2xl max-h-[85vh] overflow-y-auto space-y-6 lg:hidden text-left"
+          >
               <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
                 <h3 className="font-serif text-lg font-medium text-luxury-dark">Filters</h3>
                 <button
@@ -449,7 +459,6 @@ function CollectionPageContent({ slug }: { slug: string }) {
                 </div>
               </div>
             </motion.div>
-          </>
         )}
       </AnimatePresence>
 

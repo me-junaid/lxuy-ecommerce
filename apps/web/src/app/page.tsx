@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import {
   Header,
   Footer,
@@ -143,8 +144,8 @@ const RECOMMENDED_PRODUCTS = [
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
+  const { items, addItemToCart, setIsCartOpen } = useCart();
   const [currentHeroIdx, setCurrentHeroIdx] = useState(0);
-  const [cartCount, setCartCount] = useState(0);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -169,8 +170,19 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleAddToCart = () => {
-    setCartCount((prev) => prev + 1);
+  const handleAddToCart = (product: typeof DUMMY_PRODUCTS[0]) => {
+    addItemToCart(
+      {
+        _id: product.id,
+        name: product.name,
+        slug: product.name.toLowerCase().replace(/ /g, "-"),
+        images: [product.imageUrl],
+        brand: product.brand,
+        price: product.price,
+      },
+      `BASE-SKU-${product.id}`,
+      1
+    );
   };
 
   const handleSubscribe = (e: React.FormEvent) => {
@@ -192,10 +204,10 @@ export default function Home() {
       {/* Premium Header */}
       <Header
         brandName="LXUY"
-        cartCount={cartCount}
+        cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
         user={user}
         onLogoClick={() => router.push("/")}
-        onCartClick={() => router.push("/cart")}
+        onCartClick={() => setIsCartOpen(true)}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
         onSearchClick={() => {}}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
@@ -440,7 +452,7 @@ export default function Home() {
                   price={product.price}
                   imageUrl={product.imageUrl}
                   badge={product.badge}
-                  onAddToCart={handleAddToCart}
+                  onAddToCart={() => handleAddToCart(product)}
                 />
               </AnimatedReveal>
             ))}

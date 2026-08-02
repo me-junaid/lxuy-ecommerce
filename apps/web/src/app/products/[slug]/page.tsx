@@ -3,6 +3,7 @@
 import React, { useState, useEffect, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
+import { useCart } from "../../../context/CartContext";
 import {
   Header,
   Footer,
@@ -118,6 +119,7 @@ export default function ProductDetailPage({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // State
+  const { items, addItemToCart, setIsCartOpen } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -126,7 +128,6 @@ export default function ProductDetailPage({
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
-  const [cartCount, setCartCount] = useState(0);
   const [cartLoading, setCartLoading] = useState(false);
   const [cartSuccess, setCartSuccess] = useState(false);
   const [recommendations, setRecommendations] = useState<RecommendationProduct[]>(FALLBACK_RECOMMENDATIONS);
@@ -254,23 +255,35 @@ export default function ProductDetailPage({
     return result;
   };
 
-  const handleAddToCart = () => {
-    if (!selectedVariant || selectedVariant.stock <= 0) return;
+  const handleAddToCart = async () => {
+    if (!selectedVariant || selectedVariant.stock <= 0 || !product) return;
     
     setCartLoading(true);
     setCartSuccess(false);
 
-    // Simulate API request to backend Cart module
-    setTimeout(() => {
-      setCartLoading(false);
+    try {
+      await addItemToCart(
+        {
+          _id: product._id,
+          name: product.name,
+          slug: product.slug,
+          images: product.images,
+          brand: product.brand,
+          variants: product.variants,
+        },
+        selectedVariant.sku,
+        quantity
+      );
       setCartSuccess(true);
-      setCartCount((prev) => prev + quantity);
-
       // Reset success banner after 4 seconds
       setTimeout(() => {
         setCartSuccess(false);
       }, 4000);
-    }, 800);
+    } catch (err) {
+      console.error('Failed to add item to cart:', err);
+    } finally {
+      setCartLoading(false);
+    }
   };
 
   // Carousel scroll helpers
@@ -327,7 +340,7 @@ export default function ProductDetailPage({
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-[#FDFBF7]">
-        <Header brandName="LXUY" cartCount={cartCount} user={user} />
+        <Header brandName="LXUY" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} user={user} />
         <main className="flex-1 flex items-center justify-center pt-24">
           <div className="flex flex-col items-center space-y-4">
             <div className="w-12 h-12 border-2 border-luxury-silver border-t-luxury-dark rounded-full animate-spin" />
@@ -345,7 +358,7 @@ export default function ProductDetailPage({
   if (error || !product) {
     return (
       <div className="flex flex-col min-h-screen bg-[#FDFBF7]">
-        <Header brandName="LXUY" cartCount={cartCount} user={user} />
+        <Header brandName="LXUY" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} user={user} />
         <main className="flex-1 flex flex-col items-center justify-center px-6 pt-24 text-center">
           <h2 className="font-serif text-3xl font-light text-luxury-dark mb-4">
             Editorial Check Failed
@@ -372,10 +385,10 @@ export default function ProductDetailPage({
       {/* Premium Header */}
       <Header
         brandName="LXUY"
-        cartCount={cartCount}
+        cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
         user={user}
         onLogoClick={() => router.push("/")}
-        onCartClick={() => router.push("/cart")}
+        onCartClick={() => setIsCartOpen(true)}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
         onSearchClick={() => {}}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}

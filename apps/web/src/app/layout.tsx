@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Outfit, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
+import { CartProvider } from "../context/CartContext";
+import { CartDrawer } from "../components/CartDrawer";
 
 const sansFont = Outfit({
   variable: "--font-sans",
@@ -31,7 +33,12 @@ export default function RootLayout({
       className={`${sansFont.variable} ${serifFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <CartProvider>
+            {children}
+            <CartDrawer />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
