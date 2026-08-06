@@ -133,20 +133,20 @@ export default function CartPage() {
                       </div>
 
                       {/* Quantity selector */}
-                      <div className="col-span-12 md:col-span-3 flex justify-start md:justify-center">
-                        <div className="flex items-center border border-neutral-200 bg-transparent">
+                      <div className="col-span-12 md:col-span-3 flex justify-start md:justify-center select-none">
+                        <div className="flex items-center border border-neutral-200 bg-transparent select-none">
                           <button
                             onClick={() => updateCartItemQuantity(item.product._id, item.sku, item.quantity - 1)}
-                            className="px-3 py-1.5 text-xs hover:text-luxury-gold transition-colors bg-transparent border-none cursor-pointer"
+                            className="px-3 py-1.5 text-xs md:hover:text-luxury-gold transition-colors bg-transparent border-none cursor-pointer select-none"
                           >
                             —
                           </button>
-                          <span className="px-3 text-xs font-semibold text-neutral-700 min-w-[24px] text-center">
+                          <span className="px-3 text-xs font-semibold text-neutral-700 min-w-[24px] text-center select-none">
                             {item.quantity}
                           </span>
                           <button
                             onClick={() => updateCartItemQuantity(item.product._id, item.sku, item.quantity + 1)}
-                            className="px-3 py-1.5 text-xs hover:text-luxury-gold transition-colors bg-transparent border-none cursor-pointer"
+                            className="px-3 py-1.5 text-xs md:hover:text-luxury-gold transition-colors bg-transparent border-none cursor-pointer select-none"
                           >
                             +
                           </button>

@@ -186,22 +186,22 @@ export const CartDrawer: React.FC = () => {
 
                           {/* Quantity control & Remove */}
                           <div className="flex items-center justify-between pt-3">
-                            <div className="flex items-center border border-neutral-200 bg-white rounded-md overflow-hidden">
+                            <div className="flex items-center border border-neutral-200 bg-white rounded-md overflow-hidden select-none">
                               <button
                                 type="button"
                                 onClick={() => updateCartItemQuantity(item.product._id, item.sku, item.quantity - 1)}
-                                className="w-10 h-10 flex items-center justify-center text-sm font-light hover:bg-neutral-50 active:bg-neutral-100 transition-colors bg-transparent border-none cursor-pointer focus:outline-none"
+                                className="w-10 h-10 flex items-center justify-center text-sm font-light md:hover:bg-neutral-50 active:bg-neutral-100 transition-colors bg-transparent border-none cursor-pointer focus:outline-none select-none"
                                 aria-label="Decrease quantity"
                               >
                                 —
                               </button>
-                              <span className="w-8 text-center text-xs font-semibold text-neutral-800">
+                              <span className="w-8 text-center text-xs font-semibold text-neutral-800 select-none">
                                 {item.quantity}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => updateCartItemQuantity(item.product._id, item.sku, item.quantity + 1)}
-                                className="w-10 h-10 flex items-center justify-center text-sm font-light hover:bg-neutral-50 active:bg-neutral-100 transition-colors bg-transparent border-none cursor-pointer focus:outline-none"
+                                className="w-10 h-10 flex items-center justify-center text-sm font-light md:hover:bg-neutral-50 active:bg-neutral-100 transition-colors bg-transparent border-none cursor-pointer focus:outline-none select-none"
                                 aria-label="Increase quantity"
                               >
                                 +

@@ -726,24 +726,24 @@ export default function ProductDetailPage({
               <div className="flex space-x-4 items-center">
                 
                 {/* Quantity Counter */}
-                <div className="flex items-center border border-luxury-silver/40 h-12 bg-white rounded-md overflow-hidden">
+                <div className="flex items-center border border-luxury-silver/40 h-12 bg-white rounded-md overflow-hidden select-none">
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     disabled={isOutOfStock || quantity <= 1}
-                    className="w-12 h-full flex items-center justify-center text-neutral-500 hover:text-luxury-dark disabled:opacity-30 hover:bg-neutral-50 active:bg-neutral-100 outline-none transition-colors cursor-pointer"
+                    className="w-12 h-full flex items-center justify-center text-neutral-500 md:hover:text-luxury-dark disabled:opacity-30 md:hover:bg-neutral-50 active:bg-neutral-100 outline-none transition-colors cursor-pointer select-none"
                     aria-label="Decrease quantity"
                   >
                     —
                   </button>
-                  <span className="w-10 text-center text-xs font-sans font-medium text-luxury-dark">
+                  <span className="w-10 text-center text-xs font-sans font-medium text-luxury-dark select-none">
                     {quantity}
                   </span>
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.min(selectedVariant?.stock ?? 10, q + 1))}
                     disabled={isOutOfStock || (selectedVariant && quantity >= selectedVariant.stock)}
-                    className="w-12 h-full flex items-center justify-center text-neutral-500 hover:text-luxury-dark disabled:opacity-30 hover:bg-neutral-50 active:bg-neutral-100 outline-none transition-colors cursor-pointer"
+                    className="w-12 h-full flex items-center justify-center text-neutral-500 md:hover:text-luxury-dark disabled:opacity-30 md:hover:bg-neutral-50 active:bg-neutral-100 outline-none transition-colors cursor-pointer select-none"
                     aria-label="Increase quantity"
                   >
                     +
