@@ -7,8 +7,10 @@ import { SearchFlyout } from './SearchFlyout';
 export interface HeaderProps {
   brandName?: string;
   cartCount?: number;
+  wishlistCount?: number;
   onCartClick?: () => void;
   onProfileClick?: () => void;
+  onWishlistClick?: () => void;
   onSearchClick?: () => void;
   onLogoClick?: () => void;
   onSearchSubmit?: (query: string) => void;
@@ -21,8 +23,10 @@ export interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   brandName = 'LXUY',
   cartCount = 0,
+  wishlistCount = 0,
   onCartClick,
   onProfileClick,
+  onWishlistClick,
   onSearchClick,
   onLogoClick,
   onSearchSubmit,
@@ -78,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
           <a
-            href="#"
+            href={`/search?q=${encodeURIComponent(label)}`}
             onClick={() => setIsMobileMenuOpen(false)}
             className={`text-[11px] text-neutral-700 font-medium transition-all duration-300 ${isSelected ? 'text-luxury-gold font-bold translate-x-1' : ''
               }`}
@@ -100,20 +104,25 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const categories: Array<{ label: string; href: string; menuKey?: string; isSale?: boolean }> = [
-    { label: 'Sale', href: '#', isSale: true },
-    { label: 'New Arrivals', href: '#', menuKey: 'new-arrivals' },
-    { label: 'Men', href: '#', menuKey: 'men' },
-    { label: 'Women', href: '#', menuKey: 'women' },
+    { label: 'Sale', href: '/search?sort=price-asc', isSale: true },
+    { label: 'New Arrivals', href: '/search', menuKey: 'new-arrivals' },
+    { label: 'Men', href: '/collections/men', menuKey: 'men' },
+    { label: 'Women', href: '/collections/women', menuKey: 'women' },
   ];
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 w-full z-45 transition-all duration-500 ${
-          isHomePage && !isScrolled
-            ? 'bg-transparent border-b border-transparent'
-            : 'bg-[#FDFBF7] border-b border-luxury-silver/30'
-        }`}
+      <motion.header
+        initial={{
+          backgroundColor: isHomePage && !isScrolled ? 'rgba(253, 251, 247, 0)' : 'rgba(253, 251, 247, 1)',
+          borderBottomColor: isHomePage && !isScrolled ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.3)'
+        }}
+        animate={{
+          backgroundColor: isHomePage && !isScrolled ? 'rgba(253, 251, 247, 0)' : 'rgba(253, 251, 247, 1)',
+          borderBottomColor: isHomePage && !isScrolled ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.3)'
+        }}
+        transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-0 left-0 w-full z-45 border-b border-transparent"
       >
 
         {/* Row 1: Top Bar (Logo & Actions) */}
@@ -121,15 +130,28 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Left: Support Links (Desktop Only) */}
           <div className="hidden md:flex md:flex-1 md:items-center">
-            <div
-              className={`flex space-x-6 text-[10px] uppercase tracking-luxury font-medium transition-colors duration-500 ${
-                isHomePage && !isScrolled ? 'text-white/80' : 'text-neutral-500'
-              }`}
+            <motion.div
+              initial={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
+              }}
+              animate={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
+              }}
+              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="flex space-x-6 text-[10px] uppercase tracking-luxury font-medium"
             >
               <a href="#" className="hover:text-luxury-gold transition-colors">Stores</a>
-              <span className={isHomePage && !isScrolled ? 'text-white/20' : 'text-neutral-300'}>|</span>
+              <motion.span
+                initial={{
+                  color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(209, 213, 219, 1)'
+                }}
+                animate={{
+                  color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(209, 213, 219, 1)'
+                }}
+                transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+              >|</motion.span>
               <a href="#" className="hover:text-luxury-gold transition-colors">Support</a>
-            </div>
+            </motion.div>
           </div>
 
           {/* Center: Logo (Left-aligned on mobile, absolute-centered on desktop) */}
@@ -171,22 +193,25 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Right: Actions */}
           <div className="flex-1 md:flex-none flex items-center justify-end space-x-4 md:space-x-5">
             {/* Search */}
-            <button
+            <motion.button
               onClick={() => {
                 setIsSearchOpen(true);
                 if (onSearchClick) onSearchClick();
               }}
-              className={`p-1 outline-none transition-colors duration-500 ${
-                isHomePage && !isScrolled
-                  ? 'text-white hover:text-luxury-gold'
-                  : 'text-luxury-dark hover:text-luxury-gold'
-              }`}
+              initial={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              animate={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="p-1 outline-none hover:text-luxury-gold transition-colors"
               aria-label="Search"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-            </button>
+            </motion.button>
 
             {/* Profile */}
             {user ? (
@@ -202,43 +227,58 @@ export const Header: React.FC<HeaderProps> = ({
                 {user.firstName[0]?.toUpperCase()}{user.lastName[0]?.toUpperCase()}
               </button>
             ) : (
-              <button
+              <motion.button
                 onClick={onProfileClick}
-                className={`p-1 outline-none transition-colors duration-500 ${
-                  isHomePage && !isScrolled
-                    ? 'text-white hover:text-luxury-gold'
-                    : 'text-luxury-dark hover:text-luxury-gold'
-                }`}
+                initial={{
+                  color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                }}
+                animate={{
+                  color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                }}
+                transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+                className="p-1 outline-none hover:text-luxury-gold transition-colors"
                 aria-label="Account"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-              </button>
+              </motion.button>
             )}
 
             {/* Wishlist */}
-            <button
-              className={`p-1 outline-none transition-colors duration-500 hidden md:inline-block ${
-                isHomePage && !isScrolled
-                  ? 'text-white hover:text-luxury-gold'
-                  : 'text-luxury-dark hover:text-luxury-gold'
-              }`}
+            <motion.button
+              onClick={onWishlistClick}
+              initial={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              animate={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="relative p-1 outline-none hidden md:inline-block hover:text-luxury-gold transition-colors"
               aria-label="Wishlist"
             >
               <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-            </button>
+              {wishlistCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-luxury-gold text-[#FDFBF7] text-[8px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold tracking-tight">
+                  {wishlistCount}
+                </span>
+              )}
+            </motion.button>
 
             {/* Cart */}
-            <button
+            <motion.button
               onClick={onCartClick}
-              className={`relative p-1 outline-none transition-colors duration-500 ${
-                isHomePage && !isScrolled
-                  ? 'text-white hover:text-luxury-gold'
-                  : 'text-luxury-dark hover:text-luxury-gold'
-              }`}
+              initial={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              animate={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="relative p-1 outline-none hover:text-luxury-gold transition-colors"
               aria-label="Shopping Cart"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -249,32 +289,38 @@ export const Header: React.FC<HeaderProps> = ({
                   {cartCount}
                 </span>
               )}
-            </button>
+            </motion.button>
 
             {/* Mobile Menu Toggle (Positioned on the far right on mobile viewports) */}
-            <button
+            <motion.button
               onClick={() => setIsMobileMenuOpen(true)}
-              className={`md:hidden p-1 outline-none ml-1 transition-colors duration-500 ${
-                isHomePage && !isScrolled
-                  ? 'text-white hover:text-luxury-gold'
-                  : 'text-luxury-dark hover:text-luxury-gold'
-              }`}
+              initial={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              animate={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden p-1 outline-none ml-1 hover:text-luxury-gold transition-colors"
               aria-label="Open Mobile Menu"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-            </button>
+            </motion.button>
           </div>
         </div>
 
         {/* Row 2: Desktop Navigation Bar */}
-        <div
-          className={`hidden md:block w-full transition-all duration-500 ${
-            isHomePage && !isScrolled
-              ? 'border-t border-transparent bg-transparent'
-              : 'border-t border-luxury-silver/20 bg-[#FDFBF7]'
-          }`}
+        <motion.div
+          initial={{
+            borderTopColor: isHomePage && !isScrolled ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.2)'
+          }}
+          animate={{
+            borderTopColor: isHomePage && !isScrolled ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.2)'
+          }}
+          transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+          className="hidden md:block w-full border-t border-transparent"
         >
           <div className="max-w-7xl mx-auto flex justify-center space-x-12 h-12 items-center">
             {categories.map((cat) => (
@@ -284,31 +330,40 @@ export const Header: React.FC<HeaderProps> = ({
                 onMouseLeave={() => setActiveMenu(null)}
                 className="h-full flex items-center"
               >
-                <a
+                <motion.a
                   href={cat.href}
-                  className={`text-xs uppercase tracking-widest font-medium py-2.5 transition-colors duration-500 relative ${
-                    cat.isSale
-                      ? 'text-red-600 hover:text-red-700 font-semibold'
+                  initial={{
+                    color: cat.isSale
+                      ? '#dc2626'
                       : isHomePage && !isScrolled
-                      ? 'text-white/90 hover:text-luxury-gold'
-                      : 'text-neutral-700 hover:text-luxury-gold'
-                  }`}
+                      ? 'rgba(255, 255, 255, 0.9)'
+                      : 'rgba(17, 17, 17, 1)'
+                  }}
+                  animate={{
+                    color: cat.isSale
+                      ? '#dc2626'
+                      : isHomePage && !isScrolled
+                      ? 'rgba(255, 255, 255, 0.9)'
+                      : 'rgba(17, 17, 17, 1)'
+                  }}
+                  transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-xs uppercase tracking-widest font-medium py-2.5 relative hover:text-luxury-gold transition-colors duration-300"
                 >
                   {cat.label}
                   {activeMenu === cat.menuKey && (
                     <span className="absolute bottom-0 left-0 w-full h-[2px] bg-luxury-gold" />
                   )}
-                </a>
+                </motion.a>
 
                 {/* Desktop Mega Menu Dropdown */}
                 {cat.menuKey && (
                   <AnimatePresence>
                     {activeMenu === cat.menuKey && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15, ease: "easeInOut" }}
                         className="absolute left-0 right-0 w-full top-full bg-[#FDFBF7] border-b border-luxury-silver/30 shadow-xl z-50 py-12 px-12"
                         onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
                       >
@@ -318,28 +373,26 @@ export const Header: React.FC<HeaderProps> = ({
                               {/* Col 1: All */}
                               <div className="col-span-2 flex flex-col space-y-3">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">All</h4>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Women</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Men</a>
+                                <a href="/collections/women" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Women</a>
+                                <a href="/collections/men" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Men</a>
                               </div>
                               {/* Col 2: New In */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">New In</h4>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Polo Ralph Lauren</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Fred Perry</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Karl Lagerfeld</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Giuseppe Zanotti</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"> Kitsuné</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Casablanca</a>
+                                <a href="/search?q=polo" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Polo Ralph Lauren</a>
+                                <a href="/search?q=fred%20perry" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Fred Perry</a>
+                                <a href="/search?q=karl" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Karl Lagerfeld</a>
+                                <a href="/search?q=giuseppe" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Giuseppe Zanotti</a>
                               </div>
                               {/* Col 3: Brands */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Brands</h4>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Vivienne Westwood</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Marc Jacobs</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Hackett London</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Ted Baker</a>
-                                <a href="#" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Michael Kors</a>
-                                <a href="#" className="text-xs text-luxury-gold underline tracking-wide font-medium mt-2">View All Brands</a>
+                                <a href="/search?q=vivienne" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Vivienne Westwood</a>
+                                <a href="/search?q=marc" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Marc Jacobs</a>
+                                <a href="/search?q=hackett" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Hackett London</a>
+                                <a href="/search?q=ted%20baker" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Ted Baker</a>
+                                <a href="/search?q=michael%20kors" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Michael Kors</a>
+                                <a href="/search" className="text-xs text-luxury-gold underline tracking-wide font-medium mt-2">View All Brands</a>
                               </div>
                               {/* Col 4: Promos */}
                               <div className="col-span-4 grid grid-cols-2 gap-4">
@@ -360,14 +413,13 @@ export const Header: React.FC<HeaderProps> = ({
                               </div>
                             </>
                           )}
-
                           {cat.menuKey === 'men' && (
                             <>
                               {/* Col 1: Categories */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Clothing</h4>
                                 <a
-                                  href="#"
+                                  href="/search?q=jacket"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules2.jpeg', title: 'Jackets & Coats' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -375,7 +427,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Jackets & Coats
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=shirt"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Casual Shirts' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -383,7 +435,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Casual Shirts
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=polo"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules12.jpeg', title: 'Knitwear' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -391,7 +443,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Knitwear
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=trouser"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Trousers' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -403,7 +455,7 @@ export const Header: React.FC<HeaderProps> = ({
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Featured Brands</h4>
                                 <a
-                                  href="#"
+                                  href="/search?q=polo"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules8.jpeg', title: 'Polo Ralph Lauren' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -411,7 +463,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Polo Ralph Lauren
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=fred"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Fred Perry' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -419,7 +471,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Fred Perry
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=hackett"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules2.jpeg', title: 'Hackett London' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -427,12 +479,12 @@ export const Header: React.FC<HeaderProps> = ({
                                   Hackett London
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=kitsune"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules8.jpeg', title: ' Kitsuné' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
-                                  Kitsuné
+                                   Kitsuné
                                 </a>
                               </div>
                               {/* Col 3: Promo */}
@@ -465,7 +517,7 @@ export const Header: React.FC<HeaderProps> = ({
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Clothing</h4>
                                 <a
-                                  href="#"
+                                  href="/search?q=dress"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules1.jpeg', title: 'Dresses & Jumpsuits' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -473,7 +525,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Dresses & Jumpsuits
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=blouse"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules4.jpeg', title: 'Blouses & Tops' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -481,7 +533,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Blouses & Tops
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=coat"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules2.jpeg', title: 'Coats & Trenchcoats' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -489,7 +541,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Coats & Trenchcoats
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=trouser"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules6.jpeg', title: 'Trousers & Skirts' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -501,7 +553,7 @@ export const Header: React.FC<HeaderProps> = ({
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Featured Brands</h4>
                                 <a
-                                  href="#"
+                                  href="/search?q=vivienne"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules1.jpeg', title: 'Vivienne Westwood' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -509,7 +561,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Vivienne Westwood
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=marc"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules5.jpeg', title: 'Marc Jacobs' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -517,7 +569,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Marc Jacobs
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=coccinelle"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules11.jpeg', title: 'Coccinelle' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -525,7 +577,7 @@ export const Header: React.FC<HeaderProps> = ({
                                   Coccinelle
                                 </a>
                                 <a
-                                  href="#"
+                                  href="/search?q=lxuy"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules2.jpeg', title: 'LXUY Signature' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
@@ -586,8 +638,8 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             ))}
           </div>
-        </div>
-      </header>
+        </motion.div>
+      </motion.header>
       {!isHomePage && (
         <div className="h-16 md:h-[128px] w-full flex-shrink-0" />
       )}
@@ -672,28 +724,20 @@ export const Header: React.FC<HeaderProps> = ({
 
                                 <div className="flex flex-col space-y-1.5 pl-1 text-[11px] text-neutral-700 font-medium">
                                   <a
-                                    href="/new-arrivals?category=women"
+                                    href="/collections/women"
                                     className="transition-colors hover:text-black"
                                   >
                                     Women
                                   </a>
 
                                   <a
-                                    href="/new-arrivals?category=men"
+                                    href="/collections/men"
                                     className="transition-colors hover:text-black"
                                   >
                                     Men
                                   </a>
                                 </div>
                               </div>
-
-                              {/* <div className="relative aspect-[16/10] overflow-hidden bg-luxury-silver/5 rounded-sm mt-3 shadow-sm">
-      <img
-        src="/images/models/modules5.jpeg"
-        alt="New Arrivals"
-        className="w-full h-full object-cover"
-      />
-    </div> */}
                             </div>
                           )}
 
@@ -758,6 +802,13 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="w-full h-[1px] bg-luxury-silver/30 my-6" />
 
               <div className="flex flex-col space-y-3 text-left">
+                <a
+                  href="/wishlist"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-xs uppercase tracking-luxury text-neutral-500 font-medium"
+                >
+                  Wishlist
+                </a>
                 <a href="#" className="text-xs uppercase tracking-luxury text-neutral-500 font-medium">Store Locator</a>
                 <a href="#" className="text-xs uppercase tracking-luxury text-neutral-500 font-medium">Customer Support</a>
               </div>

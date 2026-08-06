@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 import { Input, Button, Header, Footer } from "@repo/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -10,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 function LoginPageContent() {
   const { login, user, isAuthenticated, loading, refreshUser } = useAuth();
+  const { items: cartItems, setIsCartOpen } = useCart();
+  const { items: wishlistItems } = useWishlist();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -130,10 +134,12 @@ function LoginPageContent() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header
         brandName="LXUY"
-        cartCount={0}
+        cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+        wishlistCount={wishlistItems.length}
         user={user}
         onLogoClick={() => router.push("/")}
-        onCartClick={() => router.push("/cart")}
+        onCartClick={() => setIsCartOpen(true)}
+        onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(isAuthenticated ? "/profile" : "/login")}
         onSearchClick={() => { }}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 import {
   Header,
   Footer,
@@ -145,6 +146,7 @@ export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
   const { items, addItemToCart, setIsCartOpen } = useCart();
+  const { items: wishlistItems } = useWishlist();
   const [currentHeroIdx, setCurrentHeroIdx] = useState(0);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -205,9 +207,11 @@ export default function Home() {
       <Header
         brandName="LXUY"
         cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+        wishlistCount={wishlistItems.length}
         user={user}
         onLogoClick={() => router.push("/")}
         onCartClick={() => setIsCartOpen(true)}
+        onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
         onSearchClick={() => {}}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
@@ -233,7 +237,7 @@ export default function Home() {
                   transition={{ type: "spring", stiffness: 120, damping: 20 }}
                   src="/images/LOGO/lxuy-logo.png"
                   alt="LXUY Logo"
-                  className="h-16 sm:h-24 md:h-32 w-auto object-contain brightness-0 invert"
+                  className="h-24 sm:h-36 md:h-48 w-auto object-contain brightness-0 invert"
                 />
               </Link>
             </div>
@@ -247,7 +251,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 1.02 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.1, ease: [0.25, 1, 0.5, 1] }}
+                transition={{ duration: 1.0, ease: [0.25, 1, 0.5, 1] }}
                 className="relative w-full h-full"
               >
                 <Image
@@ -292,11 +296,11 @@ export default function Home() {
         </section>
 
         {/* Editorial Gender Collections Grid */}
-        <section className="w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 w-full">
+        <section className="max-w-7xl mx-auto px-6 py-12 md:py-20 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full">
             {/* Men's Collection */}
             <AnimatedReveal direction="up" duration={1} className="w-full">
-              <div className="relative group overflow-hidden h-[450px] md:h-[600px] bg-luxury-silver/10 shadow-sm flex items-end justify-center pb-12">
+              <div className="relative group overflow-hidden h-[450px] md:h-[600px] bg-luxury-silver/10 shadow-sm flex items-end justify-center pb-12 rounded-2xl">
                 <div className="absolute inset-0 z-0 transition-transform duration-1000 ease-out group-hover:scale-105">
                   <Image
                     src="/images/models/modules8.jpeg"
@@ -329,7 +333,7 @@ export default function Home() {
 
             {/* Women's Collection */}
             <AnimatedReveal direction="up" duration={1} delay={0.15} className="w-full">
-              <div className="relative group overflow-hidden h-[450px] md:h-[600px] bg-luxury-silver/10 shadow-sm flex items-end justify-center pb-12">
+              <div className="relative group overflow-hidden h-[450px] md:h-[600px] bg-luxury-silver/10 shadow-sm flex items-end justify-center pb-12 rounded-2xl">
                 <div className="absolute inset-0 z-0 transition-transform duration-1000 ease-out group-hover:scale-105">
                   <Image
                     src="/images/models/modules1.jpeg"

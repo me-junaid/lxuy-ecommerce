@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Header, Footer, ProductCard, Button } from "@repo/ui";
 import { useAuth } from "../../../context/AuthContext";
 import { useCart } from "../../../context/CartContext";
+import { useWishlist } from "../../../context/WishlistContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Brand {
@@ -36,6 +37,7 @@ function CollectionPageContent({ slug }: { slug: string }) {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { items, addItemToCart, setIsCartOpen } = useCart();
+  const { items: wishlistItems } = useWishlist();
 
   // Read URL parameters for filters
   const initialBrand = searchParams.get("brand") || "";
@@ -147,7 +149,14 @@ function CollectionPageContent({ slug }: { slug: string }) {
   if (error && !currentCategory) {
     return (
       <div className="flex flex-col min-h-screen bg-[#FDFBF7] text-[#111111]">
-        <Header brandName="LXUY" cartCount={0} user={user} onLogoClick={() => router.push("/")} />
+        <Header
+          brandName="LXUY"
+          cartCount={0}
+          wishlistCount={wishlistItems.length}
+          user={user}
+          onLogoClick={() => router.push("/")}
+          onWishlistClick={() => router.push("/wishlist")}
+        />
         <main className="flex-1 max-w-xl mx-auto px-6 pt-8 pb-24 text-center space-y-6">
           <h2 className="font-serif text-3xl font-light text-luxury-dark">Collection Not Found</h2>
           <p className="text-xs text-neutral-500">The collection you requested does not exist or has been archived.</p>
@@ -163,9 +172,11 @@ function CollectionPageContent({ slug }: { slug: string }) {
       <Header
         brandName="LXUY"
         cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+        wishlistCount={wishlistItems.length}
         user={user}
         onLogoClick={() => router.push("/")}
         onCartClick={() => setIsCartOpen(true)}
+        onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
       />
 

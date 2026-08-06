@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Header, Footer, Button } from "@repo/ui";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -12,6 +13,7 @@ export default function CartPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { items, loading, updateCartItemQuantity, removeItemFromCart } = useCart();
+  const { items: wishlistItems } = useWishlist();
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal >= 15000 || subtotal === 0 ? 0 : 500; // ₹500 standard shipping below ₹15,000
@@ -30,9 +32,11 @@ export default function CartPage() {
       <Header
         brandName="LXUY"
         cartCount={items.reduce((sum, i) => sum + i.quantity, 0)}
+        wishlistCount={wishlistItems.length}
         user={user}
         onLogoClick={() => router.push("/")}
         onCartClick={() => {}} // Already on cart page
+        onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
       />
 

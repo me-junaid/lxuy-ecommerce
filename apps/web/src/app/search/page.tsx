@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Header, Footer, ProductCard, Button } from "@repo/ui";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Brand {
@@ -35,6 +36,7 @@ function SearchPageContent() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { items, addItemToCart, setIsCartOpen } = useCart();
+  const { items: wishlistItems } = useWishlist();
 
   // Read URL parameters
   const query = searchParams.get("q") || "";
@@ -160,9 +162,11 @@ function SearchPageContent() {
       <Header
         brandName="LXUY"
         cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+        wishlistCount={wishlistItems.length}
         user={user}
         onLogoClick={() => router.push("/")}
         onCartClick={() => setIsCartOpen(true)}
+        onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
       />
 

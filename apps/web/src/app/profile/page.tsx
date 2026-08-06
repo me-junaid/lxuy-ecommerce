@@ -2,12 +2,16 @@
 
 import React, { useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 import { Button, Header, Footer } from "@repo/ui";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 export default function ProfilePage() {
   const { user, loading, isAuthenticated, logout, logoutAllDevices } = useAuth();
+  const { items: cartItems, setIsCartOpen } = useCart();
+  const { items: wishlistItems } = useWishlist();
   const router = useRouter();
 
   // Don't redirect until we know for sure the session is gone.
@@ -45,10 +49,12 @@ export default function ProfilePage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Header
         brandName="LXUY"
-        cartCount={0}
+        cartCount={cartItems.reduce((sum, i) => sum + i.quantity, 0)}
+        wishlistCount={wishlistItems.length}
         user={user}
         onLogoClick={() => router.push("/")}
-        onCartClick={() => router.push("/cart")}
+        onCartClick={() => setIsCartOpen(true)}
+        onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push("/profile")}
         onSearchClick={() => { }}
       />

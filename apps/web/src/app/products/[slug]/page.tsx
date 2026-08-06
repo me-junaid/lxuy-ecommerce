@@ -4,6 +4,7 @@ import React, { useState, useEffect, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
 import { useCart } from "../../../context/CartContext";
+import { useWishlist } from "../../../context/WishlistContext";
 import {
   Header,
   Footer,
@@ -120,6 +121,7 @@ export default function ProductDetailPage({
 
   // State
   const { items, addItemToCart, setIsCartOpen } = useCart();
+  const { items: wishlistItems, toggleWishlistItem, isInWishlist } = useWishlist();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -286,6 +288,18 @@ export default function ProductDetailPage({
     }
   };
 
+  const handleWishlistToggle = async () => {
+    if (!product) return;
+    await toggleWishlistItem(product._id, {
+      _id: product._id,
+      name: product.name,
+      slug: product.slug,
+      images: product.images,
+      brand: product.brand,
+      variants: product.variants,
+    });
+  };
+
   // Carousel scroll helpers
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
@@ -340,7 +354,13 @@ export default function ProductDetailPage({
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-[#FDFBF7]">
-        <Header brandName="LXUY" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} user={user} />
+        <Header
+          brandName="LXUY"
+          cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+          wishlistCount={wishlistItems.length}
+          user={user}
+          onWishlistClick={() => router.push("/wishlist")}
+        />
         <main className="flex-1 flex items-center justify-center pt-24">
           <div className="flex flex-col items-center space-y-4">
             <div className="w-12 h-12 border-2 border-luxury-silver border-t-luxury-dark rounded-full animate-spin" />
@@ -358,7 +378,13 @@ export default function ProductDetailPage({
   if (error || !product) {
     return (
       <div className="flex flex-col min-h-screen bg-[#FDFBF7]">
-        <Header brandName="LXUY" cartCount={items.reduce((sum, item) => sum + item.quantity, 0)} user={user} />
+        <Header
+          brandName="LXUY"
+          cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+          wishlistCount={wishlistItems.length}
+          user={user}
+          onWishlistClick={() => router.push("/wishlist")}
+        />
         <main className="flex-1 flex flex-col items-center justify-center px-6 pt-24 text-center">
           <h2 className="font-serif text-3xl font-light text-luxury-dark mb-4">
             Editorial Check Failed
@@ -386,9 +412,11 @@ export default function ProductDetailPage({
       <Header
         brandName="LXUY"
         cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+        wishlistCount={wishlistItems.length}
         user={user}
         onLogoClick={() => router.push("/")}
         onCartClick={() => setIsCartOpen(true)}
+        onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
         onSearchClick={() => {}}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
@@ -538,13 +566,17 @@ export default function ProductDetailPage({
                 </div>
 
                 {/* Right-aligned Action Icons */}
-                <div className="flex flex-col space-y-4 pt-1 items-center text-neutral-500">
+                <div className="flex flex-col space-y-4 pt-1 items-center">
                   <button 
-                    onClick={() => alert("Added to Wishlist")} 
-                    className="hover:text-luxury-gold transition-colors focus:outline-none cursor-pointer"
-                    aria-label="Add to Wishlist"
+                    onClick={handleWishlistToggle} 
+                    className={`transition-colors focus:outline-none cursor-pointer ${
+                      product && isInWishlist(product._id)
+                        ? 'text-red-500 hover:text-red-600'
+                        : 'text-neutral-500 hover:text-luxury-gold'
+                    }`}
+                    aria-label={product && isInWishlist(product._id) ? "Remove from Wishlist" : "Add to Wishlist"}
                   >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5" fill={product && isInWishlist(product._id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                   </button>

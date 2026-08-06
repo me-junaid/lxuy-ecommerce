@@ -3,12 +3,16 @@
 import React, { useState } from "react";
 import { Input, Button, Header, Footer } from "@repo/ui";
 import { useRouter } from "next/navigation";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../lib/api";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
+  const { items: cartItems, setIsCartOpen } = useCart();
+  const { items: wishlistItems } = useWishlist();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,8 +48,11 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFBF7]">
       <Header
+        cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+        wishlistCount={wishlistItems.length}
         onLogoClick={() => router.push("/")}
-        onCartClick={() => router.push("/cart")}
+        onCartClick={() => setIsCartOpen(true)}
+        onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push("/profile")}
         onSearchClick={() => {}}
       />

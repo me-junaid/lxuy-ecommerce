@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useRouter } from 'next/navigation';
@@ -29,15 +29,26 @@ export const CartDrawer: React.FC = () => {
   // Close drawer helper
   const handleClose = () => setIsCartOpen(false);
 
-  // Auto close drawer when cart becomes empty
-  React.useEffect(() => {
-    if (isCartOpen && items.length === 0) {
+  // Track previous items length to only auto-close when items are removed
+  const prevItemsLength = useRef(items.length);
+
+  // Auto close drawer when cart becomes empty via item removal
+  useEffect(() => {
+    if (isCartOpen && items.length === 0 && prevItemsLength.current > 0) {
       const timer = setTimeout(() => {
         setIsCartOpen(false);
       }, 300);
       return () => clearTimeout(timer);
     }
+    prevItemsLength.current = items.length;
   }, [items.length, isCartOpen, setIsCartOpen]);
+
+  // Update ref when drawer closes or opens
+  useEffect(() => {
+    if (!isCartOpen) {
+      prevItemsLength.current = items.length;
+    }
+  }, [isCartOpen, items.length]);
 
   // Navigate to checkout/cart
   const handleCheckout = () => {
@@ -46,25 +57,27 @@ export const CartDrawer: React.FC = () => {
   };
 
   return (
-    <div
-      className={`fixed inset-0 z-50 transition-all duration-500 ${
-        isCartOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
-      }`}
-    >
-      {/* Backdrop Blur */}
-      <div
-        onClick={handleClose}
-        className={`absolute inset-0 bg-black/30 backdrop-blur-[4px] transition-opacity duration-300 ${
-          isCartOpen ? 'opacity-100' : 'opacity-0'
-        } cursor-pointer`}
-      />
+    <AnimatePresence>
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 pointer-events-auto">
+          {/* Backdrop Blur */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            onClick={handleClose}
+            className="absolute inset-0 bg-black/30 backdrop-blur-[4px] cursor-pointer"
+          />
 
-      {/* Drawer Panel */}
-      <div
-        className={`absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#FDFBF7] shadow-2xl border-l border-luxury-silver/20 flex flex-col h-full text-left transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] ${
-          isCartOpen ? 'translate-x-0' : 'translate-x-full'
-        } z-10`}
-      >
+          {/* Drawer Panel */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#FDFBF7] shadow-2xl border-l border-luxury-silver/20 flex flex-col h-full text-left z-10"
+          >
             {/* Header */}
             <div className="px-6 py-6 border-b border-luxury-silver/30 flex items-center justify-between">
               <div>
@@ -240,7 +253,9 @@ export const CartDrawer: React.FC = () => {
                 </div>
               </div>
             )}
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };

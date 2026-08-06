@@ -9,6 +9,8 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { ProductsModule } from './modules/products/products.module';
 import { CartModule } from './modules/cart/cart.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
+
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { CartModule } from './modules/cart/cart.module';
     BrandsModule,
     ProductsModule,
     CartModule,
+    WishlistModule,
   ],
   providers: [
     // Apply ThrottlerGuard globally so every route is rate-limited by default.
