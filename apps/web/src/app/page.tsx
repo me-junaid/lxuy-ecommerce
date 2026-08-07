@@ -441,7 +441,7 @@ export default function Home() {
             </h2>
           </AnimatedReveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-8">
             {DUMMY_PRODUCTS.map((product, index) => (
               <AnimatedReveal
                 key={product.id}

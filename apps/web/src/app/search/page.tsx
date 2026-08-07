@@ -527,7 +527,7 @@ function SearchPageContent() {
 
             {/* Products Grid */}
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8 md:gap-8">
                 {Array.from({ length: 6 }).map((_, idx) => (
                   <div key={idx} className="animate-pulse space-y-4">
                     <div className="aspect-[3/4] bg-neutral-200/60 rounded-sm" />
@@ -550,7 +550,7 @@ function SearchPageContent() {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-8 md:gap-8">
                 {sortedProducts.map((product) => {
                   const brandName = typeof product.brand === "object" && product.brand !== null ? product.brand.name : "LXUY SIGNATURE";
                   const image = product.images && product.images.length > 0 ? product.images[0] : "/images/models/modules1.jpeg";
