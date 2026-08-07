@@ -13,6 +13,7 @@ import {
 } from "@repo/ui";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 interface Brand {
   _id: string;
@@ -125,6 +126,7 @@ export default function ProductDetailPage({
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
   
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
@@ -133,6 +135,21 @@ export default function ProductDetailPage({
   const [cartLoading, setCartLoading] = useState(false);
   const [cartSuccess, setCartSuccess] = useState(false);
   const [recommendations, setRecommendations] = useState<RecommendationProduct[]>(FALLBACK_RECOMMENDATIONS);
+
+  // Load recently viewed list on mount / slug change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const local = localStorage.getItem("lxuy_recently_viewed");
+      if (local) {
+        try {
+          const list = JSON.parse(local) as any[];
+          setRecentlyViewed(list.filter((p) => p.slug !== slug));
+        } catch {
+          setRecentlyViewed([]);
+        }
+      }
+    }
+  }, [slug]);
 
   // 1. Fetch Product details on mount/slug change
   useEffect(() => {
@@ -149,6 +166,31 @@ export default function ProductDetailPage({
         }
         const data = (await response.json()) as Product;
         setProduct(data);
+
+        // Save to recently viewed history list
+        if (typeof window !== "undefined" && data) {
+          const localKey = "lxuy_recently_viewed";
+          const current = localStorage.getItem(localKey);
+          let list: any[] = [];
+          if (current) {
+            try {
+              list = JSON.parse(current);
+            } catch {
+              list = [];
+            }
+          }
+          list = list.filter((p: any) => p._id !== data._id);
+          list.unshift({
+            _id: data._id,
+            name: data.name,
+            slug: data.slug,
+            images: data.images,
+            brand: data.brand,
+            price: data.variants && data.variants.length > 0 ? data.variants[0].price : 0
+          });
+          list = list.slice(0, 4);
+          localStorage.setItem(localKey, JSON.stringify(list));
+        }
         
         // Reset active image index and scroll position on product change
         setCurrentImageIdx(0);
@@ -846,7 +888,7 @@ export default function ProductDetailPage({
         </div>
 
         {/* Bottom Recommendation Module */}
-        <div className="w-full max-w-7xl mx-auto px-6 mt-32 pb-24">
+        <div className="w-full max-w-7xl mx-auto px-6 mt-32 pb-6">
           <RecommendationSlider
             products={recommendations}
             onProductClick={(id) => {
@@ -860,6 +902,53 @@ export default function ProductDetailPage({
             }}
           />
         </div>
+
+        {/* Recently Viewed Products */}
+        {recentlyViewed.length > 0 && (
+          <div className="w-full max-w-7xl mx-auto px-6 mt-12 pb-24 border-t border-luxury-silver/20 pt-16 text-left">
+            <h3 className="font-serif text-2xl font-light text-luxury-dark mb-8">
+              Recently Viewed
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {recentlyViewed.map((p) => {
+                const brandName = typeof p.brand === 'object' && p.brand !== null ? p.brand.name : 'LXUY SIGNATURE';
+                const image = p.images && p.images.length > 0 ? p.images[0] : '/images/models/modules1.jpeg';
+                const formattedPrice = new Intl.NumberFormat('en-IN', {
+                  style: 'currency',
+                  currency: 'INR',
+                  maximumFractionDigits: 0
+                }).format(p.price);
+
+                return (
+                  <Link
+                    key={p._id}
+                    href={`/products/${p.slug}`}
+                    className="group space-y-3 block"
+                  >
+                    <div className="aspect-[3/4] overflow-hidden bg-luxury-silver/5 relative">
+                      <img
+                        src={image}
+                        alt={p.name}
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-all duration-700 ease-out"
+                      />
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                        {brandName}
+                      </span>
+                      <h4 className="font-serif text-neutral-800 tracking-wide group-hover:text-luxury-gold transition-colors text-sm font-normal truncate">
+                        {p.name}
+                      </h4>
+                      <p className="font-semibold text-neutral-700">
+                        {formattedPrice}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
       </main>
 

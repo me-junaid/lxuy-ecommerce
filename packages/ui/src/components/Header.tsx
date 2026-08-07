@@ -137,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
               animate={{
                 color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
               }}
-              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
               className="flex space-x-6 text-[10px] uppercase tracking-luxury font-medium"
             >
               <a href="#" className="hover:text-luxury-gold transition-colors">Stores</a>
@@ -148,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({
                 animate={{
                   color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(209, 213, 219, 1)'
                 }}
-                transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
               >|</motion.span>
               <a href="#" className="hover:text-luxury-gold transition-colors">Support</a>
             </motion.div>
@@ -195,8 +195,11 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Search */}
             <motion.button
               onClick={() => {
-                setIsSearchOpen(true);
-                if (onSearchClick) onSearchClick();
+                if (onSearchClick) {
+                  onSearchClick();
+                } else {
+                  window.location.href = '/search';
+                }
               }}
               initial={{
                 color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
@@ -346,7 +349,7 @@ export const Header: React.FC<HeaderProps> = ({
                       ? 'rgba(255, 255, 255, 0.9)'
                       : 'rgba(17, 17, 17, 1)'
                   }}
-                  transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
                   className="text-xs uppercase tracking-widest font-medium py-2.5 relative hover:text-luxury-gold transition-colors duration-300"
                 >
                   {cat.label}

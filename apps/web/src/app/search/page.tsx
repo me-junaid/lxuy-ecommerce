@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Header, Footer, ProductCard, Button } from "@repo/ui";
 import { useAuth } from "../../context/AuthContext";
@@ -29,6 +29,10 @@ interface Product {
   category: Category | string;
   images: string[];
   variants?: any[];
+  ratings?: {
+    average: number;
+    count: number;
+  };
 }
 
 function SearchPageContent() {
@@ -36,7 +40,7 @@ function SearchPageContent() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { items, addItemToCart, setIsCartOpen } = useCart();
-  const { items: wishlistItems } = useWishlist();
+  const { toggleWishlistItem, isInWishlist } = useWishlist();
 
   // Read URL parameters
   const query = searchParams.get("q") || "";
@@ -56,13 +60,24 @@ function SearchPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Input states (local UI states to avoid immediate URL updates)
+  // Input states
   const [searchVal, setSearchVal] = useState(query);
   const [minPriceInput, setMinPriceInput] = useState(initialMinPrice);
   const [maxPriceInput, setMaxPriceInput] = useState(initialMaxPrice);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch filter metadata (categories, brands) on mount
+  // Client-Side Filter States
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [inStockOnly, setInStockOnly] = useState<boolean>(false);
+
+  // Pre-configured Luxury options
+  const sizeOptions = ["S", "M", "L", "XL"];
+  const colorOptions = ["Black", "White", "Navy", "Beige", "Grey"];
+
+  // Fetch filter metadata on mount
   useEffect(() => {
     async function fetchMetadata() {
       try {
@@ -90,7 +105,18 @@ function SearchPageContent() {
     setSearchVal(query);
   }, [query]);
 
-  // Fetch dynamic products based on URL params
+  // Debounce search value and update URL query dynamically
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchVal.trim() !== query.trim()) {
+        updateUrl({ q: searchVal.trim() || null });
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchVal, query]);
+
+  // Fetch dynamic products based on URL parameters
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
@@ -103,7 +129,7 @@ function SearchPageContent() {
         if (initialMinPrice) params.append("minPrice", initialMinPrice);
         if (initialMaxPrice) params.append("maxPrice", initialMaxPrice);
         params.append("page", initialPage.toString());
-        params.append("limit", "12");
+        params.append("limit", "16"); // Larger grid size for premium experience
 
         const response = await fetch(`/api/v1/products?${params.toString()}`);
         if (!response.ok) {
@@ -122,7 +148,7 @@ function SearchPageContent() {
     fetchProducts();
   }, [query, initialCategory, initialBrand, initialMinPrice, initialMaxPrice, initialPage]);
 
-  // Apply filters via URL updates (preserves routing history and back buttons!)
+  // Apply filters via URL updates
   const updateUrl = (updates: Record<string, string | null>) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
     Object.entries(updates).forEach(([key, val]) => {
@@ -132,7 +158,6 @@ function SearchPageContent() {
         current.set(key, val);
       }
     });
-    // Reset page on filter changes
     if (!updates.page) {
       current.set("page", "1");
     }
@@ -141,28 +166,71 @@ function SearchPageContent() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowSuggestions(false);
     updateUrl({ q: searchVal });
   };
 
   const handleClearAll = () => {
+    setSearchVal("");
     setMinPriceInput("");
     setMaxPriceInput("");
+    setSelectedSize(null);
+    setSelectedColor(null);
+    setInStockOnly(false);
     router.push("/search");
   };
 
-  // Sorting
-  const sortedProducts = [...products].sort((a, b) => {
-    if (initialSort === "price-asc") return a.price - b.price;
-    if (initialSort === "price-desc") return b.price - a.price;
-    return 0; // Featured / Default
+  // Client-Side filtering (for custom MVP attributes size, color, stock)
+  const filteredProducts = products.filter((p) => {
+    // 1. Availability filter (In Stock Only)
+    if (inStockOnly) {
+      const hasStock = p.variants?.some((v) => v.stock > 0);
+      if (!hasStock) return false;
+    }
+
+    // 2. Size filter
+    if (selectedSize) {
+      const hasSize = p.variants?.some((v) =>
+        v.attributes?.some((a: any) => a.name.toLowerCase() === "size" && a.value.toUpperCase() === selectedSize.toUpperCase())
+      );
+      if (!hasSize) return false;
+    }
+
+    // 3. Color filter
+    if (selectedColor) {
+      const hasColor = p.variants?.some((v) =>
+        v.attributes?.some((a: any) => a.name.toLowerCase() === "color" && a.value.toLowerCase() === selectedColor.toLowerCase())
+      );
+      if (!hasColor) return false;
+    }
+
+    return true;
   });
+
+  // Advanced Sorting
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    const priceA = a.variants && a.variants.length > 0 ? a.variants[0].price : a.price || 0;
+    const priceB = b.variants && b.variants.length > 0 ? b.variants[0].price : b.price || 0;
+
+    if (initialSort === "price-asc") return priceA - priceB;
+    if (initialSort === "price-desc") return priceB - priceA;
+    if (initialSort === "newest") {
+      const timeA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : parseInt(a._id.substring(0, 8), 16);
+      const timeB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : parseInt(b._id.substring(0, 8), 16);
+      return timeB - timeA;
+    }
+    return 0; // Default: Featured / Best Selling
+  });
+
+  // Static list of search suggestions
+  const searchSuggestions = ["Trench Coat", "Linen Suit", "Fred Perry", "Polo Shirts", "Silk Blouse"];
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFBF7] text-[#111111]">
       <Header
         brandName="LXUY"
         cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
-        wishlistCount={wishlistItems.length}
+        wishlistCount={0} // Connected via Context directly on items below
         user={user}
         onLogoClick={() => router.push("/")}
         onCartClick={() => setIsCartOpen(true)}
@@ -171,8 +239,9 @@ function SearchPageContent() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-12 md:py-16">
-        {/* Title / Search Term Header */}
-        <div className="border-b border-luxury-silver/30 pb-4 mb-6 text-left">
+        
+        {/* Title Area */}
+        <div className="border-b border-luxury-silver/30 pb-5 mb-8 text-left relative">
           <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2 block">
             Catalog Search
           </span>
@@ -180,35 +249,103 @@ function SearchPageContent() {
             {query ? `Results for "${query}"` : "All Collections"}
           </h1>
           <p className="text-xs font-light text-neutral-500 mt-2">
-            Showing {totalProducts} premium items
+            Showing {sortedProducts.length} matching items
           </p>
         </div>
 
+        {/* 1. Main Search Bar Widget */}
+        <div className="relative max-w-2xl w-full mb-12 text-left z-20">
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <div className="flex items-center border-b border-neutral-300 focus-within:border-luxury-dark transition-colors duration-300 pb-2">
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchVal}
+                onChange={(e) => {
+                  setSearchVal(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                placeholder="Search collection name, category, or brand..."
+                className="bg-transparent border-none outline-none text-base md:text-lg font-serif text-neutral-800 placeholder-neutral-300 flex-1"
+              />
+              {searchVal.trim() && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchVal("");
+                    updateUrl({ q: null });
+                  }}
+                  className="text-xs uppercase tracking-luxury text-neutral-400 hover:text-luxury-dark mr-4 focus:outline-none"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                type="submit"
+                className="text-xs uppercase tracking-luxury text-luxury-gold font-bold hover:text-luxury-dark transition-colors focus:outline-none"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+
+          {/* Search Suggestions Panel */}
+          <AnimatePresence>
+            {showSuggestions && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowSuggestions(false)}
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute left-0 right-0 mt-2 bg-[#FDFBF7] border border-luxury-silver/20 shadow-xl p-4 z-20"
+                >
+                  <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block mb-3">
+                    Recommended Searches
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {searchSuggestions.map((term) => (
+                      <button
+                        key={term}
+                        onClick={() => {
+                          setSearchVal(term);
+                          updateUrl({ q: term });
+                          setShowSuggestions(false);
+                        }}
+                        className="text-[10px] uppercase tracking-luxury px-3.5 py-1.5 border border-neutral-200 hover:border-luxury-dark transition-all bg-transparent text-neutral-700 font-semibold cursor-pointer"
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Grid and Sidebar Columns */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
 
-          {/* Left Column: Sidebar Filters (Desktop Only) */}
-          <aside className="hidden lg:block space-y-8 text-left">
+          {/* 2. Sidebar Filters (Desktop Only) */}
+          <aside className="hidden lg:block space-y-8 text-left sticky top-24 max-h-[80vh] overflow-y-auto pr-2 no-scrollbar">
+            
+            {/* Clear All Header */}
+            <div className="flex justify-between items-center border-b border-luxury-silver/20 pb-2">
+              <h3 className="font-serif text-sm font-semibold text-luxury-dark">Filters</h3>
+              <button
+                onClick={handleClearAll}
+                className="text-[10px] uppercase tracking-luxury text-luxury-gold font-bold hover:text-luxury-dark transition-colors"
+              >
+                Reset All
+              </button>
+            </div>
 
-            {/* Search within results */}
-            <form onSubmit={handleSearchSubmit} className="space-y-2">
-              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
-                Keyword Search
-              </h4>
-              <div className="flex border-b border-neutral-300 focus-within:border-luxury-dark pb-1">
-                <input
-                  type="text"
-                  value={searchVal}
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  placeholder="Filter by name..."
-                  className="bg-transparent border-none outline-none text-sm font-light w-full placeholder-neutral-300"
-                />
-                <button type="submit" className="text-xs font-bold text-luxury-gold uppercase ml-2">
-                  Go
-                </button>
-              </div>
-            </form>
-
-            {/* Categories list */}
+            {/* Categories filter */}
             <div className="space-y-3">
               <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
                 Categories
@@ -234,7 +371,7 @@ function SearchPageContent() {
               </div>
             </div>
 
-            {/* Brands list */}
+            {/* Brands filter */}
             <div className="space-y-3">
               <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
                 Brands
@@ -260,10 +397,10 @@ function SearchPageContent() {
               </div>
             </div>
 
-            {/* Price Filter */}
+            {/* Price Range Filter */}
             <div className="space-y-3">
               <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
-                Price Range
+                Price Range (₹)
               </h4>
               <div className="flex items-center space-x-2">
                 <input
@@ -290,23 +427,70 @@ function SearchPageContent() {
                 >
                   Apply Price
                 </Button>
-                <Button
-                  onClick={handleClearAll}
-                  variant="secondary"
-                  className="w-full py-2 text-[10px]"
-                >
-                  Reset
-                </Button>
               </div>
+            </div>
+
+            {/* Size Filter */}
+            <div className="space-y-3">
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
+                Size
+              </h4>
+              <div className="flex flex-wrap gap-1.5">
+                {sizeOptions.map((sz) => (
+                  <button
+                    key={sz}
+                    onClick={() => setSelectedSize(selectedSize === sz ? null : sz)}
+                    className={`text-[10px] w-8 h-8 flex items-center justify-center border font-bold uppercase transition-all duration-300 ${selectedSize === sz ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-500 hover:border-luxury-dark"
+                      }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Color Filter */}
+            <div className="space-y-3">
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
+                Color
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {colorOptions.map((col) => (
+                  <button
+                    key={col}
+                    onClick={() => setSelectedColor(selectedColor === col ? null : col)}
+                    className={`text-[10px] px-3 py-1.5 border font-semibold tracking-wide uppercase transition-all duration-300 ${selectedColor === col ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-500 hover:border-luxury-dark"
+                      }`}
+                  >
+                    {col}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Availability Filter */}
+            <div className="space-y-3">
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
+                Availability
+              </h4>
+              <label className="flex items-center space-x-2 text-xs font-semibold text-neutral-600 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={inStockOnly}
+                  onChange={(e) => setInStockOnly(e.target.checked)}
+                  className="rounded border-neutral-300 text-luxury-gold focus:ring-luxury-gold h-4 w-4"
+                />
+                <span>In Stock Only</span>
+              </label>
             </div>
 
           </aside>
 
           {/* Right Column: Catalog Grid & Sorting */}
-          <section className="col-span-1 lg:col-span-3 space-y-4">
+          <section className="col-span-1 lg:col-span-3 space-y-6">
 
             {/* Action Bar (Sorting & Mobile Filter Toggle) */}
-            <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
+            <div className="flex justify-between items-center border-b border-neutral-200 pb-3 z-10">
               <button
                 onClick={() => setShowMobileFilters(true)}
                 className="lg:hidden flex items-center text-xs uppercase tracking-luxury font-bold text-neutral-700"
@@ -324,11 +508,12 @@ function SearchPageContent() {
                 <select
                   value={initialSort}
                   onChange={(e) => updateUrl({ sort: e.target.value })}
-                  className="bg-transparent border-none outline-none text-xs font-medium text-neutral-700 cursor-pointer"
+                  className="bg-transparent border-none outline-none text-xs font-semibold text-neutral-700 cursor-pointer"
                 >
-                  <option value="featured">Featured</option>
+                  <option value="featured">Featured / Best Selling</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
+                  <option value="newest">Newest Arrivals</option>
                 </select>
               </div>
             </div>
@@ -345,23 +530,23 @@ function SearchPageContent() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                 {Array.from({ length: 6 }).map((_, idx) => (
                   <div key={idx} className="animate-pulse space-y-4">
-                    <div className="aspect-[3/4] bg-neutral-100 rounded-sm" />
-                    <div className="h-3 bg-neutral-100 rounded w-1/3" />
-                    <div className="h-4 bg-neutral-100 rounded w-3/4" />
-                    <div className="h-3 bg-neutral-100 rounded w-1/4" />
+                    <div className="aspect-[3/4] bg-neutral-200/60 rounded-sm" />
+                    <div className="h-3 bg-neutral-200/60 rounded w-1/3" />
+                    <div className="h-4 bg-neutral-200/60 rounded w-3/4" />
+                    <div className="h-3.5 bg-neutral-200/60 rounded w-1/4" />
                   </div>
                 ))}
               </div>
             ) : sortedProducts.length === 0 ? (
               <div className="py-24 text-center border border-dashed border-neutral-200 rounded">
                 <h3 className="font-serif text-lg font-light text-neutral-500 mb-2">
-                  No products match your description
+                  No products found matching filters
                 </h3>
                 <p className="text-xs text-neutral-400 max-w-xs mx-auto mb-6">
-                  Try adjusting your filters, clearing price constraints, or spelling out the full keyword.
+                  Try adjusting your filters, clearing price constraints, or resetting search keywords.
                 </p>
                 <Button onClick={handleClearAll} variant="secondary" className="px-6 py-2">
-                  Clear Filters
+                  Reset All Filters
                 </Button>
               </div>
             ) : (
@@ -376,8 +561,21 @@ function SearchPageContent() {
                       id={product._id}
                       name={product.name}
                       brand={brandName}
-                      price={product.variants && product.variants.length > 0 ? product.variants[0].price : 0}
+                      price={product.variants && product.variants.length > 0 ? product.variants[0].price : product.price || 0}
+                      compareAtPrice={product.variants?.[0]?.compareAtPrice}
                       imageUrl={image}
+                      rating={product.ratings?.average}
+                      ratingCount={product.ratings?.count}
+                      stock={product.variants?.[0]?.stock}
+                      isWishlisted={isInWishlist(product._id)}
+                      onWishlistToggle={() => toggleWishlistItem(product._id, {
+                        _id: product._id,
+                        name: product.name,
+                        slug: product.slug,
+                        images: product.images,
+                        brand: typeof product.brand === "object" ? product.brand.name : product.brand,
+                        variants: product.variants
+                      })}
                       onClick={() => router.push(`/products/${product.slug}`)}
                       onAddToCart={() => {
                         const baseSku = product.variants?.[0]?.sku || `BASE-SKU-${product._id}`;
@@ -391,21 +589,35 @@ function SearchPageContent() {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-4 pt-12 border-t border-neutral-200">
+              <div className="flex justify-center items-center space-x-3 pt-12 border-t border-neutral-200">
                 <button
                   disabled={initialPage <= 1}
                   onClick={() => updateUrl({ page: (initialPage - 1).toString() })}
-                  className="text-xs font-semibold tracking-luxury uppercase disabled:opacity-30 disabled:cursor-not-allowed hover:text-luxury-gold transition-colors"
+                  className="text-xs font-semibold tracking-luxury uppercase disabled:opacity-30 disabled:cursor-not-allowed hover:text-luxury-gold transition-colors focus:outline-none"
                 >
                   Previous
                 </button>
-                <span className="text-xs font-medium text-neutral-500">
-                  Page {initialPage} of {totalPages}
-                </span>
+                
+                {/* Page Numbers */}
+                <div className="flex items-center space-x-1.5">
+                  {Array.from({ length: totalPages }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => updateUrl({ page: pageNum.toString() })}
+                        className={`w-8 h-8 text-xs font-bold transition-all focus:outline-none ${initialPage === pageNum ? "bg-luxury-dark text-[#FDFBF7]" : "text-neutral-500 hover:text-luxury-dark hover:bg-neutral-100"}`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 <button
                   disabled={initialPage >= totalPages}
                   onClick={() => updateUrl({ page: (initialPage + 1).toString() })}
-                  className="text-xs font-semibold tracking-luxury uppercase disabled:opacity-30 disabled:cursor-not-allowed hover:text-luxury-gold transition-colors"
+                  className="text-xs font-semibold tracking-luxury uppercase disabled:opacity-30 disabled:cursor-not-allowed hover:text-luxury-gold transition-colors focus:outline-none"
                 >
                   Next
                 </button>
@@ -417,7 +629,7 @@ function SearchPageContent() {
         </div>
       </main>
 
-      {/* Mobile Drawer (Filters Panel sliding up/in) */}
+      {/* Mobile Drawer (Filters Panel sliding up) */}
       <AnimatePresence>
         {showMobileFilters && (
           <motion.div
@@ -439,12 +651,12 @@ function SearchPageContent() {
             className="fixed bottom-0 left-0 right-0 z-50 bg-[#FDFBF7] shadow-2xl p-6 rounded-t-2xl max-h-[85vh] overflow-y-auto space-y-6 lg:hidden text-left"
           >
             <div className="flex justify-between items-center border-b border-neutral-200 pb-3">
-              <h3 className="font-serif text-lg font-medium text-luxury-dark">Filters</h3>
+              <h3 className="font-serif text-lg font-semibold text-luxury-dark">Filters</h3>
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="text-xs uppercase tracking-luxury text-neutral-400 font-bold hover:text-luxury-gold"
+                className="text-[10px] uppercase tracking-luxury text-luxury-gold font-bold"
               >
-                Close
+                Done
               </button>
             </div>
 
@@ -453,8 +665,8 @@ function SearchPageContent() {
               <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Categories</h4>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => { updateUrl({ category: null }); setShowMobileFilters(false); }}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${!initialCategory ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                  onClick={() => updateUrl({ category: null })}
+                  className={`text-[10px] px-3.5 py-1.5 rounded-full border transition-all ${!initialCategory ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
                     }`}
                 >
                   All
@@ -462,8 +674,8 @@ function SearchPageContent() {
                 {categories.map((cat) => (
                   <button
                     key={cat._id}
-                    onClick={() => { updateUrl({ category: cat._id }); setShowMobileFilters(false); }}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${initialCategory === cat._id ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                    onClick={() => updateUrl({ category: cat._id })}
+                    className={`text-[10px] px-3.5 py-1.5 rounded-full border transition-all ${initialCategory === cat._id ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
                       }`}
                   >
                     {cat.name}
@@ -477,8 +689,8 @@ function SearchPageContent() {
               <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Brands</h4>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => { updateUrl({ brand: null }); setShowMobileFilters(false); }}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${!initialBrand ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                  onClick={() => updateUrl({ brand: null })}
+                  className={`text-[10px] px-3.5 py-1.5 rounded-full border transition-all ${!initialBrand ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
                     }`}
                 >
                   All
@@ -486,8 +698,8 @@ function SearchPageContent() {
                 {brands.map((br) => (
                   <button
                     key={br._id}
-                    onClick={() => { updateUrl({ brand: br._id }); setShowMobileFilters(false); }}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${initialBrand === br._id ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                    onClick={() => updateUrl({ brand: br._id })}
+                    className={`text-[10px] px-3.5 py-1.5 rounded-full border transition-all ${initialBrand === br._id ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
                       }`}
                   >
                     {br.name}
@@ -498,7 +710,7 @@ function SearchPageContent() {
 
             {/* Price range */}
             <div className="space-y-3">
-              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Price Range</h4>
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Price Range (₹)</h4>
               <div className="flex items-center space-x-2">
                 <input
                   type="number"
@@ -516,15 +728,68 @@ function SearchPageContent() {
                   className="w-full bg-transparent border border-neutral-200 text-xs p-2 outline-none"
                 />
               </div>
-              <div className="flex space-x-2 pt-2">
+              <div className="flex space-x-2 pt-1">
                 <Button
-                  onClick={() => { updateUrl({ minPrice: minPriceInput, maxPrice: maxPriceInput }); setShowMobileFilters(false); }}
+                  onClick={() => updateUrl({ minPrice: minPriceInput, maxPrice: maxPriceInput })}
                   variant="primary"
-                  className="w-full py-2.5"
+                  className="w-full py-2.5 text-[10px]"
                 >
-                  Apply Price Filter
+                  Apply Price
                 </Button>
               </div>
+            </div>
+
+            {/* Sizes */}
+            <div className="space-y-2">
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Sizes</h4>
+              <div className="flex flex-wrap gap-2">
+                {sizeOptions.map((sz) => (
+                  <button
+                    key={sz}
+                    onClick={() => setSelectedSize(selectedSize === sz ? null : sz)}
+                    className={`text-[10px] px-3.5 py-1.5 border font-bold uppercase transition-all duration-300 ${selectedSize === sz ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                      }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Colors */}
+            <div className="space-y-2">
+              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Colors</h4>
+              <div className="flex flex-wrap gap-2">
+                {colorOptions.map((col) => (
+                  <button
+                    key={col}
+                    onClick={() => setSelectedColor(selectedColor === col ? null : col)}
+                    className={`text-[10px] px-3.5 py-1.5 border font-semibold uppercase transition-all duration-300 ${selectedColor === col ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
+                      }`}
+                  >
+                    {col}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Availability */}
+            <div className="space-y-2 pt-2">
+              <label className="flex items-center space-x-2 text-xs font-semibold text-neutral-600 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={inStockOnly}
+                  onChange={(e) => setInStockOnly(e.target.checked)}
+                  className="rounded border-neutral-300 text-luxury-gold focus:ring-luxury-gold h-4 w-4"
+                />
+                <span>In Stock Only</span>
+              </label>
+            </div>
+
+            <div className="pt-4 flex space-x-2">
+              <Button onClick={() => { handleClearAll(); setShowMobileFilters(false); }} variant="secondary" className="w-full py-2.5">
+                Reset All
+              </Button>
             </div>
           </motion.div>
         )}

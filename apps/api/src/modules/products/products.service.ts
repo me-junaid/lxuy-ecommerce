@@ -61,9 +61,13 @@ export class ProductsService {
       filters.status = 'published';
     }
 
-    // 2. Search query (text index match)
+    // 2. Search query (regex match for partial string matching)
     if (queryDto.search) {
-      filters.$text = { $search: queryDto.search };
+      const searchRegex = { $regex: queryDto.search, $options: 'i' };
+      filters.$or = [
+        { name: searchRegex },
+        { description: searchRegex }
+      ];
     }
 
     // 3. Category match

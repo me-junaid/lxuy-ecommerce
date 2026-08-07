@@ -32,7 +32,22 @@ export const SearchFlyout: React.FC<SearchFlyoutProps> = ({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load recently viewed from localStorage when open
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      const local = localStorage.getItem('lxuy_recently_viewed');
+      if (local) {
+        try {
+          setRecentlyViewed(JSON.parse(local));
+        } catch {
+          setRecentlyViewed([]);
+        }
+      }
+    }
+  }, [isOpen]);
 
   // Focus input on open
   useEffect(() => {
@@ -167,7 +182,7 @@ export const SearchFlyout: React.FC<SearchFlyoutProps> = ({
         <div className="space-y-6 text-left flex-1 overflow-y-auto pr-1 no-scrollbar">
           <h3 className="text-[10px] uppercase tracking-luxury font-bold text-neutral-400 border-b border-luxury-silver/25 pb-2 sticky top-0 bg-[#FDFBF7] z-10 flex justify-between items-center">
             <span>
-              {query.trim() ? `Search Results (${results.length})` : 'Type to search luxury catalog'}
+              {query.trim() ? `Search Results (${results.length})` : 'Explore Tailored Silhouettes'}
             </span>
             {loading && (
               <svg className="animate-spin h-3 w-3 text-luxury-gold" fill="none" viewBox="0 0 24 24">
@@ -177,46 +192,129 @@ export const SearchFlyout: React.FC<SearchFlyoutProps> = ({
             )}
           </h3>
 
-          {query.trim() && results.length === 0 && !loading ? (
-            <div className="py-20 text-center text-sm font-light text-neutral-400">
-              No matches found for &ldquo;{query}&rdquo;.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-6">
-              {results.map((p, index) => {
-                const brandName = typeof p.brand === 'object' && p.brand !== null ? p.brand.name : 'LXUY SIGNATURE';
-                const image = p.images && p.images.length > 0 ? p.images[0] : '/images/models/modules1.jpeg';
+          {query.trim() ? (
+            loading ? (
+              <div className="py-20 text-center text-sm font-light text-neutral-400">
+                Searching archives...
+              </div>
+            ) : results.length === 0 ? (
+              <div className="py-20 text-center text-sm font-light text-neutral-400">
+                No matches found for &ldquo;{query}&rdquo;.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-6">
+                {results.map((p, index) => {
+                  const brandName = typeof p.brand === 'object' && p.brand !== null ? p.brand.name : 'LXUY SIGNATURE';
+                  const image = p.images && p.images.length > 0 ? p.images[0] : '/images/models/modules1.jpeg';
+                  const formattedPrice = new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                  }).format(p.price);
 
-                return (
-                  <motion.div
-                    key={p._id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                    onClick={() => handleItemClick(p.slug)}
-                    className="group space-y-3 cursor-pointer"
-                  >
-                    <div className="aspect-[3/4] overflow-hidden bg-luxury-silver/5 relative">
-                      <img
-                        src={image}
-                        alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-all duration-700 ease-out"
-                      />
-                    </div>
-                    <div className="space-y-1 text-xs">
-                      <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
-                        {brandName}
-                      </span>
-                      <h4 className="font-serif text-neutral-800 tracking-wide group-hover:text-luxury-gold transition-colors text-sm font-normal truncate">
-                        {p.name}
-                      </h4>
-                      <p className="font-light text-neutral-500">
-                        ${p.price.toLocaleString()}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                  return (
+                    <motion.div
+                      key={p._id}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.05 }}
+                      onClick={() => handleItemClick(p.slug)}
+                      className="group space-y-3 cursor-pointer"
+                    >
+                      <div className="aspect-[3/4] overflow-hidden bg-luxury-silver/5 relative">
+                        <img
+                          src={image}
+                          alt={p.name}
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-all duration-700 ease-out"
+                        />
+                      </div>
+                      <div className="space-y-1 text-xs">
+                        <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                          {brandName}
+                        </span>
+                        <h4 className="font-serif text-neutral-800 tracking-wide group-hover:text-luxury-gold transition-colors text-sm font-normal truncate">
+                          {p.name}
+                        </h4>
+                        <p className="font-semibold text-neutral-700">
+                          {formattedPrice}
+                        </p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )
+          ) : (
+            /* Empty Query View: Popular Searches & Recently Viewed */
+            <div className="space-y-12 animate-fade-in pt-2">
+              {/* Popular Searches */}
+              <div className="space-y-4">
+                <h4 className="text-[10px] uppercase tracking-luxury font-bold text-neutral-400">
+                  Popular Searches
+                </h4>
+                <div className="flex flex-wrap gap-2.5">
+                  {['Trench Coat', 'Polo', 'Linen Suit', 'Fred Perry', 'Jacket', 'Silk'].map((term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      onClick={() => {
+                        setQuery(term);
+                        inputRef.current?.focus();
+                      }}
+                      className="text-[10px] uppercase tracking-luxury px-4 py-2 border border-neutral-200 hover:border-luxury-dark transition-colors duration-300 bg-transparent text-neutral-700 font-semibold cursor-pointer"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recently Viewed */}
+              {recentlyViewed.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="text-[10px] uppercase tracking-luxury font-bold text-neutral-400">
+                    Recently Viewed
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                    {recentlyViewed.map((p) => {
+                      const brandName = typeof p.brand === 'object' && p.brand !== null ? p.brand.name : 'LXUY SIGNATURE';
+                      const image = p.images && p.images.length > 0 ? p.images[0] : '/images/models/modules1.jpeg';
+                      const formattedPrice = new Intl.NumberFormat('en-IN', {
+                        style: 'currency',
+                        currency: 'INR',
+                        maximumFractionDigits: 0
+                      }).format(p.price);
+
+                      return (
+                        <div
+                          key={p._id}
+                          onClick={() => handleItemClick(p.slug)}
+                          className="group space-y-3 cursor-pointer"
+                        >
+                          <div className="aspect-[3/4] overflow-hidden bg-luxury-silver/5 relative">
+                            <img
+                              src={image}
+                              alt={p.name}
+                              className="w-full h-full object-cover group-hover:scale-[1.03] transition-all duration-700 ease-out"
+                            />
+                          </div>
+                          <div className="space-y-1 text-xs">
+                            <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">
+                              {brandName}
+                            </span>
+                            <h4 className="font-serif text-neutral-800 tracking-wide group-hover:text-luxury-gold transition-colors text-sm font-normal truncate">
+                              {p.name}
+                            </h4>
+                            <p className="font-semibold text-neutral-700">
+                              {formattedPrice}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

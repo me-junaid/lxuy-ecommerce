@@ -141,7 +141,7 @@ function LoginPageContent() {
         onCartClick={() => setIsCartOpen(true)}
         onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(isAuthenticated ? "/profile" : "/login")}
-        onSearchClick={() => { }}
+        onSearchClick={() =>router.push("/search")}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
         onProductClick={(slug) => router.push(`/products/${slug}`)}
       />

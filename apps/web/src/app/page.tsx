@@ -213,7 +213,7 @@ export default function Home() {
         onCartClick={() => setIsCartOpen(true)}
         onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
-        onSearchClick={() => {}}
+        onSearchClick={() => router.push("/search")}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
         onProductClick={(slug) => router.push(`/products/${slug}`)}
         isHomePage={true}

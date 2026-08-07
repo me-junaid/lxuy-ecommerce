@@ -50,7 +50,7 @@ async function bootstrap() {
   // deploying to production (add your production domain).
   const allowedOrigins = isProduction
     ? (configService.get<string>('ALLOWED_ORIGINS') || '').split(',').map((o) => o.trim())
-    : ['http://localhost:3000'];
+    : ['http://localhost:3000', 'http://localhost:3002'];
 
   app.enableCors({
     origin: (origin, callback) => {
