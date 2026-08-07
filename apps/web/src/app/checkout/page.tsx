@@ -8,6 +8,7 @@ import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { api } from "../../lib/api";
 
 interface AddressForm {
   email: string;
@@ -206,15 +207,43 @@ export default function CheckoutPage() {
     }
 
     setIsSubmitting(true);
-    
-    // Simulate payment API delay
-    setTimeout(async () => {
-      const orderId = `LX-${Math.floor(100000 + Math.random() * 900000)}-${new Date().getFullYear()}`;
-      setMockOrderId(orderId);
+    setFormErrors((prev) => {
+      const next = { ...prev };
+      delete next.submit;
+      return next;
+    });
+
+    try {
+      const response = await api.post("/api/v1/orders", {
+        shippingAddress: {
+          email: addressForm.email,
+          phone: addressForm.phone,
+          firstName: addressForm.firstName,
+          lastName: addressForm.lastName,
+          street: addressForm.street,
+          apartment: addressForm.apartment,
+          city: addressForm.city,
+          state: addressForm.state,
+          zip: addressForm.zip,
+          country: addressForm.country,
+        },
+        paymentMethod: paymentMethod,
+        shippingMethod: shippingMethod,
+        couponCode: activeCoupon ? activeCoupon.code : undefined,
+      });
+
+      setMockOrderId(response._id || response.id);
       setIsSubmitting(false);
       setOrderPlaced(true);
       await clearCart();
-    }, 2000);
+    } catch (err: any) {
+      console.error("Failed to place order:", err);
+      setFormErrors((prev) => ({
+        ...prev,
+        submit: err.message || "Failed to place order. Please try again.",
+      }));
+      setIsSubmitting(false);
+    }
   };
 
   const checkmarkPathVariants = {
@@ -610,7 +639,12 @@ export default function CheckoutPage() {
                         </span>
                       </div>
 
-                      <div className="pt-4">
+                      <div className="pt-4 space-y-3">
+                        {formErrors.submit && (
+                          <p className="text-[11px] text-red-500 font-medium tracking-wide text-center leading-relaxed">
+                            {formErrors.submit}
+                          </p>
+                        )}
                         <Button
                           type="button"
                           onClick={handlePlaceOrder}

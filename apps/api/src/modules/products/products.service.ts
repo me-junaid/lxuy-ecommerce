@@ -191,4 +191,14 @@ export class ProductsService {
     const product = await this.findById(id);
     await this.productModel.deleteOne({ _id: product._id }).exec();
   }
+
+  async decrementStock(productId: string, sku: string, quantity: number): Promise<void> {
+    const result = await this.productModel.updateOne(
+      { _id: new Types.ObjectId(productId), 'variants.sku': sku },
+      { $inc: { 'variants.$.stock': -quantity } }
+    ).exec();
+    if (result.matchedCount === 0) {
+      throw new NotFoundException(`Product variant with SKU ${sku} not found`);
+    }
+  }
 }

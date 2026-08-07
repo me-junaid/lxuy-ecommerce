@@ -128,8 +128,26 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Row 1: Top Bar (Logo & Actions) */}
         <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between relative">
 
-          {/* Left: Support Links (Desktop Only) */}
-          <div className="hidden md:flex md:flex-1 md:items-center">
+          {/* Left: Hamburger on Mobile, Support Links on Desktop */}
+          <div className="flex flex-1 items-center">
+            {/* Mobile Menu Toggle (Left Aligned on Mobile) */}
+            <motion.button
+              onClick={() => setIsMobileMenuOpen(true)}
+              initial={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              animate={{
+                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden p-1 outline-none mr-3 hover:text-luxury-gold transition-colors bg-transparent border-none cursor-pointer focus:outline-none"
+              aria-label="Open Mobile Menu"
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </motion.button>
+
             <motion.div
               initial={{
                 color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
@@ -138,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
                 color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
               }}
               transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
-              className="flex space-x-6 text-[10px] uppercase tracking-luxury font-medium"
+              className="hidden md:flex space-x-6 text-[10px] uppercase tracking-luxury font-medium"
             >
               <a href="#" className="hover:text-luxury-gold transition-colors">Stores</a>
               <motion.span
@@ -154,8 +172,8 @@ export const Header: React.FC<HeaderProps> = ({
             </motion.div>
           </div>
 
-          {/* Center: Logo (Left-aligned on mobile, absolute-centered on desktop) */}
-          <div className="flex-shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2 text-left md:text-center min-w-[80px] min-h-[40px] flex items-center justify-center">
+          {/* Center: Logo (Centered on both mobile and desktop) */}
+          <div className="flex-shrink-0 absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 text-center min-w-[80px] min-h-[40px] flex items-center justify-center z-10">
             {(!isHomePage || isScrolled) && (
               <>
                 {onLogoClick ? (
@@ -294,23 +312,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </motion.button>
 
-            {/* Mobile Menu Toggle (Positioned on the far right on mobile viewports) */}
-            <motion.button
-              onClick={() => setIsMobileMenuOpen(true)}
-              initial={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
-              }}
-              animate={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
-              }}
-              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden p-1 outline-none ml-1 hover:text-luxury-gold transition-colors"
-              aria-label="Open Mobile Menu"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </motion.button>
+
           </div>
         </div>
 
