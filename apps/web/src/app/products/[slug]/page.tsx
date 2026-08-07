@@ -401,14 +401,54 @@ export default function ProductDetailPage({
           cartCount={items.reduce((sum, item) => sum + item.quantity, 0)}
           wishlistCount={wishlistItems.length}
           user={user}
+          onLogoClick={() => router.push("/")}
+          onCartClick={() => setIsCartOpen(true)}
           onWishlistClick={() => router.push("/wishlist")}
+          onProfileClick={() => router.push(user ? "/profile" : "/login")}
+          onSearchClick={() => {}}
+          onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
+          onProductClick={(slug) => router.push(`/products/${slug}`)}
         />
-        <main className="flex-1 flex items-center justify-center pt-24">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-12 h-12 border-2 border-luxury-silver border-t-luxury-dark rounded-full animate-spin" />
-            <span className="font-sans text-[10px] uppercase tracking-luxury text-neutral-500">
-              Retrieving Silhouettes...
-            </span>
+        <main className="flex-1 w-full pt-16 md:pt-20">
+          <div className="flex flex-col lg:flex-row w-full items-start">
+            {/* Left Media Block Skeleton (60% width) */}
+            <div className="w-full h-[60vh] lg:h-[calc(100vh-125px)] lg:w-[60%] bg-neutral-100/50 animate-pulse flex items-center justify-center relative">
+              <div className="opacity-15 max-w-[100px]">
+                <img src="/images/LOGO/lxuy-logo.png" alt="LXUY" className="w-full h-auto object-contain grayscale" />
+              </div>
+            </div>
+
+            {/* Right Details Block Skeleton (40% width) */}
+            <div className="w-full lg:w-[40%] px-6 md:px-12 lg:px-16 py-10 flex flex-col space-y-8 animate-pulse">
+              {/* Brand and Title Skeleton */}
+              <div className="space-y-4 border-b border-luxury-silver/10 pb-6">
+                <div className="h-3 bg-neutral-200/60 rounded w-1/4 animate-pulse" />
+                <div className="h-8 bg-neutral-200/60 rounded w-3/4 animate-pulse" />
+                <div className="h-6 bg-neutral-200/60 rounded w-1/3 mt-4 animate-pulse" />
+              </div>
+
+              {/* Attributes Selection Skeleton */}
+              <div className="space-y-4">
+                <div className="h-3 bg-neutral-200/60 rounded w-1/3 animate-pulse" />
+                <div className="flex space-x-2">
+                  <div className="h-11 w-14 bg-neutral-200/40 animate-pulse" />
+                  <div className="h-11 w-14 bg-neutral-200/40 animate-pulse" />
+                  <div className="h-11 w-14 bg-neutral-200/40 animate-pulse" />
+                </div>
+              </div>
+
+              {/* CTA Skeleton */}
+              <div className="space-y-4 pt-4 border-t border-luxury-silver/10">
+                <div className="h-12 bg-neutral-200/60 w-full animate-pulse" />
+              </div>
+
+              {/* Description Paragraph Skeleton */}
+              <div className="space-y-3 pt-4">
+                <div className="h-3 bg-neutral-200/40 w-full animate-pulse" />
+                <div className="h-3 bg-neutral-200/40 w-5/6 animate-pulse" />
+                <div className="h-3 bg-neutral-200/40 w-4/5 animate-pulse" />
+              </div>
+            </div>
           </div>
         </main>
         <Footer />

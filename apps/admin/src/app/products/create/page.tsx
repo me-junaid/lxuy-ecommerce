@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { api } from "../../../lib/api";
-import Link from "next/link";
 import { Button } from "@repo/ui";
+import AdminLayout from "../../../components/AdminLayout";
+import { motion } from "framer-motion";
 
 interface Brand {
   _id: string;
@@ -18,7 +19,7 @@ interface Category {
 }
 
 export default function CreateProductPage() {
-  const { user, loading, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   // Filter lists
@@ -40,13 +41,6 @@ export default function CreateProductPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  // Authenticate session
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login");
-    }
-  }, [user, loading, router]);
 
   // Load filter categories and brands
   useEffect(() => {
@@ -123,276 +117,210 @@ export default function CreateProductPage() {
     }
   };
 
-  if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
-        <div className="text-xs uppercase tracking-luxury text-neutral-400 font-semibold">
-          Authenticating access...
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#FDFBF7]">
-      
-      {/* Sidebar Nav */}
-      <aside className="w-full md:w-64 bg-[#FDFBF7] border-b md:border-b-0 md:border-r border-luxury-silver/30 p-6 flex flex-col justify-between">
-        <div className="space-y-8 text-left">
-          <div className="space-y-1">
-            <span className="font-serif text-2xl font-bold tracking-[0.25em] text-luxury-dark block">
-              LXUY
-            </span>
-            <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold block">
-              Management Portal
-            </span>
-          </div>
-
-          <nav className="flex flex-col space-y-3 pt-6 border-t border-luxury-silver/25">
-            <Link
-              href="/"
-              className="text-xs uppercase tracking-luxury font-semibold text-neutral-500 hover:text-luxury-dark transition-colors"
-            >
-              Overview
-            </Link>
-            <Link
-              href="/products"
-              className="text-xs uppercase tracking-luxury font-semibold text-neutral-500 hover:text-luxury-dark transition-colors"
-            >
-              Catalog Inventory
-            </Link>
-            <Link
-              href="/products/create"
-              className="text-xs uppercase tracking-luxury font-bold text-luxury-gold"
-            >
-              Add Product
-            </Link>
-          </nav>
-        </div>
-
-        <div className="pt-6 border-t border-luxury-silver/25 text-left space-y-4">
-          <div>
-            <span className="text-[10px] text-neutral-400 block">Logged in as:</span>
-            <span className="text-xs font-semibold text-neutral-700 capitalize truncate block">
-              {user.firstName} {user.lastName}
-            </span>
-            <span className="text-[9px] font-bold text-luxury-gold uppercase tracking-wider block">
-              {user.role.replace("_", " ")}
-            </span>
-          </div>
-          <button
-            onClick={logout}
-            className="text-[10px] uppercase tracking-luxury font-bold text-red-500 hover:text-red-700 focus:outline-none"
-          >
-            Sign Out
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Form Area */}
-      <main className="flex-1 p-8 md:p-12 text-left space-y-8 max-w-4xl">
+    <AdminLayout>
+      <main className="flex-1 p-8 md:p-12 text-left space-y-8 overflow-x-hidden selection:bg-[#B38F5F]/15 selection:text-[#B38F5F]">
         
         {/* Banner Section */}
-        <div className="border-b border-luxury-silver/30 pb-4">
-          <h1 className="font-serif text-3xl font-light text-luxury-dark leading-tight">
-            Add Product Entry
+        <div className="border-b border-neutral-200 pb-5">
+          <h1 className="font-serif text-3xl font-light text-[#111111] leading-tight">
+            Add Product Silhouette
           </h1>
-          <p className="text-xs text-neutral-400 mt-1">
-            Create a new luxury product entry inside the central database.
+          <p className="text-[11px] uppercase tracking-widest text-[#B38F5F] mt-1.5 font-bold">
+            Catalog a new premium design item. All new items start in Draft status.
           </p>
         </div>
 
         {error && (
-          <div className="p-4 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded text-center">
+          <div className="max-w-4xl p-4 text-xs font-semibold text-red-700 bg-red-50 border border-red-100 rounded">
             {error}
           </div>
         )}
 
         {loadingMetadata ? (
-          <div className="py-20 text-center text-xs uppercase tracking-luxury text-neutral-400 font-semibold animate-pulse">
-            Loading partner configurations...
+          <div className="py-24 text-center text-[10px] uppercase tracking-[0.25em] text-[#B38F5F] font-bold animate-pulse">
+            Loading configuration filters...
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="max-w-4xl space-y-6 pb-12">
             
-            {/* Grid fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Two-Column Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white border border-neutral-200 p-6 md:p-8 rounded-lg shadow-sm">
               
               {/* Product Name */}
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
+              <div className="space-y-1.5">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
                   Product Name *
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="e.g. Classic Wool Trench Coat"
-                  className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none"
+                  placeholder="e.g. Classic Linen Blazer"
+                  className="w-full bg-white border border-neutral-200 text-[#111111] placeholder-neutral-400 focus:border-[#B38F5F] text-sm p-3 outline-none rounded transition-all duration-300"
                   required
                 />
               </div>
 
-              {/* Product Slug */}
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                  Product URL Slug *
+              {/* Slug (Disabled/Generated) */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  URL Slug (Auto-Generated)
                 </label>
                 <input
                   type="text"
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="e.g. classic-wool-trench-coat"
-                  className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none"
-                  required
+                  disabled
+                  placeholder="auto-generated-slug-path"
+                  className="w-full bg-neutral-50/50 border border-neutral-200 text-neutral-400 text-sm p-3 outline-none rounded select-none cursor-not-allowed"
                 />
               </div>
 
-              {/* Category */}
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                  Category *
-                </label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none cursor-pointer"
-                  required
-                >
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Brand */}
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                  Brand *
+              {/* Designer Brand Select */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  Designer Brand *
                 </label>
                 <select
                   value={selectedBrand}
                   onChange={(e) => setSelectedBrand(e.target.value)}
-                  className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none cursor-pointer"
+                  className="w-full bg-white border border-neutral-200 text-[#111111] focus:border-[#B38F5F] text-sm p-3 outline-none rounded cursor-pointer transition-all duration-300"
                   required
                 >
-                  {brands.map((br) => (
-                    <option key={br._id} value={br._id}>
-                      {br.name}
+                  {brands.map((b) => (
+                    <option key={b._id} value={b._id}>
+                      {b.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Price */}
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                  Base Price (INR ₹) *
+              {/* Category Select */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  Catalog Category *
                 </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="e.g. 15999"
-                  className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none"
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full bg-white border border-neutral-200 text-[#111111] focus:border-[#B38F5F] text-sm p-3 outline-none rounded cursor-pointer transition-all duration-300"
                   required
-                />
+                >
+                  {categories.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Stock */}
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                  Initial Stock Count *
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={stock}
-                  onChange={(e) => setStock(e.target.value)}
-                  placeholder="e.g. 20"
-                  className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none"
-                  required
-                />
-              </div>
-
-              {/* SKU Code */}
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                  SKU Identifier Code *
+              {/* SKU code */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  Stock keeping unit (SKU) *
                 </label>
                 <input
                   type="text"
                   value={sku}
                   onChange={(e) => setSku(e.target.value)}
-                  placeholder="e.g. Ralph Lauren SKU (RL-WTC-01)"
-                  className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none"
+                  placeholder="e.g. LX-MN-SH-01"
+                  className="w-full bg-white border border-neutral-200 text-[#111111] placeholder-neutral-400 focus:border-[#B38F5F] text-sm p-3 outline-none rounded transition-all duration-300"
                   required
                 />
               </div>
 
-              {/* Image URL */}
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                  Image Path URL
+              {/* Image URL path */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  Cover Image URL Path
                 </label>
                 <input
                   type="text"
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="e.g. /images/models/modules1.jpeg"
-                  className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none"
+                  className="w-full bg-white border border-neutral-200 text-[#111111] placeholder-neutral-400 focus:border-[#B38F5F] text-sm p-3 outline-none rounded transition-all duration-300"
+                />
+              </div>
+
+              {/* Unit Retail Price */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  Retail Price (INR) *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="e.g. 12500"
+                  className="w-full bg-white border border-neutral-200 text-[#111111] placeholder-neutral-400 focus:border-[#B38F5F] text-sm p-3 outline-none rounded transition-all duration-300"
+                  required
+                />
+              </div>
+
+              {/* Opening Stock Levels */}
+              <div className="space-y-1.5">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  Opening Stock Count *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="e.g. 25"
+                  className="w-full bg-white border border-neutral-200 text-[#111111] placeholder-neutral-400 focus:border-[#B38F5F] text-sm p-3 outline-none rounded transition-all duration-300"
+                  required
+                />
+              </div>
+
+              {/* Product Summary */}
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  Brief Summary
+                </label>
+                <input
+                  type="text"
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                  placeholder="e.g. Slim-fit linen blazer meticulously crafted in Italy."
+                  className="w-full bg-white border border-neutral-200 text-[#111111] placeholder-neutral-400 focus:border-[#B38F5F] text-sm p-3 outline-none rounded transition-all duration-300"
+                />
+              </div>
+
+              {/* Full Description */}
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-[9px] uppercase tracking-[0.2em] font-semibold text-neutral-500">
+                  Full Editorial Description *
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter deep editorial description detailing materials, design notes, and fits..."
+                  rows={5}
+                  className="w-full bg-white border border-neutral-200 text-[#111111] placeholder-neutral-400 focus:border-[#B38F5F] text-sm p-3 outline-none rounded resize-y transition-all duration-300"
+                  required
                 />
               </div>
 
             </div>
 
-            {/* Summary */}
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                Short Summary Narrative
-              </label>
-              <input
-                type="text"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                placeholder="A brief luxury editorial sentence..."
-                className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase tracking-luxury font-semibold text-neutral-500">
-                Description Details *
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Full fabric composition, lining styles, and fit description..."
-                rows={4}
-                className="w-full bg-transparent border border-neutral-300 focus:border-luxury-dark text-xs p-3 outline-none resize-none"
-                required
-              />
-            </div>
-
-            {/* Save Buttons */}
-            <div className="pt-4 flex space-x-4">
+            {/* Action buttons */}
+            <div className="flex space-x-4">
               <Button
                 type="submit"
                 disabled={isSubmitting}
                 variant="primary"
-                className="px-6 py-2.5 text-xs uppercase font-bold tracking-luxury"
+                className="px-8 py-3 text-[10px] font-bold uppercase tracking-[0.25em] bg-[#B38F5F] hover:bg-[#9c7b50] text-white border-none rounded transition-all duration-300"
               >
-                {isSubmitting ? "Creating..." : "Save Product Draft"}
+                {isSubmitting ? "Saving..." : "Catalog Item (Draft)"}
               </Button>
               <Button
                 type="button"
                 onClick={() => router.push("/products")}
                 variant="secondary"
-                className="px-6 py-2.5 text-xs uppercase font-bold tracking-luxury"
+                className="px-8 py-3 text-[10px] font-bold uppercase tracking-[0.25em] bg-transparent hover:bg-neutral-50 text-neutral-500 hover:text-[#111111] border border-neutral-200 hover:border-neutral-300 rounded transition-all duration-300"
               >
                 Cancel
               </Button>
@@ -402,7 +330,6 @@ export default function CreateProductPage() {
         )}
 
       </main>
-
-    </div>
+    </AdminLayout>
   );
 }

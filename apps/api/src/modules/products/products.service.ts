@@ -178,10 +178,12 @@ export class ProductsService {
       }
     }
 
+    const cleanedDto = cleanUndefined(updateProductDto);
+
     Object.assign(product, {
-      ...updateProductDto,
-      category: updateProductDto.category ? new Types.ObjectId(updateProductDto.category) : product.category,
-      brand: updateProductDto.brand ? new Types.ObjectId(updateProductDto.brand) : product.brand,
+      ...cleanedDto,
+      category: cleanedDto.category ? new Types.ObjectId(cleanedDto.category) : product.category,
+      brand: cleanedDto.brand ? new Types.ObjectId(cleanedDto.brand) : product.brand,
     });
 
     return product.save();
@@ -201,4 +203,14 @@ export class ProductsService {
       throw new NotFoundException(`Product variant with SKU ${sku} not found`);
     }
   }
+}
+
+function cleanUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned as Partial<T>;
 }

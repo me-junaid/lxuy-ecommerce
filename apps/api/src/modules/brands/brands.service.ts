@@ -54,7 +54,8 @@ export class BrandsService {
       }
     }
 
-    Object.assign(brand, updateBrandDto);
+    const cleanedDto = cleanUndefined(updateBrandDto);
+    Object.assign(brand, cleanedDto);
     return brand.save();
   }
 
@@ -62,4 +63,14 @@ export class BrandsService {
     const brand = await this.findById(id);
     await this.brandModel.deleteOne({ _id: brand._id }).exec();
   }
+}
+
+function cleanUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned as Partial<T>;
 }

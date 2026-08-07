@@ -36,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   isScrolled = false,
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const isTransparent = isHomePage && !isScrolled && !activeMenu;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [hoveredMenuItem, setHoveredMenuItem] = useState<{
@@ -114,15 +115,16 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <motion.header
         initial={{
-          backgroundColor: isHomePage && !isScrolled ? 'rgba(253, 251, 247, 0)' : 'rgba(253, 251, 247, 1)',
-          borderBottomColor: isHomePage && !isScrolled ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.3)'
+          backgroundColor: isTransparent ? 'rgba(253, 251, 247, 0)' : 'rgba(253, 251, 247, 1)',
+          borderBottomColor: isTransparent ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.3)'
         }}
         animate={{
-          backgroundColor: isHomePage && !isScrolled ? 'rgba(253, 251, 247, 0)' : 'rgba(253, 251, 247, 1)',
-          borderBottomColor: isHomePage && !isScrolled ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.3)'
+          backgroundColor: isTransparent ? 'rgba(253, 251, 247, 0)' : 'rgba(253, 251, 247, 1)',
+          borderBottomColor: isTransparent ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.3)'
         }}
-        transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
         className="fixed top-0 left-0 w-full z-45 border-b border-transparent"
+        onMouseLeave={() => setActiveMenu(null)}
       >
 
         {/* Row 1: Top Bar (Logo & Actions) */}
@@ -134,13 +136,13 @@ export const Header: React.FC<HeaderProps> = ({
             <motion.button
               onClick={() => setIsMobileMenuOpen(true)}
               initial={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
               animate={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
-              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden p-1 outline-none mr-3 hover:text-luxury-gold transition-colors bg-transparent border-none cursor-pointer focus:outline-none"
+              transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden p-1 outline-none mr-3 hover:text-luxury-gold transition-colors duration-0 bg-transparent border-none cursor-pointer focus:outline-none"
               aria-label="Open Mobile Menu"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,33 +150,57 @@ export const Header: React.FC<HeaderProps> = ({
               </svg>
             </motion.button>
 
-            <motion.div
+            {/* Mobile Search Toggle (Left Aligned on Mobile next to Hamburger) */}
+            <motion.button
+              onClick={() => {
+                if (onSearchClick) {
+                  onSearchClick();
+                } else {
+                  window.location.href = '/search';
+                }
+              }}
               initial={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
               animate={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+              }}
+              transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden p-1 outline-none mr-3 hover:text-luxury-gold transition-colors duration-0 bg-transparent border-none cursor-pointer focus:outline-none"
+              aria-label="Search"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </motion.button>
+
+            <motion.div
+              initial={{
+                color: isTransparent ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
+              }}
+              animate={{
+                color: isTransparent ? 'rgba(255, 255, 255, 0.8)' : 'rgba(115, 115, 115, 1)'
               }}
               transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
               className="hidden md:flex space-x-6 text-[10px] uppercase tracking-luxury font-medium"
             >
-              <a href="#" className="hover:text-luxury-gold transition-colors">Stores</a>
+              <a href="#" className="hover:text-luxury-gold transition-colors duration-0">Stores</a>
               <motion.span
                 initial={{
-                  color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(209, 213, 219, 1)'
+                  color: isTransparent ? 'rgba(255, 255, 255, 0.2)' : 'rgba(209, 213, 219, 1)'
                 }}
                 animate={{
-                  color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 0.2)' : 'rgba(209, 213, 219, 1)'
+                  color: isTransparent ? 'rgba(255, 255, 255, 0.2)' : 'rgba(209, 213, 219, 1)'
                 }}
                 transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
               >|</motion.span>
-              <a href="#" className="hover:text-luxury-gold transition-colors">Support</a>
+              <a href="#" className="hover:text-luxury-gold transition-colors duration-0">Support</a>
             </motion.div>
           </div>
 
           {/* Center: Logo (Centered on both mobile and desktop) */}
           <div className="flex-shrink-0 absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 text-center min-w-[80px] min-h-[40px] flex items-center justify-center z-10">
-            {(!isHomePage || isScrolled) && (
+            {!isTransparent && (
               <>
                 {onLogoClick ? (
                   <button
@@ -220,13 +246,13 @@ export const Header: React.FC<HeaderProps> = ({
                 }
               }}
               initial={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
               animate={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
-              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
-              className="p-1 outline-none hover:text-luxury-gold transition-colors"
+              transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="hidden md:inline-block p-1 outline-none hover:text-luxury-gold transition-colors duration-0"
               aria-label="Search"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -238,8 +264,8 @@ export const Header: React.FC<HeaderProps> = ({
             {user ? (
               <button
                 onClick={onProfileClick}
-                className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 text-xs font-semibold tracking-wider ${
-                  isHomePage && !isScrolled
+                className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-0 text-xs font-semibold tracking-wider ${
+                  isTransparent
                     ? 'bg-white/15 text-white border border-white/30 hover:border-white hover:bg-white/20'
                     : 'bg-luxury-gold/15 text-luxury-dark border border-luxury-gold/30 hover:border-luxury-gold hover:bg-luxury-gold/20'
                 }`}
@@ -251,13 +277,13 @@ export const Header: React.FC<HeaderProps> = ({
               <motion.button
                 onClick={onProfileClick}
                 initial={{
-                  color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                  color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
                 }}
                 animate={{
-                  color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                  color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
                 }}
-                transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
-                className="p-1 outline-none hover:text-luxury-gold transition-colors"
+                transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
+                className="p-1 outline-none hover:text-luxury-gold transition-colors duration-0"
                 aria-label="Account"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -270,13 +296,13 @@ export const Header: React.FC<HeaderProps> = ({
             <motion.button
               onClick={onWishlistClick}
               initial={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
               animate={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
-              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
-              className="relative p-1 outline-none hidden md:inline-block hover:text-luxury-gold transition-colors"
+              transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="relative p-1 outline-none hidden md:inline-block hover:text-luxury-gold transition-colors duration-0"
               aria-label="Wishlist"
             >
               <svg className="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -293,13 +319,13 @@ export const Header: React.FC<HeaderProps> = ({
             <motion.button
               onClick={onCartClick}
               initial={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
               animate={{
-                color: isHomePage && !isScrolled ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
+                color: isTransparent ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)'
               }}
-              transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
-              className="relative p-1 outline-none hover:text-luxury-gold transition-colors"
+              transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
+              className="relative p-1 outline-none hover:text-luxury-gold transition-colors duration-0"
               aria-label="Shopping Cart"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -319,12 +345,12 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Row 2: Desktop Navigation Bar */}
         <motion.div
           initial={{
-            borderTopColor: isHomePage && !isScrolled ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.2)'
+            borderTopColor: isTransparent ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.2)'
           }}
           animate={{
-            borderTopColor: isHomePage && !isScrolled ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.2)'
+            borderTopColor: isTransparent ? 'rgba(229, 229, 229, 0)' : 'rgba(229, 229, 229, 0.2)'
           }}
-          transition={{ duration: isHomePage ? 0.8 : 0, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
           className="hidden md:block w-full border-t border-transparent"
         >
           <div className="max-w-7xl mx-auto flex justify-center space-x-12 h-12 items-center">
@@ -332,7 +358,6 @@ export const Header: React.FC<HeaderProps> = ({
               <div
                 key={cat.label}
                 onMouseEnter={() => cat.menuKey && setActiveMenu(cat.menuKey)}
-                onMouseLeave={() => setActiveMenu(null)}
                 className="h-full flex items-center"
               >
                 <motion.a
@@ -340,19 +365,19 @@ export const Header: React.FC<HeaderProps> = ({
                   initial={{
                     color: cat.isSale
                       ? '#dc2626'
-                      : isHomePage && !isScrolled
+                      : isTransparent
                       ? 'rgba(255, 255, 255, 0.9)'
                       : 'rgba(17, 17, 17, 1)'
                   }}
                   animate={{
                     color: cat.isSale
                       ? '#dc2626'
-                      : isHomePage && !isScrolled
+                      : isTransparent
                       ? 'rgba(255, 255, 255, 0.9)'
                       : 'rgba(17, 17, 17, 1)'
                   }}
                   transition={{ duration: isHomePage ? 0 : 0, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-xs uppercase tracking-widest font-medium py-2.5 relative hover:text-luxury-gold transition-colors duration-300"
+                  className="text-xs uppercase tracking-widest font-medium py-2.5 relative hover:text-luxury-gold transition-colors duration-0"
                 >
                   {cat.label}
                   {activeMenu === cat.menuKey && (
@@ -368,7 +393,7 @@ export const Header: React.FC<HeaderProps> = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15, ease: "easeInOut" }}
+                        transition={{ duration: 0, ease: "easeInOut" }}
                         className="absolute left-0 right-0 w-full top-full bg-[#FDFBF7] border-b border-luxury-silver/30 shadow-xl z-50 py-12 px-12"
                         onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
                       >

@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await api.post<{ accessToken: string }>("/api/v1/auth/refresh");
         setAccessToken(data.accessToken);
 
-        const profile = await api.get<User>("/api/v1/auth/profile");
+        const profile = await api.get<User>("/api/v1/auth/me");
         if (profile.role === "admin" || profile.role === "store_manager") {
           setUser(profile);
         } else {

@@ -83,9 +83,11 @@ export class CategoriesService {
       }
     }
 
+    const cleanedDto = cleanUndefined(updateCategoryDto);
+
     Object.assign(category, {
-      ...updateCategoryDto,
-      parent: updateCategoryDto.parent === null ? null : updateCategoryDto.parent ? new Types.ObjectId(updateCategoryDto.parent) : category.parent,
+      ...cleanedDto,
+      parent: cleanedDto.parent === null ? null : cleanedDto.parent ? new Types.ObjectId(cleanedDto.parent) : category.parent,
     });
 
     return category.save();
@@ -99,4 +101,14 @@ export class CategoriesService {
 
     await this.categoryModel.deleteOne({ _id: category._id }).exec();
   }
+}
+
+function cleanUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
+  const cleaned: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = value;
+    }
+  }
+  return cleaned as Partial<T>;
 }

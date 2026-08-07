@@ -43,34 +43,38 @@ const HERO_SLIDES = [
 // Local Model Product Images
 const DUMMY_PRODUCTS = [
   {
-    id: "1",
+    id: "6a6df523b45ec8fee3d8c0a8",
     name: "Draped Silk Blouse",
     brand: "LXUY SIGNATURE",
     price: 450,
     imageUrl: "/images/models/modules1.jpeg",
     badge: "New Collection",
+    sku: "DSB-W-S-BEIGE",
   },
   {
-    id: "2",
+    id: "6a6df524b45ec8fee3d8c0b2",
     name: "Classic Wool Trench Coat",
     brand: "LXUY SIGNATURE",
     price: 890,
     imageUrl: "/images/models/modules2.jpeg",
     badge: "Limited Edition",
+    sku: "CWC-W-S-OATMEAL",
   },
   {
-    id: "3",
+    id: "6a6df524b45ec8fee3d8c0b9",
     name: "Linen Wide-Leg Trouser",
     brand: "LXUY SIGNATURE",
     price: 320,
     imageUrl: "/images/models/modules3.jpeg",
+    sku: "LWT-W-S-WHITE",
   },
   {
-    id: "4",
+    id: "6a6df524b45ec8fee3d8c0c0",
     name: "Ribbed Merino Knit Dress",
     brand: "LXUY SIGNATURE",
     price: 520,
     imageUrl: "/images/models/modules4.jpeg",
+    sku: "RMK-W-S-BLACK",
   },
 ];
 
@@ -87,7 +91,7 @@ const LOOKBOOK_IMAGES = [
 
 const RECOMMENDED_PRODUCTS = [
   {
-    id: "rec-1",
+    id: "6a6df524b45ec8fee3d8c0ca",
     name: "Classic Beige Linen Suit",
     brand: "POLO RALPH LAUREN",
     price: 18900,
@@ -96,7 +100,7 @@ const RECOMMENDED_PRODUCTS = [
     imageUrl: "/images/models/modules5.jpeg",
   },
   {
-    id: "rec-2",
+    id: "6a6df525b45ec8fee3d8c0d1",
     name: "Navy Solid Classic Fit Short Sleeve Polo",
     brand: "HACKETT LONDON",
     price: 9600,
@@ -105,7 +109,7 @@ const RECOMMENDED_PRODUCTS = [
     imageUrl: "/images/models/modules6.jpeg",
   },
   {
-    id: "rec-3",
+    id: "6a6df525b45ec8fee3d8c0d5",
     name: "Sand Linen Casual Jacket",
     brand: "POLO RALPH LAUREN",
     price: 14400,
@@ -114,7 +118,7 @@ const RECOMMENDED_PRODUCTS = [
     imageUrl: "/images/models/modules7.jpeg",
   },
   {
-    id: "rec-4",
+    id: "6a6df525b45ec8fee3d8c0d9",
     name: "Tan Double-Breasted Editorial Suit",
     brand: "POLO RALPH LAUREN",
     price: 23400,
@@ -123,7 +127,7 @@ const RECOMMENDED_PRODUCTS = [
     imageUrl: "/images/models/modules8.jpeg",
   },
   {
-    id: "rec-5",
+    id: "6a6df525b45ec8fee3d8c0dd",
     name: "Knitted Polo Cardigan",
     brand: "FRED PERRY",
     price: 8600,
@@ -132,7 +136,7 @@ const RECOMMENDED_PRODUCTS = [
     imageUrl: "/images/models/modules9.jpeg",
   },
   {
-    id: "rec-6",
+    id: "6a6df525b45ec8fee3d8c0de",
     name: "Trench Coat Coat Trimmed",
     brand: "KARL LAGERFELD",
     price: 27900,
@@ -182,7 +186,7 @@ export default function Home() {
         brand: product.brand,
         price: product.price,
       },
-      `BASE-SKU-${product.id}`,
+      product.sku,
       1
     );
   };
@@ -287,9 +291,11 @@ export default function Home() {
                  */}
 
                 <div className="mt-auto">
-                  <Button variant="primary">
-                    Explore Shop
-                  </Button>
+                  <Link href="/search">
+                    <Button variant="primary">
+                      Explore Shop
+                    </Button>
+                  </Link>
                 </div>
               </div>
           </div>

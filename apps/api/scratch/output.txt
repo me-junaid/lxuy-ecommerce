@@ -1,0 +1,6 @@
+Connected to test DB!
+Found product: Lxuy Men Shirt
+Original status: draft
+Running Object.assign with updateProductDto...
+Attempting to save...
+Saved successfully!
