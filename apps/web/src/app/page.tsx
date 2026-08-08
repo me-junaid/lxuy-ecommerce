@@ -250,6 +250,7 @@ export default function Home() {
                   alt={HERO_SLIDES[currentHeroIdx].title}
                   fill
                   priority
+                  draggable={false}
                   className="w-full h-full object-cover opacity-80"
                 />
               </motion.div>
@@ -449,6 +450,10 @@ export default function Home() {
                   price={product.price}
                   imageUrl={product.imageUrl}
                   badge={product.badge}
+                  onClick={() => {
+                    const slug = product.name.toLowerCase().replace(/ /g, "-");
+                    router.push(`/products/${slug}`);
+                  }}
                   onAddToCart={() => handleAddToCart(product)}
                 />
               </AnimatedReveal>
@@ -460,7 +465,13 @@ export default function Home() {
         <AnimatedReveal direction="up" delay={0.1}>
           <RecommendationSlider
             products={RECOMMENDED_PRODUCTS}
-            onProductClick={(id) => alert(`Product clicked: ${id}`)}
+            onProductClick={(id) => {
+              const match = RECOMMENDED_PRODUCTS.find((r) => r.id === id);
+              if (match && match.name) {
+                const slug = match.name.toLowerCase().replace(/ /g, "-");
+                router.push(`/products/${slug}`);
+              }
+            }}
           />
         </AnimatedReveal>
 

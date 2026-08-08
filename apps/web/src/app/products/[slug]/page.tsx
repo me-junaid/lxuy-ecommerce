@@ -404,17 +404,7 @@ export default function ProductDetailPage({
     }
   };
 
-  const scrollPrev = () => {
-    if (currentImageIdx > 0 && product) {
-      scrollToIndex(currentImageIdx - 1);
-    }
-  };
 
-  const scrollNext = () => {
-    if (product && currentImageIdx < product.images.length - 1) {
-      scrollToIndex(currentImageIdx + 1);
-    }
-  };
 
   const uniqueAttributes = product?.variants ? getUniqueAttributes(product.variants) : {};
   const isOutOfStock = !selectedVariant || selectedVariant.stock <= 0;
@@ -592,62 +582,36 @@ export default function ProductDetailPage({
 
             {/* "Different Angles" Navigation Control Panel (overlaid on top of bottom stage) */}
             {product.images && product.images.length > 1 && (
-              <div className="absolute bottom-6 right-6 z-10 flex flex-col items-center space-y-2.5 bg-[#111111]/85 backdrop-blur-md p-3 border border-neutral-800 rounded-xl shadow-lg max-w-[calc(100vw-3rem)]">
-                <div className="flex items-center space-x-3.5">
-                  {/* Left Arrow */}
-                  <button
-                    onClick={scrollPrev}
-                    disabled={currentImageIdx === 0}
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors disabled:opacity-20 cursor-pointer focus:outline-none"
-                    aria-label="Previous image"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-
-                  {/* Thumbnail Strip */}
-                  <div
-                    className="flex space-x-2 items-center overflow-x-auto max-w-[200px] md:max-w-[300px] py-0.5"
-                    style={{
-                      scrollbarWidth: "none",
-                      msOverflowStyle: "none",
-                    }}
-                  >
-                    {product.images.map((img, idx) => {
-                      const isActive = currentImageIdx === idx;
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => scrollToIndex(idx)}
-                          className={`relative w-10 h-10 shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 cursor-pointer focus:outline-none ${isActive
-                              ? "border-blue-500 scale-105"
-                              : "border-transparent opacity-60 hover:opacity-100"
-                            }`}
-                          aria-label={`Go to image ${idx + 1}`}
-                        >
-                          <Image
-                            src={img}
-                            alt={`Thumbnail ${idx + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Right Arrow */}
-                  <button
-                    onClick={scrollNext}
-                    disabled={currentImageIdx === product.images.length - 1}
-                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors disabled:opacity-20 cursor-pointer focus:outline-none"
-                    aria-label="Next image"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+              <div className="absolute bottom-6 right-6 z-10 flex items-center bg-[#111111]/85 backdrop-blur-md p-2 border border-neutral-800 rounded-xl shadow-lg max-w-[calc(100vw-3rem)]">
+                {/* Thumbnail Strip */}
+                <div
+                  className="flex space-x-2 items-center overflow-x-auto max-w-[200px] md:max-w-[300px]"
+                  style={{
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                  }}
+                >
+                  {product.images.map((img, idx) => {
+                    const isActive = currentImageIdx === idx;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => scrollToIndex(idx)}
+                        className={`relative w-10 h-10 shrink-0 rounded-md overflow-hidden transition-all duration-300 cursor-pointer focus:outline-none ${isActive
+                            ? "opacity-100"
+                            : "opacity-40 hover:opacity-80"
+                          }`}
+                        aria-label={`Go to image ${idx + 1}`}
+                      >
+                        <Image
+                          src={img}
+                          alt={`Thumbnail ${idx + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

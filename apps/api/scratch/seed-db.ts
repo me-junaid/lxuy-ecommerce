@@ -121,6 +121,8 @@ async function seed() {
     { name: "LXUY SIGNATURE", slug: "lxuy-signature", description: "LXUY main designer label" },
     { name: "POLO RALPH LAUREN", slug: "polo-ralph-lauren", description: "Polo Ralph Lauren brand label" },
     { name: "HACKETT LONDON", slug: "hackett-london", description: "Hackett London brand label" },
+    { name: "FRED PERRY", slug: "fred-perry", description: "Fred Perry brand label" },
+    { name: "KARL LAGERFELD", slug: "karl-lagerfeld", description: "Karl Lagerfeld brand label" },
   ];
 
   const brandMap: Record<string, any> = {};
@@ -377,6 +379,50 @@ async function seed() {
         },
       ],
     },
+    {
+      name: "Knitted Polo Cardigan",
+      slug: "knitted-polo-cardigan",
+      description: "A premium knitted polo cardigan from Fred Perry, designed for classic casual wear.",
+      summary: "Fred Perry knitted polo cardigan.",
+      images: ["/images/models/modules9.jpeg"],
+      category: categoryMap["women"],
+      brand: brandMap["fred-perry"],
+      status: "published",
+      ratings: { average: 4.8, count: 12 },
+      variants: [
+        {
+          sku: "KPC-W-M-BROWN",
+          price: 8600,
+          compareAtPrice: 12000,
+          stock: 10,
+          attributes: [{ name: "Size", value: "M" }, { name: "Color", value: "Brown" }],
+          images: ["/images/models/modules9.jpeg"],
+          isActive: true,
+        }
+      ]
+    },
+    {
+      name: "Trench Coat Coat Trimmed",
+      slug: "trench-coat-coat-trimmed",
+      description: "A premium Karl Lagerfeld trench coat trimmed to perfection, featuring signature styling details.",
+      summary: "Karl Lagerfeld trimmed trench coat.",
+      images: ["/images/models/modules10.jpeg"],
+      category: categoryMap["women"],
+      brand: brandMap["karl-lagerfeld"],
+      status: "published",
+      ratings: { average: 4.9, count: 8 },
+      variants: [
+        {
+          sku: "TCCT-W-M-BEIGE",
+          price: 27900,
+          compareAtPrice: 45000,
+          stock: 5,
+          attributes: [{ name: "Size", value: "M" }, { name: "Color", value: "Beige" }],
+          images: ["/images/models/modules10.jpeg"],
+          isActive: true,
+        }
+      ]
+    }
   ];
 
   for (const prod of productsToSeed) {
