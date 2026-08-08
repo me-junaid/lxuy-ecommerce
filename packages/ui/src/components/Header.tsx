@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SearchFlyout } from './SearchFlyout';
@@ -40,6 +40,34 @@ export const Header: React.FC<HeaderProps> = ({
   isScrolled = false,
 }) => {
   const router = useRouter();
+
+  const { scrollY } = useScroll();
+  const [vh, setVh] = useState(800);
+  const [isDesktop, setIsDesktop] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setVh(window.innerHeight);
+      setIsDesktop(window.innerWidth >= 768);
+      const handleResize = () => {
+        setVh(window.innerHeight);
+        setIsDesktop(window.innerWidth >= 768);
+      };
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
+
+  const initialY = isHomePage ? (vh / 2 - (isDesktop ? 40 : 32)) : 0;
+  const scrollYTarget = 200;
+
+  const logoY = useTransform(scrollY, [0, scrollYTarget], [isHomePage ? initialY : 0, 0]);
+  const logoScale = useTransform(scrollY, [0, scrollYTarget], [isHomePage ? (isDesktop ? 3.2 : 2.0) : 1.0, 1.0]);
+  const logoColor = useTransform(
+    scrollY,
+    [0, 120],
+    isHomePage ? ['rgba(255, 255, 255, 1)', 'rgba(17, 17, 17, 1)'] : ['rgba(17, 17, 17, 1)', 'rgba(17, 17, 17, 1)']
+  );
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const isTransparent = isHomePage && !isScrolled && !activeMenu;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -204,40 +232,43 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Center: Logo (Centered on both mobile and desktop) */}
-          <div className="flex-shrink-0 absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 text-center min-w-[80px] min-h-[40px] flex items-center justify-center z-10">
-            {!isTransparent && (
-              <>
-                 {onLogoClick ? (
-                  <button
-                    onClick={onLogoClick}
-                    className="flex items-center justify-center hover:opacity-85 transition-opacity bg-transparent border-none p-0 cursor-pointer focus:outline-none"
-                    aria-label="Go to homepage"
-                  >
-                    <motion.span
-                      layoutId="main-logo"
-                      transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-                      className="font-serif text-2xl md:text-3xl font-light tracking-[0.25em] text-luxury-dark uppercase"
-                    >
-                      {brandName}
-                    </motion.span>
-                  </button>
-                ) : (
-                  <Link
-                    href="/"
-                    className="inline-flex items-center justify-center hover:opacity-85 transition-opacity"
-                  >
-                    <motion.span
-                      layoutId="main-logo"
-                      transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-                      className="font-serif text-2xl md:text-3xl font-light tracking-[0.25em] text-luxury-dark uppercase"
-                    >
-                      {brandName}
-                    </motion.span>
-                  </Link>
-                )}
-              </>
+          <motion.div
+            style={{ y: logoY }}
+            className="flex-shrink-0 absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 text-center min-w-[80px] min-h-[40px] flex items-center justify-center z-10"
+          >
+            {onLogoClick ? (
+              <button
+                onClick={onLogoClick}
+                className="flex items-center justify-center hover:opacity-85 transition-opacity bg-transparent border-none p-0 cursor-pointer focus:outline-none"
+                aria-label="Go to homepage"
+              >
+                <motion.span
+                  style={{
+                    scale: logoScale,
+                    color: logoColor,
+                  }}
+                  className="font-serif text-2xl md:text-3xl font-light tracking-[0.25em] uppercase select-none block origin-center"
+                >
+                  {brandName}
+                </motion.span>
+              </button>
+            ) : (
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center hover:opacity-85 transition-opacity"
+              >
+                <motion.span
+                  style={{
+                    scale: logoScale,
+                    color: logoColor,
+                  }}
+                  className="font-serif text-2xl md:text-3xl font-light tracking-[0.25em] uppercase select-none block origin-center"
+                >
+                  {brandName}
+                </motion.span>
+              </Link>
             )}
-          </div>
+          </motion.div>
 
           {/* Right: Actions */}
           <div className="flex-1 md:flex-none flex items-center justify-end space-x-4 md:space-x-5">

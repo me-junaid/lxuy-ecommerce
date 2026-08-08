@@ -127,7 +127,7 @@ export default function ProductDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
-  
+
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string>>({});
@@ -206,27 +206,27 @@ export default function ProductDetailPage({
           list = list.slice(0, 4);
           localStorage.setItem(localKey, JSON.stringify(list));
         }
-        
+
         // Reset active image index and scroll position on product change
         setCurrentImageIdx(0);
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollLeft = 0;
         }
 
-          // Set default variant and attributes
-          if (data.variants && data.variants.length > 0) {
-            // Look for first active variant
-            const activeVar = data.variants.find((v) => v.isActive) || data.variants[0];
-            setSelectedVariant(activeVar);
-            
-            const defaultAttrs: Record<string, string> = {};
-            activeVar.attributes.forEach((attr) => {
-              if (attr.name !== "Color") {
-                defaultAttrs[attr.name] = attr.value;
-              }
-            });
-            setSelectedAttributes(defaultAttrs);
-          }
+        // Set default variant and attributes
+        if (data.variants && data.variants.length > 0) {
+          // Look for first active variant
+          const activeVar = data.variants.find((v) => v.isActive) || data.variants[0];
+          setSelectedVariant(activeVar);
+
+          const defaultAttrs: Record<string, string> = {};
+          activeVar.attributes.forEach((attr) => {
+            if (attr.name !== "Color") {
+              defaultAttrs[attr.name] = attr.value;
+            }
+          });
+          setSelectedAttributes(defaultAttrs);
+        }
 
         // Try to load category recommendations dynamically
         const catId = typeof data.category === "object" ? data.category._id : data.category;
@@ -281,7 +281,7 @@ export default function ProductDetailPage({
   // Handle attribute selection changes
   const handleAttributeChange = (attributeName: string, value: string) => {
     if (!product) return;
-    
+
     const updatedAttrs = {
       ...selectedAttributes,
       [attributeName]: value,
@@ -311,7 +311,7 @@ export default function ProductDetailPage({
         attrs[attr.name].add(attr.value);
       });
     });
-    
+
     const result: Record<string, string[]> = {};
     Object.keys(attrs).forEach((key) => {
       result[key] = Array.from(attrs[key]);
@@ -321,7 +321,7 @@ export default function ProductDetailPage({
 
   const handleAddToCart = async () => {
     if (!selectedVariant || selectedVariant.stock <= 0 || !product) return;
-    
+
     setCartLoading(true);
     setCartSuccess(false);
 
@@ -374,10 +374,10 @@ export default function ProductDetailPage({
     const container = e.currentTarget;
     const scrollLeft = container.scrollLeft;
     const children = container.children;
-    
+
     let closestIdx = 0;
     let minDistance = Infinity;
-    
+
     for (let i = 0; i < children.length; i++) {
       const child = children[i] as HTMLElement;
       const distance = Math.abs(child.offsetLeft - scrollLeft);
@@ -386,7 +386,7 @@ export default function ProductDetailPage({
         closestIdx = i;
       }
     }
-    
+
     if (closestIdx !== currentImageIdx) {
       setCurrentImageIdx(closestIdx);
     }
@@ -432,7 +432,7 @@ export default function ProductDetailPage({
           onCartClick={() => setIsCartOpen(true)}
           onWishlistClick={() => router.push("/wishlist")}
           onProfileClick={() => router.push(user ? "/profile" : "/login")}
-          onSearchClick={() => {}}
+          onSearchClick={() => { }}
           onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
           onProductClick={(slug) => router.push(`/products/${slug}`)}
         />
@@ -527,14 +527,14 @@ export default function ProductDetailPage({
         onCartClick={() => setIsCartOpen(true)}
         onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
-        onSearchClick={() => {}}
+        onSearchClick={() => { }}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
         onProductClick={(slug) => router.push(`/products/${slug}`)}
       />
 
       {/* Main content is full-bleed, zero initial vertical padding */}
       <main className="flex-1 w-full">
-        
+
         {/* Success Banner */}
         <AnimatePresence>
           {cartSuccess && (
@@ -552,7 +552,7 @@ export default function ProductDetailPage({
                   Successfully added {quantity} item(s) to your shopping cart.
                 </span>
               </div>
-              <button 
+              <button
                 onClick={() => router.push("/cart")}
                 className="text-[10px] uppercase tracking-luxury text-[#FDFBF7] hover:text-luxury-gold underline focus:outline-none"
               >
@@ -564,12 +564,12 @@ export default function ProductDetailPage({
 
         {/* Product Details Section: 60/40 full-bleed split */}
         <div className="flex flex-col lg:flex-row w-full items-start">
-          
+
           {/* Left Media Block (60% width, sticky desktop viewport, zero padding, zero gap) */}
           <div className="w-full h-[60vh] lg:sticky lg:top-20 lg:h-[calc(100vh-125px)] lg:w-[60%] relative bg-luxury-silver/5 overflow-hidden flex flex-col justify-between">
-            
+
             {/* Scrollable Image Stage (100% width, snap aligned, scrollbar hidden) */}
-            <div 
+            <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
               className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scroll-smooth"
@@ -607,7 +607,7 @@ export default function ProductDetailPage({
                   </button>
 
                   {/* Thumbnail Strip */}
-                  <div 
+                  <div
                     className="flex space-x-2 items-center overflow-x-auto max-w-[200px] md:max-w-[300px] py-0.5"
                     style={{
                       scrollbarWidth: "none",
@@ -620,11 +620,10 @@ export default function ProductDetailPage({
                         <button
                           key={idx}
                           onClick={() => scrollToIndex(idx)}
-                          className={`relative w-10 h-10 shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 cursor-pointer focus:outline-none ${
-                            isActive 
-                              ? "border-blue-500 scale-105" 
+                          className={`relative w-10 h-10 shrink-0 rounded-md overflow-hidden transition-all duration-300 border-2 cursor-pointer focus:outline-none ${isActive
+                              ? "border-blue-500 scale-105"
                               : "border-transparent opacity-60 hover:opacity-100"
-                          }`}
+                            }`}
                           aria-label={`Go to image ${idx + 1}`}
                         >
                           <Image
@@ -656,7 +655,7 @@ export default function ProductDetailPage({
 
           {/* Right Product Details Info Block (40% width, padded, scrolls normally) */}
           <div className="w-full lg:w-[40%] px-6 md:px-12 lg:px-16 py-10 flex flex-col space-y-8">
-            
+
             {/* Header info */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
@@ -676,29 +675,28 @@ export default function ProductDetailPage({
 
                 {/* Right-aligned Action Icons */}
                 <div className="flex flex-col space-y-4 pt-1 items-center">
-                  <motion.button 
+                  <motion.button
                     whileHover={{ scale: 1.15 }}
                     whileTap={{ scale: 0.85 }}
-                    onClick={handleWishlistToggle} 
-                    className={`transition-colors focus:outline-none cursor-pointer ${
-                      product && isInWishlist(product._id)
+                    onClick={handleWishlistToggle}
+                    className={`transition-colors focus:outline-none cursor-pointer ${product && isInWishlist(product._id)
                         ? 'text-red-500 hover:text-red-600'
                         : 'text-neutral-500 hover:text-[#C5A880]'
-                    }`}
+                      }`}
                     aria-label={product && isInWishlist(product._id) ? "Remove from Wishlist" : "Add to Wishlist"}
                   >
                     {product && isInWishlist(product._id) ? (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-heart-fill w-5 h-5" viewBox="0 0 16 16">
-                        <path fillRule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+                        <path fillRule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314" />
                       </svg>
                     ) : (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-heart w-5 h-5" viewBox="0 0 16 16">
-                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
                       </svg>
                     )}
                   </motion.button>
-                  
-                  <motion.button 
+
+                  <motion.button
                     whileHover={{ scale: 1.15 }}
                     whileTap={{ scale: 0.85 }}
                     onClick={async () => {
@@ -708,17 +706,17 @@ export default function ProductDetailPage({
                       } catch {
                         showToast("Failed to copy link.", "error");
                       }
-                    }} 
+                    }}
                     className="text-neutral-500 hover:text-[#C5A880] transition-colors focus:outline-none cursor-pointer"
                     aria-label="Share product"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-share w-5 h-5" viewBox="0 0 16 16">
-                      <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
+                      <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3" />
                     </svg>
                   </motion.button>
                 </div>
               </div>
-              
+
               {/* Ratings */}
               {product.ratings && product.ratings.count > 0 && (
                 <div className="flex items-center space-x-2 mt-2 mb-4">
@@ -750,7 +748,7 @@ export default function ProductDetailPage({
                 <span className="text-[10px] font-sans text-neutral-400">
                   (Inclusive of all Taxes)
                 </span>
-                
+
                 {/* Badges / Warnings */}
                 <div className="pt-2 flex flex-wrap gap-2 h-2">
                   {selectedVariant && selectedVariant.stock > 0 && selectedVariant.stock <= 3 && (
@@ -787,15 +785,15 @@ export default function ProductDetailPage({
                         </span>
                       </div>
                       {attrName === "Size" && (
-                        <button 
-                          onClick={() => setIsSizeChartOpen(true)} 
+                        <button
+                          onClick={() => setIsSizeChartOpen(true)}
                           className="text-[10px] uppercase tracking-luxury text-luxury-dark hover:text-luxury-gold underline font-semibold focus:outline-none cursor-pointer"
                         >
                           SIZE CHART
                         </button>
                       )}
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-2">
                       {uniqueAttributes[attrName].map((val) => {
                         const isSelected = selectedAttributes[attrName] === val;
@@ -803,11 +801,10 @@ export default function ProductDetailPage({
                           <button
                             key={val}
                             onClick={() => handleAttributeChange(attrName, val)}
-                            className={`h-11 min-w-[3.5rem] px-4 text-xs font-sans transition-all duration-300 flex items-center justify-center cursor-pointer ${
-                              isSelected
+                            className={`h-11 min-w-[3.5rem] px-4 text-xs font-sans transition-all duration-300 flex items-center justify-center cursor-pointer ${isSelected
                                 ? "bg-[#111111] text-[#FDFBF7] border border-transparent font-medium"
                                 : "bg-transparent text-luxury-dark border border-luxury-silver/40 hover:border-luxury-dark"
-                            }`}
+                              }`}
                           >
                             {val}
                           </button>
@@ -827,7 +824,7 @@ export default function ProductDetailPage({
               className="flex flex-col space-y-4 pt-4 border-t border-luxury-silver/20"
             >
               <div className="flex space-x-4 items-center">
-                
+
                 {/* Quantity Counter */}
                 <div className="flex items-center border border-luxury-silver/40 h-12 bg-white rounded-md overflow-hidden select-none">
                   <button
@@ -892,7 +889,7 @@ export default function ProductDetailPage({
               <h3 className="text-[10px] uppercase tracking-luxury text-neutral-500 font-semibold">
                 Delivery Details
               </h3>
-              
+
               <div className="relative flex items-center border border-luxury-silver/40 h-12 bg-white max-w-sm">
                 <input
                   type="text"
@@ -916,7 +913,7 @@ export default function ProductDetailPage({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3 3L22 4" />
                 </svg>
                 <span>15 days returns / exchange available.</span>
-                <button 
+                <button
                   onClick={() => alert("Free returns and exchanges within 15 days on all unworn items in original packaging.")}
                   className="underline hover:text-luxury-dark transition-colors focus:outline-none cursor-pointer"
                 >
@@ -1027,15 +1024,15 @@ export default function ProductDetailPage({
           >
             {toast.type === "success" ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-circle-fill text-emerald-500 w-4 h-4" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
               </svg>
             ) : toast.type === "error" ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-exclamation-circle-fill text-rose-500 w-4 h-4" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2" />
               </svg>
             ) : (
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-info-circle-fill text-sky-500 w-4 h-4" viewBox="0 0 16 16">
-                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
               </svg>
             )}
             <span>{toast.message}</span>
@@ -1055,7 +1052,7 @@ export default function ProductDetailPage({
               onClick={() => setIsSizeChartOpen(false)}
               className="fixed inset-0 bg-[#111111]/60 backdrop-blur-sm"
             />
-            
+
             {/* Modal Content */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -1077,7 +1074,7 @@ export default function ProductDetailPage({
                 aria-label="Close modal"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x w-6 h-6" viewBox="0 0 16 16">
-                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
                 </svg>
               </button>
 

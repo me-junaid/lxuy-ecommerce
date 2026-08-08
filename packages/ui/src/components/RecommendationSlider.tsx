@@ -61,9 +61,9 @@ export const RecommendationSlider: React.FC<RecommendationSliderProps> = ({
   };
 
   return (
-    <section className="relative w-full max-w-7xl mx-auto px-6 py-10 md:py-20 bg-[#FDFBF7]">
+    <section className="relative w-full max-w-7xl mx-auto px-0 md:px-6 py-10 md:py-20 bg-[#FDFBF7]">
       {/* Title */}
-      <div className="text-center mb-10">
+      <div className="text-center mb-10 px-6">
         <h2 className="text-base tracking-[0.2em] text-neutral-800 font-light uppercase">
           <span className="font-bold mr-1">Styles</span> {title.substring(title.indexOf(' ') + 1)}
         </h2>
@@ -86,7 +86,7 @@ export const RecommendationSlider: React.FC<RecommendationSliderProps> = ({
         {/* Horizontal Scroll Container */}
         <div
           ref={scrollContainerRef}
-          className="w-[calc(100%+3rem)] -mx-6 px-6 md:w-full md:mx-0 md:px-1 flex space-x-6 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-4 scroll-pl-6 md:scroll-pl-0"
+          className="w-full flex space-x-6 overflow-x-auto scrollbar-none snap-x snap-mandatory pb-4 px-6 md:px-1 scroll-pl-6 md:scroll-pl-0"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map((product) => {

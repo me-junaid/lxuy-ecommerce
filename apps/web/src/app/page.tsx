@@ -232,20 +232,7 @@ export default function Home() {
           {/* Top Gradient Overlay for Header Readability */}
           <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-black/45 via-black/10 to-transparent z-25 pointer-events-none" />
 
-          {/* Centered Logo with layoutId */}
-          {!isScrolled && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-              <Link href="/" className="inline-block hover:opacity-90 transition-opacity pointer-events-auto">
-                <motion.span
-                  layoutId="main-logo"
-                  transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                  className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-light tracking-[0.25em] text-white text-center uppercase drop-shadow-md block"
-                >
-                  LXUY
-                </motion.span>
-              </Link>
-            </div>
-          )}
+
 
           {/* Slides */}
           <div className="absolute inset-0 z-0">
@@ -373,7 +360,7 @@ export default function Home() {
         </section>
 
         {/* Full-screen Video Section: Men */}
-        <section className="relative w-full h-[65vh] md:h-[85vh] bg-luxury-dark overflow-hidden">
+        <section className="relative w-full h-[calc(100vh-64px)] md:h-[85vh] bg-luxury-dark overflow-hidden">
           <video
             src="/videos/men-home-page.mp4"
             autoPlay
@@ -405,7 +392,7 @@ export default function Home() {
         </section>
 
         {/* Full-screen Video Section: Women */}
-        <section className="relative w-full h-[65vh] md:h-[85vh] bg-luxury-dark overflow-hidden">
+        <section className="relative w-full h-[calc(100vh-64px)] md:h-[85vh] bg-luxury-dark overflow-hidden">
           <video
             src="/videos/women-home-page.mp4"
             autoPlay
