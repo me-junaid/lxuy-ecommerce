@@ -131,7 +131,8 @@ function SearchPageContent() {
         params.append("page", initialPage.toString());
         params.append("limit", "16"); // Larger grid size for premium experience
 
-        const response = await fetch(`/api/v1/products?${params.toString()}`);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const response = await fetch(`${baseUrl}/api/v1/products?${params.toString()}`);
         if (!response.ok) {
           throw new Error("Failed to fetch products matching parameters.");
         }

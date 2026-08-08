@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export const Footer: React.FC = () => {
   return (
@@ -16,10 +17,10 @@ export const Footer: React.FC = () => {
         {/* Collections Link Column */}
         <div className="flex flex-col space-y-3 text-left">
           <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2">Collections</h4>
-          <a href="#" className="text-xs text-neutral-300 hover:text-luxury-gold transition-colors duration-300">New Arrivals</a>
-          <a href="#" className="text-xs text-neutral-300 hover:text-luxury-gold transition-colors duration-300">Women</a>
-          <a href="#" className="text-xs text-neutral-300 hover:text-luxury-gold transition-colors duration-300">Men</a>
-          <a href="#" className="text-xs text-neutral-300 hover:text-luxury-gold transition-colors duration-300">Limited Edition</a>
+          <Link href="/search" className="text-xs text-neutral-300 hover:text-luxury-gold transition-colors duration-300">New Arrivals</Link>
+          <Link href="/collections/women" className="text-xs text-neutral-300 hover:text-luxury-gold transition-colors duration-300">Women</Link>
+          <Link href="/collections/men" className="text-xs text-neutral-300 hover:text-luxury-gold transition-colors duration-300">Men</Link>
+          <Link href="/search" className="text-xs text-neutral-300 hover:text-luxury-gold transition-colors duration-300">Limited Edition</Link>
         </div>
 
         {/* Services Link Column */}

@@ -157,7 +157,8 @@ export default function ProductDetailPage({
       setLoading(true);
       setError("");
       try {
-        const response = await fetch(`/api/v1/products/${slug}`);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const response = await fetch(`${baseUrl}/api/v1/products/${slug}`);
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error("The requested product silhouette could not be found.");
@@ -214,7 +215,8 @@ export default function ProductDetailPage({
         // Try to load category recommendations dynamically
         const catId = typeof data.category === "object" ? data.category._id : data.category;
         if (catId) {
-          const recResponse = await fetch(`/api/v1/products?category=${catId}&limit=4`);
+          const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+          const recResponse = await fetch(`${baseUrl}/api/v1/products?category=${catId}&limit=4`);
           if (recResponse.ok) {
             const recData = await recResponse.json();
             if (recData.data && recData.data.length > 0) {
@@ -413,8 +415,8 @@ export default function ProductDetailPage({
           <div className="flex flex-col lg:flex-row w-full items-start">
             {/* Left Media Block Skeleton (60% width) */}
             <div className="w-full h-[60vh] lg:h-[calc(100vh-125px)] lg:w-[60%] bg-neutral-100/50 animate-pulse flex items-center justify-center relative">
-              <div className="opacity-15 max-w-[100px]">
-                <img src="/images/LOGO/lxuy-logo.png" alt="LXUY" className="w-full h-auto object-contain grayscale" />
+              <div className="opacity-15 font-serif text-3xl font-light tracking-[0.25em] text-neutral-400 uppercase select-none">
+                LXUY
               </div>
             </div>
 

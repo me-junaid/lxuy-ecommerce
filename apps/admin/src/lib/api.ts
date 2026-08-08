@@ -87,7 +87,13 @@ export async function apiRequest<T = any>(
     config.body = JSON.stringify(data);
   }
 
-  let response = await fetch(path, config);
+  const isAuthPath = path.startsWith('/api/v1/auth') || path.startsWith('api/v1/auth');
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  const fullPath = isAuthPath 
+    ? path 
+    : `${baseUrl.replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`;
+
+  let response = await fetch(fullPath, config);
 
   if (
     response.status === 401 &&

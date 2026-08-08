@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export interface SearchFlyoutProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export const SearchFlyout: React.FC<SearchFlyoutProps> = ({
   onSearchSubmit,
   onProductClick,
 }) => {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,7 +88,8 @@ export const SearchFlyout: React.FC<SearchFlyoutProps> = ({
     setLoading(true);
     const delayDebounceFn = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/v1/products?search=${encodeURIComponent(query.trim())}`);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const response = await fetch(`${baseUrl}/api/v1/products?search=${encodeURIComponent(query.trim())}`);
         if (response.ok) {
           const resJson = await response.json();
           setResults(resJson.data || []);
@@ -108,7 +111,7 @@ export const SearchFlyout: React.FC<SearchFlyoutProps> = ({
       if (onSearchSubmit) {
         onSearchSubmit(query.trim());
       } else {
-        window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
+        router.push(`/search?q=${encodeURIComponent(query.trim())}`);
       }
     }
   };
@@ -118,7 +121,7 @@ export const SearchFlyout: React.FC<SearchFlyoutProps> = ({
     if (onProductClick) {
       onProductClick(slug);
     } else {
-      window.location.href = `/products/${slug}`;
+      router.push(`/products/${slug}`);
     }
   };
 

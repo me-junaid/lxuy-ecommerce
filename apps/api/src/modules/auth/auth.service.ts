@@ -181,15 +181,33 @@ export class AuthService {
     let matchedPrev = false;
 
     if (session.refreshTokenHash) {
-      isValid = await bcrypt.compare(refreshToken, session.refreshTokenHash);
+      try {
+        isValid = await bcrypt.compare(refreshToken, session.refreshTokenHash);
+      } catch (err) {
+        this.logger.error(
+          `Bcrypt compare failed for session hash: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+        isValid = false;
+      }
     }
 
     // Grace-window check for parallel refresh requests
     if (!isValid && session.prevRefreshTokenHash && session.prevTokenExpiresAt) {
       const isGraceWindowActive = new Date() < new Date(session.prevTokenExpiresAt);
       if (isGraceWindowActive) {
-        isValid = await bcrypt.compare(refreshToken, session.prevRefreshTokenHash);
-        if (isValid) matchedPrev = true;
+        try {
+          isValid = await bcrypt.compare(refreshToken, session.prevRefreshTokenHash);
+          if (isValid) matchedPrev = true;
+        } catch (err) {
+          this.logger.error(
+            `Bcrypt compare failed for prev session hash: ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+          isValid = false;
+        }
       }
     }
 

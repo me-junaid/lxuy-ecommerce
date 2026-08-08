@@ -64,9 +64,10 @@ function CollectionPageContent({ slug }: { slug: string }) {
   useEffect(() => {
     async function fetchMetadata() {
       try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
         const [resCat, resBrand] = await Promise.all([
-          fetch(`/api/v1/categories/${slug}`),
-          fetch("/api/v1/brands"),
+          fetch(`${baseUrl}/api/v1/categories/${slug}`),
+          fetch(`${baseUrl}/api/v1/brands`),
         ]);
         if (resCat.ok) {
           const cat = await resCat.json();
@@ -100,7 +101,8 @@ function CollectionPageContent({ slug }: { slug: string }) {
         params.append("page", initialPage.toString());
         params.append("limit", "12");
 
-        const response = await fetch(`/api/v1/products?${params.toString()}`);
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const response = await fetch(`${baseUrl}/api/v1/products?${params.toString()}`);
         if (!response.ok) {
           throw new Error("Failed to fetch products matching parameters.");
         }

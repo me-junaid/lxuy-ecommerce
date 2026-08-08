@@ -227,7 +227,7 @@ export default function Home() {
       <main className="flex-1 flex flex-col">
         
         {/* Editorial Hero Slider Section */}
-        <section className="relative w-full h-screen flex items-center justify-center bg-[#E5E5E5] overflow-hidden">
+        <section className="relative w-full h-screen flex items-center justify-center bg-luxury-dark overflow-hidden">
           
           {/* Top Gradient Overlay for Header Readability */}
           <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-black/45 via-black/10 to-transparent z-25 pointer-events-none" />
@@ -236,27 +236,27 @@ export default function Home() {
           {!isScrolled && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
               <Link href="/" className="inline-block hover:opacity-90 transition-opacity pointer-events-auto">
-                <motion.img
+                <motion.span
                   layoutId="main-logo"
                   transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                  src="/images/LOGO/lxuy-logo.png"
-                  alt="LXUY Logo"
-                  className="h-24 sm:h-36 md:h-48 w-auto object-contain brightness-0 invert"
-                />
+                  className="font-serif text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-light tracking-[0.25em] text-white text-center uppercase drop-shadow-md block"
+                >
+                  LXUY
+                </motion.span>
               </Link>
             </div>
           )}
 
           {/* Slides */}
           <div className="absolute inset-0 z-0">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.div
                 key={currentHeroIdx}
                 initial={{ opacity: 0, scale: 1.02 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.0, ease: [0.25, 1, 0.5, 1] }}
-                className="relative w-full h-full"
+                className="absolute inset-0"
               >
                 <Image
                   src={HERO_SLIDES[currentHeroIdx].image}

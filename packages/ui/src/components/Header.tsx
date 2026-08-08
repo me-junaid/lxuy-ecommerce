@@ -2,7 +2,11 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { SearchFlyout } from './SearchFlyout';
+
+const MotionLink = motion(Link);
 
 export interface HeaderProps {
   brandName?: string;
@@ -35,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   isHomePage = false,
   isScrolled = false,
 }) => {
+  const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const isTransparent = isHomePage && !isScrolled && !activeMenu;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -82,14 +87,14 @@ export const Header: React.FC<HeaderProps> = ({
               <img src={imageUrl} alt={label} className="w-full h-full object-cover animate-scale-up" />
             </div>
           )}
-          <a
+          <Link
             href={`/search?q=${encodeURIComponent(label)}`}
             onClick={() => setIsMobileMenuOpen(false)}
             className={`text-[11px] text-neutral-700 font-medium transition-all duration-300 ${isSelected ? 'text-luxury-gold font-bold translate-x-1' : ''
               }`}
           >
             {label}
-          </a>
+          </Link>
         </div>
 
         {!isSelected && (
@@ -156,7 +161,7 @@ export const Header: React.FC<HeaderProps> = ({
                 if (onSearchClick) {
                   onSearchClick();
                 } else {
-                  window.location.href = '/search';
+                  router.push('/search');
                 }
               }}
               initial={{
@@ -202,33 +207,33 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex-shrink-0 absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 text-center min-w-[80px] min-h-[40px] flex items-center justify-center z-10">
             {!isTransparent && (
               <>
-                {onLogoClick ? (
+                 {onLogoClick ? (
                   <button
                     onClick={onLogoClick}
                     className="flex items-center justify-center hover:opacity-85 transition-opacity bg-transparent border-none p-0 cursor-pointer focus:outline-none"
                     aria-label="Go to homepage"
                   >
-                    <motion.img
+                    <motion.span
                       layoutId="main-logo"
                       transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-                      src="/images/LOGO/lxuy-logo.png"
-                      alt={brandName}
-                      className="h-10 w-auto object-contain"
-                    />
+                      className="font-serif text-2xl md:text-3xl font-light tracking-[0.25em] text-luxury-dark uppercase"
+                    >
+                      {brandName}
+                    </motion.span>
                   </button>
                 ) : (
-                  <a
+                  <Link
                     href="/"
                     className="inline-flex items-center justify-center hover:opacity-85 transition-opacity"
                   >
-                    <motion.img
+                    <motion.span
                       layoutId="main-logo"
                       transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-                      src="/images/LOGO/lxuy-logo.png"
-                      alt={brandName}
-                      className="h-10 w-auto object-contain"
-                    />
-                  </a>
+                      className="font-serif text-2xl md:text-3xl font-light tracking-[0.25em] text-luxury-dark uppercase"
+                    >
+                      {brandName}
+                    </motion.span>
+                  </Link>
                 )}
               </>
             )}
@@ -242,7 +247,7 @@ export const Header: React.FC<HeaderProps> = ({
                 if (onSearchClick) {
                   onSearchClick();
                 } else {
-                  window.location.href = '/search';
+                  router.push('/search');
                 }
               }}
               initial={{
@@ -360,7 +365,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onMouseEnter={() => cat.menuKey && setActiveMenu(cat.menuKey)}
                 className="h-full flex items-center"
               >
-                <motion.a
+                <MotionLink
                   href={cat.href}
                   initial={{
                     color: cat.isSale
@@ -383,7 +388,7 @@ export const Header: React.FC<HeaderProps> = ({
                   {activeMenu === cat.menuKey && (
                     <span className="absolute bottom-0 left-0 w-full h-[2px] bg-luxury-gold" />
                   )}
-                </motion.a>
+                </MotionLink>
 
                 {/* Desktop Mega Menu Dropdown */}
                 {cat.menuKey && (
@@ -403,26 +408,26 @@ export const Header: React.FC<HeaderProps> = ({
                               {/* Col 1: All */}
                               <div className="col-span-2 flex flex-col space-y-3">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">All</h4>
-                                <a href="/collections/women" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Women</a>
-                                <a href="/collections/men" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Men</a>
+                                <Link href="/collections/women" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Women</Link>
+                                <Link href="/collections/men" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Men</Link>
                               </div>
                               {/* Col 2: New In */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">New In</h4>
-                                <a href="/search?q=polo" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Polo Ralph Lauren</a>
-                                <a href="/search?q=fred%20perry" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Fred Perry</a>
-                                <a href="/search?q=karl" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Karl Lagerfeld</a>
-                                <a href="/search?q=giuseppe" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Giuseppe Zanotti</a>
+                                <Link href="/search?q=polo" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Polo Ralph Lauren</Link>
+                                <Link href="/search?q=fred%20perry" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Fred Perry</Link>
+                                <Link href="/search?q=karl" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Karl Lagerfeld</Link>
+                                <Link href="/search?q=giuseppe" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Giuseppe Zanotti</Link>
                               </div>
                               {/* Col 3: Brands */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Brands</h4>
-                                <a href="/search?q=vivienne" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Vivienne Westwood</a>
-                                <a href="/search?q=marc" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Marc Jacobs</a>
-                                <a href="/search?q=hackett" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Hackett London</a>
-                                <a href="/search?q=ted%20baker" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Ted Baker</a>
-                                <a href="/search?q=michael%20kors" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Michael Kors</a>
-                                <a href="/search" className="text-xs text-luxury-gold underline tracking-wide font-medium mt-2">View All Brands</a>
+                                <Link href="/search?q=vivienne" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Vivienne Westwood</Link>
+                                <Link href="/search?q=marc" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Marc Jacobs</Link>
+                                <Link href="/search?q=hackett" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Hackett London</Link>
+                                <Link href="/search?q=ted%20baker" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Ted Baker</Link>
+                                <Link href="/search?q=michael%20kors" className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors">Michael Kors</Link>
+                                <Link href="/search" className="text-xs text-luxury-gold underline tracking-wide font-medium mt-2">View All Brands</Link>
                               </div>
                               {/* Col 4: Promos */}
                               <div className="col-span-4 grid grid-cols-2 gap-4">
@@ -443,79 +448,79 @@ export const Header: React.FC<HeaderProps> = ({
                               </div>
                             </>
                           )}
-                          {cat.menuKey === 'men' && (
+                           {cat.menuKey === 'men' && (
                             <>
                               {/* Col 1: Categories */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Clothing</h4>
-                                <a
+                                <Link
                                   href="/search?q=jacket"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules2.jpeg', title: 'Jackets & Coats' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Jackets & Coats
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=shirt"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Casual Shirts' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Casual Shirts
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=polo"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules12.jpeg', title: 'Knitwear' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Knitwear
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=trouser"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Trousers' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Trousers
-                                </a>
+                                </Link>
                               </div>
                               {/* Col 2: Brands */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Featured Brands</h4>
-                                <a
+                                <Link
                                   href="/search?q=polo"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules8.jpeg', title: 'Polo Ralph Lauren' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Polo Ralph Lauren
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=fred"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules6.jpeg', title: 'Fred Perry' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Fred Perry
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=hackett"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules2.jpeg', title: 'Hackett London' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Hackett London
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=kitsune"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'men', imageUrl: '/images/models/modules8.jpeg', title: ' Kitsuné' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                    Kitsuné
-                                </a>
+                                </Link>
                               </div>
                               {/* Col 3: Promo */}
                               <div className="col-span-6 grid grid-cols-2 gap-4">
@@ -539,81 +544,79 @@ export const Header: React.FC<HeaderProps> = ({
                                 </div>
                               </div>
                             </>
-                          )}
-
-                          {cat.menuKey === 'women' && (
+                          )}                           {cat.menuKey === 'women' && (
                             <>
                               {/* Col 1: Categories */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Clothing</h4>
-                                <a
+                                <Link
                                   href="/search?q=dress"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules1.jpeg', title: 'Dresses & Jumpsuits' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Dresses & Jumpsuits
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=blouse"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules4.jpeg', title: 'Blouses & Tops' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Blouses & Tops
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=coat"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules2.jpeg', title: 'Coats & Trenchcoats' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Coats & Trenchcoats
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=trouser"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules6.jpeg', title: 'Trousers & Skirts' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Trousers & Skirts
-                                </a>
+                                </Link>
                               </div>
                               {/* Col 2: Brands */}
                               <div className="col-span-3 flex flex-col space-y-2">
                                 <h4 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/25 pb-2">Featured Brands</h4>
-                                <a
+                                <Link
                                   href="/search?q=vivienne"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules1.jpeg', title: 'Vivienne Westwood' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Vivienne Westwood
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=marc"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules5.jpeg', title: 'Marc Jacobs' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Marc Jacobs
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=coccinelle"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules11.jpeg', title: 'Coccinelle' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   Coccinelle
-                                </a>
-                                <a
+                                </Link>
+                                <Link
                                   href="/search?q=lxuy"
                                   className="text-xs text-neutral-700 hover:text-luxury-gold transition-colors"
                                   onMouseEnter={() => setHoveredMenuItem({ menuKey: 'women', imageUrl: '/images/models/modules2.jpeg', title: 'LXUY Signature' })}
                                   onMouseLeave={() => setHoveredMenuItem(null)}
                                 >
                                   LXUY Signature
-                                </a>
+                                </Link>
                               </div>
                               {/* Col 3: Promo */}
                               <div className="col-span-6 grid grid-cols-2 gap-4">
@@ -732,20 +735,20 @@ export const Header: React.FC<HeaderProps> = ({
                           </svg>
                         </button>
                       ) : (
-                        <a
+                        <Link
                           href={link.href}
                           onClick={() => setIsMobileMenuOpen(false)}
                           className={`block text-sm uppercase tracking-widest font-semibold py-1.5 ${link.isSale ? 'text-red-600' : 'text-luxury-dark'
                             }`}
                         >
                           {link.label}
-                        </a>
+                        </Link>
                       )}
 
                       {/* Expanded Submenu Content */}
                       {hasSubmenu && isExpanded && (
                         <div className="mt-3 pl-4 space-y-5">
-                          {link.menuKey === 'new-arrivals' && (
+                           {link.menuKey === 'new-arrivals' && (
                             <div className="space-y-4">
                               <div className="space-y-2">
                                 <span className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold border-b border-luxury-silver/10 pb-1 block">
@@ -753,19 +756,21 @@ export const Header: React.FC<HeaderProps> = ({
                                 </span>
 
                                 <div className="flex flex-col space-y-1.5 pl-1 text-[11px] text-neutral-700 font-medium">
-                                  <a
+                                  <Link
                                     href="/collections/women"
+                                    onClick={() => setIsMobileMenuOpen(false)}
                                     className="transition-colors hover:text-black"
                                   >
                                     Women
-                                  </a>
+                                  </Link>
 
-                                  <a
+                                  <Link
                                     href="/collections/men"
+                                    onClick={() => setIsMobileMenuOpen(false)}
                                     className="transition-colors hover:text-black"
                                   >
                                     Men
-                                  </a>
+                                  </Link>
                                 </div>
                               </div>
                             </div>
@@ -832,25 +837,25 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="w-full h-[1px] bg-luxury-silver/30 my-6" />
 
               <div className="flex flex-col space-y-3 text-left">
-                <a
+                <Link
                   href="/wishlist"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-xs uppercase tracking-luxury text-neutral-500 font-medium"
                 >
                   Wishlist
-                </a>
+                </Link>
                 <a href="#" className="text-xs uppercase tracking-luxury text-neutral-500 font-medium">Store Locator</a>
                 <a href="#" className="text-xs uppercase tracking-luxury text-neutral-500 font-medium">Customer Support</a>
               </div>
 
               <div className="mt-auto pt-6 text-left">
-                <a
+                <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-xs uppercase tracking-luxury font-bold border-b border-luxury-dark pb-1 text-luxury-dark"
                 >
                   Sign In
-                </a>
+                </Link>
               </div>
             </motion.div>
           </>
