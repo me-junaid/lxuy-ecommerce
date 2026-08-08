@@ -450,25 +450,6 @@ function SearchPageContent() {
               </div>
             </div>
 
-            {/* Color Filter */}
-            <div className="space-y-3">
-              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
-                Color
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {colorOptions.map((col) => (
-                  <button
-                    key={col}
-                    onClick={() => setSelectedColor(selectedColor === col ? null : col)}
-                    className={`text-[10px] px-3 py-1.5 border font-semibold tracking-wide uppercase transition-all duration-300 ${selectedColor === col ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-500 hover:border-luxury-dark"
-                      }`}
-                  >
-                    {col}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Availability Filter */}
             <div className="space-y-3">
               <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">
@@ -752,23 +733,6 @@ function SearchPageContent() {
                       }`}
                   >
                     {sz}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Colors */}
-            <div className="space-y-2">
-              <h4 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Colors</h4>
-              <div className="flex flex-wrap gap-2">
-                {colorOptions.map((col) => (
-                  <button
-                    key={col}
-                    onClick={() => setSelectedColor(selectedColor === col ? null : col)}
-                    className={`text-[10px] px-3.5 py-1.5 border font-semibold uppercase transition-all duration-300 ${selectedColor === col ? "bg-luxury-dark text-[#FDFBF7] border-luxury-dark" : "border-neutral-200 text-neutral-600"
-                      }`}
-                  >
-                    {col}
                   </button>
                 ))}
               </div>

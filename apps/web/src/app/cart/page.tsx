@@ -40,9 +40,9 @@ export default function CartPage() {
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 pt-24 pb-16 md:pt-28 md:pb-24">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-6 pt-4 pb-16 md:pt-8 md:pb-24">
         {/* Title */}
-        <div className="border-b border-luxury-silver/30 pb-6 mb-10 text-left">
+        <div className="border-b border-luxury-silver/30 pb-6 mb-8 text-left">
           <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2 block">
             Shopping Bag
           </span>
@@ -113,7 +113,7 @@ export default function CartPage() {
                           </h3>
                           {item.attributes.length > 0 && (
                             <div className="flex flex-wrap gap-2 pt-1">
-                              {item.attributes.map((attr) => (
+                              {item.attributes.filter(attr => attr.name !== "Color").map((attr) => (
                                 <span
                                   key={attr.name}
                                   className="text-[9px] border border-luxury-silver/30 bg-[#FDFBF7] px-2 py-0.5 text-neutral-500 font-medium"

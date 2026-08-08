@@ -541,8 +541,8 @@ export default function Home() {
               </p>
             </AnimatedReveal>
 
-            {/* Asymmetric Masonry Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            {/* Desktop Grid Layout */}
+            <div className="hidden md:grid grid-cols-3 gap-8 items-start">
               
               {/* Column 1 */}
               <div className="flex flex-col space-y-8">
@@ -649,6 +649,28 @@ export default function Home() {
                 </AnimatedReveal>
               </div>
 
+            </div>
+
+            {/* Mobile Carousel Layout */}
+            <div className="md:hidden flex overflow-x-auto gap-6 snap-x snap-mandatory scrollbar-none pb-6 -mx-6 px-6">
+              {LOOKBOOK_IMAGES.map((img, idx) => (
+                <div 
+                  key={idx} 
+                  className="snap-center shrink-0 w-[78vw] aspect-[3/4] relative overflow-hidden bg-white/50 shadow-sm first:ml-2 last:mr-2"
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.caption}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent flex items-end p-5">
+                    <span className="text-white text-xs uppercase tracking-luxury font-medium">
+                      {img.caption}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>

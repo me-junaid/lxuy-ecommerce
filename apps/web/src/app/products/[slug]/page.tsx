@@ -135,6 +135,20 @@ export default function ProductDetailPage({
   const [cartLoading, setCartLoading] = useState(false);
   const [cartSuccess, setCartSuccess] = useState(false);
   const [recommendations, setRecommendations] = useState<RecommendationProduct[]>(FALLBACK_RECOMMENDATIONS);
+  const [isSizeChartOpen, setIsSizeChartOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message, type });
+  };
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
 
   // Load recently viewed list on mount / slug change
   useEffect(() => {
@@ -199,18 +213,20 @@ export default function ProductDetailPage({
           scrollContainerRef.current.scrollLeft = 0;
         }
 
-        // Set default variant and attributes
-        if (data.variants && data.variants.length > 0) {
-          // Look for first active variant
-          const activeVar = data.variants.find((v) => v.isActive) || data.variants[0];
-          setSelectedVariant(activeVar);
-          
-          const defaultAttrs: Record<string, string> = {};
-          activeVar.attributes.forEach((attr) => {
-            defaultAttrs[attr.name] = attr.value;
-          });
-          setSelectedAttributes(defaultAttrs);
-        }
+          // Set default variant and attributes
+          if (data.variants && data.variants.length > 0) {
+            // Look for first active variant
+            const activeVar = data.variants.find((v) => v.isActive) || data.variants[0];
+            setSelectedVariant(activeVar);
+            
+            const defaultAttrs: Record<string, string> = {};
+            activeVar.attributes.forEach((attr) => {
+              if (attr.name !== "Color") {
+                defaultAttrs[attr.name] = attr.value;
+              }
+            });
+            setSelectedAttributes(defaultAttrs);
+          }
 
         // Try to load category recommendations dynamically
         const catId = typeof data.category === "object" ? data.category._id : data.category;
@@ -256,6 +272,7 @@ export default function ProductDetailPage({
   ) => {
     return variants.find((variant) => {
       return variant.attributes.every((attr) => {
+        if (attr.name === "Color") return true; // Ignore Color attribute during matching
         return attributes[attr.name] === attr.value;
       });
     });
@@ -287,6 +304,7 @@ export default function ProductDetailPage({
     variants.forEach((v) => {
       if (!v.isActive) return;
       v.attributes.forEach((attr) => {
+        if (attr.name === "Color") return; // Skip Color attribute
         if (!attrs[attr.name]) {
           attrs[attr.name] = new Set<string>();
         }
@@ -334,14 +352,21 @@ export default function ProductDetailPage({
 
   const handleWishlistToggle = async () => {
     if (!product) return;
-    await toggleWishlistItem(product._id, {
-      _id: product._id,
-      name: product.name,
-      slug: product.slug,
-      images: product.images,
-      brand: product.brand,
-      variants: product.variants,
-    });
+    const isAdding = !isInWishlist(product._id);
+    try {
+      await toggleWishlistItem(product._id, {
+        _id: product._id,
+        name: product.name,
+        slug: product.slug,
+        images: product.images,
+        brand: product.brand,
+        variants: product.variants,
+      });
+      showToast(isAdding ? "Added to wishlist" : "Removed from wishlist");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to update wishlist", "error");
+    }
   };
 
   // Carousel scroll helpers
@@ -651,39 +676,46 @@ export default function ProductDetailPage({
 
                 {/* Right-aligned Action Icons */}
                 <div className="flex flex-col space-y-4 pt-1 items-center">
-                  <button 
+                  <motion.button 
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.85 }}
                     onClick={handleWishlistToggle} 
                     className={`transition-colors focus:outline-none cursor-pointer ${
                       product && isInWishlist(product._id)
                         ? 'text-red-500 hover:text-red-600'
-                        : 'text-neutral-500 hover:text-luxury-gold'
+                        : 'text-neutral-500 hover:text-[#C5A880]'
                     }`}
                     aria-label={product && isInWishlist(product._id) ? "Remove from Wishlist" : "Add to Wishlist"}
                   >
-                    <svg className="w-5 h-5" fill={product && isInWishlist(product._id) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </button>
+                    {product && isInWishlist(product._id) ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-heart-fill w-5 h-5" viewBox="0 0 16 16">
+                        <path fillRule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-heart w-5 h-5" viewBox="0 0 16 16">
+                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15"/>
+                      </svg>
+                    )}
+                  </motion.button>
                   
-                  <button 
-                    onClick={() => alert("Link copied to clipboard")} 
-                    className="hover:text-luxury-gold transition-colors focus:outline-none cursor-pointer"
+                  <motion.button 
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.85 }}
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(window.location.href);
+                        showToast("Link copied to clipboard!");
+                      } catch {
+                        showToast("Failed to copy link.", "error");
+                      }
+                    }} 
+                    className="text-neutral-500 hover:text-[#C5A880] transition-colors focus:outline-none cursor-pointer"
                     aria-label="Share product"
                   >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 10.742l4.636-2.318a3 3 0 10-.678-1.62l-4.637 2.318a3 3 0 10.678 1.62h.001zm6.632-6.632a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM7.5 12a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm9.75 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-share w-5 h-5" viewBox="0 0 16 16">
+                      <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5m-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"/>
                     </svg>
-                  </button>
-
-                  <button 
-                    onClick={() => alert("Size Chart Details:\nS: Chest 36\"\nM: Chest 38\"\nL: Chest 40\"\nXL: Chest 42\"")} 
-                    className="hover:text-luxury-gold transition-colors focus:outline-none cursor-pointer"
-                    aria-label="Size guide"
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </button>
+                  </motion.button>
                 </div>
               </div>
               
@@ -720,7 +752,7 @@ export default function ProductDetailPage({
                 </span>
                 
                 {/* Badges / Warnings */}
-                <div className="pt-2 flex flex-wrap gap-2">
+                <div className="pt-2 flex flex-wrap gap-2 h-2">
                   {selectedVariant && selectedVariant.stock > 0 && selectedVariant.stock <= 3 && (
                     <span className="text-[9px] uppercase tracking-wider bg-amber-50 text-amber-600 px-2 py-0.5 border border-amber-200">
                       Only {selectedVariant.stock} left in stock
@@ -743,19 +775,6 @@ export default function ProductDetailPage({
                 transition={{ duration: 0.6, delay: 0.1, ease: [0.215, 0.61, 0.355, 1] }}
                 className="space-y-6"
               >
-                {/* "Find my perfect size" Link (only for size attribute) */}
-                {uniqueAttributes["Size"] && (
-                  <div 
-                    onClick={() => alert("Checking fit recommendations...")}
-                    className="flex items-center space-x-2 text-[11px] text-luxury-dark hover:text-luxury-gold transition-colors cursor-pointer"
-                  >
-                    <svg className="w-4 h-4 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                    </svg>
-                    <span className="underline tracking-wider uppercase text-[9px] font-semibold">Find my perfect size</span>
-                  </div>
-                )}
-
                 {Object.keys(uniqueAttributes).map((attrName) => (
                   <div key={attrName} className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -769,10 +788,10 @@ export default function ProductDetailPage({
                       </div>
                       {attrName === "Size" && (
                         <button 
-                          onClick={() => alert("Size Chart Details:\nS: Chest 36\"\nM: Chest 38\"\nL: Chest 40\"\nXL: Chest 42\"")} 
+                          onClick={() => setIsSizeChartOpen(true)} 
                           className="text-[10px] uppercase tracking-luxury text-luxury-dark hover:text-luxury-gold underline font-semibold focus:outline-none cursor-pointer"
                         >
-                          Size Chart
+                          SIZE CHART
                         </button>
                       )}
                     </div>
@@ -930,7 +949,7 @@ export default function ProductDetailPage({
         </div>
 
         {/* Bottom Recommendation Module */}
-        <div className="w-full max-w-7xl mx-auto px-6 mt-32 pb-6">
+        <div className="w-full mt-10 md:mt-20 pb-0">
           <RecommendationSlider
             products={recommendations}
             onProductClick={(id) => {
@@ -947,7 +966,7 @@ export default function ProductDetailPage({
 
         {/* Recently Viewed Products */}
         {recentlyViewed.length > 0 && (
-          <div className="w-full max-w-7xl mx-auto px-6 mt-12 pb-24 border-t border-luxury-silver/20 pt-16 text-left">
+          <div className="w-full max-w-7xl mx-auto px-6 mt-4 md:mt-10 pb-16 md:pb-24 border-t border-luxury-silver/20 pt-8 md:pt-16 text-left">
             <h3 className="font-serif text-2xl font-light text-luxury-dark mb-8">
               Recently Viewed
             </h3>
@@ -996,6 +1015,135 @@ export default function ProductDetailPage({
 
       {/* Scaffolding Footer */}
       <Footer />
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-6 right-6 z-50 flex items-center space-x-3 bg-[#111111]/95 backdrop-blur-md text-[#FDFBF7] border border-[#C5A880]/20 px-5 py-3 shadow-2xl rounded-sm font-sans text-xs tracking-wider"
+          >
+            {toast.type === "success" ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-check-circle-fill text-emerald-500 w-4 h-4" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+              </svg>
+            ) : toast.type === "error" ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-exclamation-circle-fill text-rose-500 w-4 h-4" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4m.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-info-circle-fill text-sky-500 w-4 h-4" viewBox="0 0 16 16">
+                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+              </svg>
+            )}
+            <span>{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Size Chart Modal */}
+      <AnimatePresence>
+        {isSizeChartOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSizeChartOpen(false)}
+              className="fixed inset-0 bg-[#111111]/60 backdrop-blur-sm"
+            />
+            
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="relative w-full max-w-lg bg-[#FDFBF7] border border-[#C5A880]/30 shadow-2xl p-8 rounded-sm font-sans z-10 overflow-hidden"
+            >
+              {/* Decorative corner elements */}
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#C5A880]/40" />
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#C5A880]/40" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#C5A880]/40" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#C5A880]/40" />
+
+              {/* Close Button */}
+              <button
+                onClick={() => setIsSizeChartOpen(false)}
+                className="absolute top-5 right-5 text-neutral-400 hover:text-[#111111] transition-colors focus:outline-none cursor-pointer"
+                aria-label="Close modal"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x w-6 h-6" viewBox="0 0 16 16">
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                </svg>
+              </button>
+
+              {/* Title */}
+              <div className="text-center mb-6">
+                <span className="text-[10px] uppercase tracking-luxury text-[#C5A880] font-bold block mb-1">
+                  Fit Guide
+                </span>
+                <h2 className="font-serif text-2xl font-light text-[#111111]">
+                  Size Chart
+                </h2>
+              </div>
+
+              {/* Table of measurements */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-[#E5E5E5] text-neutral-400 font-semibold tracking-wider uppercase">
+                      <th className="py-3 px-2 font-medium">Size</th>
+                      <th className="py-3 px-2 font-medium">Chest (in)</th>
+                      <th className="py-3 px-2 font-medium">Waist (in)</th>
+                      <th className="py-3 px-2 font-medium">Sleeve (in)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E5E5E5]/60 text-neutral-700 font-light">
+                    <tr className="hover:bg-neutral-50 transition-colors">
+                      <td className="py-3.5 px-2 font-medium text-[#111111]">Small (S)</td>
+                      <td className="py-3.5 px-2">36 - 38</td>
+                      <td className="py-3.5 px-2">30 - 32</td>
+                      <td className="py-3.5 px-2">32.5</td>
+                    </tr>
+                    <tr className="hover:bg-neutral-50 transition-colors">
+                      <td className="py-3.5 px-2 font-medium text-[#111111]">Medium (M)</td>
+                      <td className="py-3.5 px-2">38 - 40</td>
+                      <td className="py-3.5 px-2">32 - 34</td>
+                      <td className="py-3.5 px-2">33.5</td>
+                    </tr>
+                    <tr className="hover:bg-neutral-50 transition-colors">
+                      <td className="py-3.5 px-2 font-medium text-[#111111]">Large (L)</td>
+                      <td className="py-3.5 px-2">40 - 42</td>
+                      <td className="py-3.5 px-2">34 - 36</td>
+                      <td className="py-3.5 px-2">34.5</td>
+                    </tr>
+                    <tr className="hover:bg-neutral-50 transition-colors">
+                      <td className="py-3.5 px-2 font-medium text-[#111111]">X-Large (XL)</td>
+                      <td className="py-3.5 px-2">42 - 44</td>
+                      <td className="py-3.5 px-2">36 - 38</td>
+                      <td className="py-3.5 px-2">35.5</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Measuring Tip */}
+              <div className="mt-6 bg-[#E5E5E5]/20 p-4 border border-[#E5E5E5]/30">
+                <p className="text-[10px] uppercase tracking-wider text-[#C5A880] font-semibold mb-1">
+                  How to measure:
+                </p>
+                <p className="text-[11px] text-neutral-500 font-light leading-relaxed">
+                  Measure around the fullest part of your chest, keeping the tape horizontal. For waist, measure around the narrowest part (typically where your body bends side to side).
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

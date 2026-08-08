@@ -67,9 +67,9 @@ export default function WishlistPage() {
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 pt-24 pb-16 md:pt-28 md:pb-24">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-6 pt-4 pb-16 md:pt-8 md:pb-24">
         {/* Title */}
-        <div className="border-b border-luxury-silver/30 pb-6 mb-10 text-left">
+        <div className="border-b border-luxury-silver/30 pb-6 mb-8 text-left">
           <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-2 block">
             Saved Items
           </span>
@@ -101,7 +101,7 @@ export default function WishlistPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-12">
             <AnimatePresence>
               {wishlistItems.map((product) => {
                 const brandName =
@@ -149,7 +149,7 @@ export default function WishlistPage() {
                           {brandName}
                         </span>
                         <Link href={`/products/${product.slug}`}>
-                          <h3 className="font-serif text-lg font-light text-luxury-dark hover:text-luxury-gold transition-colors duration-300 line-clamp-1 leading-tight">
+                          <h3 className="font-serif text-sm sm:text-lg font-light text-luxury-dark hover:text-luxury-gold transition-colors duration-300 line-clamp-1 leading-tight">
                             {product.name}
                           </h3>
                         </Link>

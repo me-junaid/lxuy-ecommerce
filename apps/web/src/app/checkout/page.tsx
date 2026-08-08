@@ -271,7 +271,7 @@ export default function CheckoutPage() {
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 pt-24 pb-16 md:pt-28 md:pb-24">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-6 pt-4 pb-16 md:pt-8 md:pb-24">
         <AnimatePresence mode="wait">
           {!orderPlaced ? (
             <motion.div
@@ -549,7 +549,7 @@ export default function CheckoutPage() {
                             <div className="flex-1 min-w-0">
                               <h4 className="font-serif text-xs text-luxury-dark truncate">{item.product.name}</h4>
                               <p className="text-[10px] text-neutral-400 font-light mt-0.5">
-                                Qty: {item.quantity} | Size: {item.attributes?.[0]?.value || "Standard"}
+                                Qty: {item.quantity} | Size: {item.attributes?.find(a => a.name.toLowerCase() === "size")?.value || "Standard"}
                               </p>
                             </div>
                             <span className="text-xs font-semibold text-neutral-700">
