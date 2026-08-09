@@ -4,6 +4,57 @@ This file defines the request and response shapes, validation rules, and error c
 
 ---
 
+## Coupons Service (`/api/v1/coupons`)
+
+### 1. Validate Coupon
+Validates a promo code against the provided cart subtotal. Returns discount details. Does NOT redeem the coupon (idempotent).
+
+* **Endpoint:** `POST /api/v1/coupons/validate`
+* **Auth:** None required (public)
+* **Request Body:**
+  ```json
+  { "code": "LUXURY20", "cartSubtotal": 10000 }
+  ```
+* **Success Response (`200 OK`):**
+  ```json
+  {
+    "code": "LUXURY20",
+    "type": "percentage",
+    "value": 20,
+    "discountAmount": 2000
+  }
+  ```
+* **Error Responses:**
+  * `400 Bad Request` — invalid/expired/exhausted code, or minimum order not met.
+
+---
+
+## Promotions Service (`/api/v1/promotions`)
+
+### 1. Get Active Promotions
+Returns all currently active promotions sorted by priority (highest first).
+
+* **Endpoint:** `GET /api/v1/promotions/active`
+* **Auth:** None required (public)
+* **Success Response (`200 OK`):**
+  ```json
+  [
+    {
+      "_id": "...",
+      "title": "Complimentary Shipping on Orders Over ₹15,000",
+      "subtitle": "Use code LUXURY20 for an additional 20% off",
+      "ctaLabel": "Explore Collection",
+      "ctaUrl": "/collections/new-arrivals",
+      "bgColor": "#111111",
+      "textColor": "#C5A880",
+      "isActive": true,
+      "priority": 10
+    }
+  ]
+  ```
+
+---
+
 ## Authentication Service (`/api/v1/auth`)
 
 ### 1. Register User

@@ -13,7 +13,7 @@ export default function CartPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { items, loading, updateCartItemQuantity, removeItemFromCart } = useCart();
-  const { items: wishlistItems } = useWishlist();
+  const { items: wishlistItems, toggleWishlistItem, isInWishlist } = useWishlist();
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal >= 15000 || subtotal === 0 ? 0 : 500; // ₹500 standard shipping below ₹15,000
@@ -128,6 +128,21 @@ export default function CartPage() {
                             className="text-[9px] uppercase tracking-luxury text-neutral-400 hover:text-red-500 font-bold transition-colors pt-2 block bg-transparent border-none cursor-pointer"
                           >
                             Remove
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await toggleWishlistItem(item.product._id, {
+                                _id: item.product._id,
+                                name: item.product.name,
+                                slug: item.product.slug,
+                                images: item.product.images,
+                                brand: item.product.brand,
+                              });
+                              removeItemFromCart(item.product._id, item.sku);
+                            }}
+                            className="text-[9px] uppercase tracking-luxury font-bold transition-colors pt-0.5 block bg-transparent border-none cursor-pointer text-neutral-400 hover:text-luxury-gold"
+                          >
+                            {isInWishlist(item.product._id) ? '♥ In Wishlist' : '♡ Save for Later'}
                           </button>
                         </div>
                       </div>

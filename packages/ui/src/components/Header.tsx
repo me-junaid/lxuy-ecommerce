@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useMotionValue, animate } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SearchFlyout } from './SearchFlyout';
@@ -61,15 +61,39 @@ export const Header: React.FC<HeaderProps> = ({
   const initialY = isHomePage ? (vh / 2 - (isDesktop ? 40 : 32)) : 0;
   const scrollYTarget = 200;
 
-  const logoY = useTransform(scrollY, [0, scrollYTarget], [isHomePage ? initialY : 0, 0]);
-  const logoScale = useTransform(scrollY, [0, scrollYTarget], [isHomePage ? (isDesktop ? 3.2 : 2.0) : 1.0, 1.0]);
-  const logoColor = useTransform(
-    scrollY,
-    [0, 120],
-    isHomePage ? ['rgba(255, 255, 255, 1)', 'rgba(17, 17, 17, 1)'] : ['rgba(17, 17, 17, 1)', 'rgba(17, 17, 17, 1)']
-  );
+  const logoY = useMotionValue(isHomePage ? initialY : 0);
+  const logoScale = useMotionValue(isHomePage ? (isDesktop ? 3.2 : 2.0) : 1.0);
+  const logoColor = useMotionValue(isHomePage ? 'rgba(255, 255, 255, 1)' : 'rgba(17, 17, 17, 1)');
+
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const isTransparent = isHomePage && !isScrolled && !activeMenu;
+
+  useEffect(() => {
+    const updateLogo = (latestScroll: number) => {
+      if (activeMenu) {
+        animate(logoY, 0, { duration: 0.3, ease: [0.16, 1, 0.3, 1] });
+        animate(logoScale, 1.0, { duration: 0.3, ease: [0.16, 1, 0.3, 1] });
+        animate(logoColor, 'rgba(17, 17, 17, 1)', { duration: 0.3, ease: [0.16, 1, 0.3, 1] });
+      } else {
+        const pct = Math.min(Math.max(latestScroll / scrollYTarget, 0), 1);
+        const targetY = initialY * (1 - pct);
+        const targetScale = (isHomePage ? (isDesktop ? 3.2 : 2.0) : 1.0) * (1 - pct) + 1.0 * pct;
+        
+        const colorPct = Math.min(Math.max(latestScroll / 120, 0), 1);
+        const targetColor = isHomePage 
+          ? (colorPct > 0.5 ? 'rgba(17, 17, 17, 1)' : 'rgba(255, 255, 255, 1)')
+          : 'rgba(17, 17, 17, 1)';
+
+        logoY.set(targetY);
+        logoScale.set(targetScale);
+        logoColor.set(targetColor);
+      }
+    };
+
+    updateLogo(scrollY.get());
+
+    return scrollY.on("change", updateLogo);
+  }, [activeMenu, scrollY, initialY, isDesktop, isHomePage]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [hoveredMenuItem, setHoveredMenuItem] = useState<{
@@ -186,10 +210,9 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile Search Toggle (Left Aligned on Mobile next to Hamburger) */}
             <motion.button
               onClick={() => {
+                router.push('/search');
                 if (onSearchClick) {
                   onSearchClick();
-                } else {
-                  router.push('/search');
                 }
               }}
               initial={{
@@ -275,10 +298,9 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Search */}
             <motion.button
               onClick={() => {
+                router.push('/search');
                 if (onSearchClick) {
                   onSearchClick();
-                } else {
-                  router.push('/search');
                 }
               }}
               initial={{

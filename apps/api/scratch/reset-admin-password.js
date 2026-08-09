@@ -18,9 +18,12 @@ async function run() {
       {
         $set: {
           name: 'Store Manager',
+          firstName: 'Store',
+          lastName: 'Manager',
           role: 'store_manager',
           password: hashedPassword,
-          isVerified: true
+          isEmailVerified: true,
+          isActive: true
         }
       },
       { upsert: true }
@@ -33,9 +36,12 @@ async function run() {
       {
         $set: {
           name: 'Administrator',
+          firstName: 'LXUY',
+          lastName: 'Administrator',
           role: 'admin',
           password: hashedPassword,
-          isVerified: true
+          isEmailVerified: true,
+          isActive: true
         }
       },
       { upsert: true }

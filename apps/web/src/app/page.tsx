@@ -150,7 +150,7 @@ export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
   const { items, addItemToCart, setIsCartOpen } = useCart();
-  const { items: wishlistItems } = useWishlist();
+  const { items: wishlistItems, toggleWishlistItem, isInWishlist } = useWishlist();
   const [currentHeroIdx, setCurrentHeroIdx] = useState(0);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -217,7 +217,7 @@ export default function Home() {
         onCartClick={() => setIsCartOpen(true)}
         onWishlistClick={() => router.push("/wishlist")}
         onProfileClick={() => router.push(user ? "/profile" : "/login")}
-        onSearchClick={() => router.push("/search")}
+        onSearchClick={() => {}}
         onSearchSubmit={(q) => router.push(`/search?q=${encodeURIComponent(q)}`)}
         onProductClick={(slug) => router.push(`/products/${slug}`)}
         isHomePage={true}
@@ -450,6 +450,16 @@ export default function Home() {
                   price={product.price}
                   imageUrl={product.imageUrl}
                   badge={product.badge}
+                  isWishlisted={isInWishlist(product.id)}
+                  onWishlistToggle={(e) => {
+                    e.stopPropagation();
+                    toggleWishlistItem(product.id, {
+                      _id: product.id,
+                      name: product.name,
+                      slug: product.name.toLowerCase().replace(/ /g, "-"),
+                      images: [product.imageUrl],
+                    });
+                  }}
                   onClick={() => {
                     const slug = product.name.toLowerCase().replace(/ /g, "-");
                     router.push(`/products/${slug}`);

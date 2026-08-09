@@ -37,7 +37,7 @@ function CollectionPageContent({ slug }: { slug: string }) {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const { items, addItemToCart, setIsCartOpen } = useCart();
-  const { items: wishlistItems } = useWishlist();
+  const { items: wishlistItems, toggleWishlistItem, isInWishlist } = useWishlist();
 
   // Read URL parameters for filters
   const initialBrand = searchParams.get("brand") || "";
@@ -345,6 +345,18 @@ function CollectionPageContent({ slug }: { slug: string }) {
                       brand={brandName}
                       price={product.variants && product.variants.length > 0 ? product.variants[0].price : 0}
                       imageUrl={image}
+                      isWishlisted={isInWishlist(product._id)}
+                      onWishlistToggle={(e) => {
+                        e.stopPropagation();
+                        toggleWishlistItem(product._id, {
+                          _id: product._id,
+                          name: product.name,
+                          slug: product.slug,
+                          images: product.images,
+                          brand: typeof product.brand === 'object' ? product.brand.name : product.brand,
+                          variants: product.variants,
+                        });
+                      }}
                       onClick={() => router.push(`/products/${product.slug}`)}
                       onAddToCart={() => {
                         const baseSku = product.variants?.[0]?.sku || `BASE-SKU-${product._id}`;

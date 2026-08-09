@@ -73,9 +73,15 @@ export default function CheckoutPage() {
   
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
-  const [activeCoupon, setActiveCoupon] = useState<{ code: string; discountPercent: number } | null>(null);
+  const [activeCoupon, setActiveCoupon] = useState<{
+    code: string;
+    type: 'percentage' | 'fixed';
+    value: number;
+    discountAmount: number;
+  } | null>(null);
   const [couponError, setCouponError] = useState("");
   const [couponSuccess, setCouponSuccess] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
   // Order Submission State
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,7 +102,7 @@ export default function CheckoutPage() {
 
   // Calculate pricing
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discountAmount = activeCoupon ? (subtotal * activeCoupon.discountPercent) / 100 : 0;
+  const discountAmount = activeCoupon ? activeCoupon.discountAmount : 0;
   const shippingFee = shippingMethod === "express" ? 500 : 0;
   const taxableAmount = subtotal - discountAmount + shippingFee;
   const tax = taxableAmount * 0.18; // 18% GST
@@ -144,27 +150,34 @@ export default function CheckoutPage() {
     }
   };
 
-  // Coupon application
-  const applyCoupon = () => {
+  // Coupon application via API
+  const applyCoupon = async () => {
     setCouponError("");
     setCouponSuccess("");
-    
+
     const code = couponCode.toUpperCase().trim();
     if (!code) {
-      setCouponError("Please enter a coupon code.");
+      setCouponError("Please enter a promo code.");
       return;
     }
 
-    if (code === "LUXURY20") {
-      setActiveCoupon({ code: "LUXURY20", discountPercent: 20 });
-      setCouponSuccess("Promo code LUXURY20 applied (20% Off).");
+    setIsApplyingCoupon(true);
+    try {
+      const result = await api.post('/api/v1/coupons/validate', {
+        code,
+        cartSubtotal: subtotal,
+      });
+      setActiveCoupon(result);
+      const label =
+        result.type === 'percentage'
+          ? `${result.value}% off`
+          : `₹${result.value.toLocaleString('en-IN')} off`;
+      setCouponSuccess(`Promo code ${result.code} applied — ${label}.`);
       setCouponCode("");
-    } else if (code === "WELCOME10") {
-      setActiveCoupon({ code: "WELCOME10", discountPercent: 10 });
-      setCouponSuccess("Promo code WELCOME10 applied (10% Off).");
-      setCouponCode("");
-    } else {
-      setCouponError("Invalid promo code. Try LUXURY20 or WELCOME10.");
+    } catch (err: any) {
+      setCouponError(err.message || 'Invalid promo code. Please try again.');
+    } finally {
+      setIsApplyingCoupon(false);
     }
   };
 
@@ -572,9 +585,10 @@ export default function CheckoutPage() {
                           <button
                             type="button"
                             onClick={applyCoupon}
-                            className="px-4 py-2 border border-luxury-dark text-luxury-dark hover:bg-luxury-dark hover:text-luxury-cream text-[10px] font-semibold tracking-luxury uppercase transition-colors duration-300 bg-transparent cursor-pointer"
+                            disabled={isApplyingCoupon}
+                            className="px-4 py-2 border border-luxury-dark text-luxury-dark hover:bg-luxury-dark hover:text-luxury-cream text-[10px] font-semibold tracking-luxury uppercase transition-colors duration-300 bg-transparent cursor-pointer disabled:opacity-50"
                           >
-                            Apply
+                            {isApplyingCoupon ? '...' : 'Apply'}
                           </button>
                         </div>
 
@@ -613,7 +627,9 @@ export default function CheckoutPage() {
                         </div>
                         {activeCoupon && (
                           <div className="flex justify-between text-green-600 font-medium">
-                            <span>Discount ({activeCoupon.discountPercent}%)</span>
+                            <span>
+                              Discount ({activeCoupon.type === 'percentage' ? `${activeCoupon.value}%` : `₹${activeCoupon.value}`})
+                            </span>
                             <span>-{formatPrice(discountAmount)}</span>
                           </div>
                         )}

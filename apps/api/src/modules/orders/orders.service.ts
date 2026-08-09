@@ -5,6 +5,7 @@ import { Order, OrderDocument } from './order.schema';
 import { CreateOrderDto } from './order.dto';
 import { CartService } from '../cart/cart.service';
 import { ProductsService } from '../products/products.service';
+import { CouponsService } from '../coupons/coupons.service';
 
 @Injectable()
 export class OrdersService {
@@ -13,6 +14,7 @@ export class OrdersService {
     private readonly orderModel: Model<OrderDocument>,
     private readonly cartService: CartService,
     private readonly productsService: ProductsService,
+    private readonly couponsService: CouponsService,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto): Promise<OrderDocument> {
@@ -55,17 +57,17 @@ export class OrdersService {
       subtotal += variant.price * item.quantity;
     }
 
-    // 3. Compute Coupon Discount
-    let discountPercent = 0;
+    // 3. Compute Coupon Discount via database-backed CouponsService
+    let discount = 0;
     if (dto.couponCode) {
-      const code = dto.couponCode.toUpperCase().trim();
-      if (code === 'LUXURY20') {
-        discountPercent = 20;
-      } else if (code === 'WELCOME10') {
-        discountPercent = 10;
+      try {
+        const validation = await this.couponsService.validateCoupon(dto.couponCode, subtotal);
+        discount = validation.discountAmount;
+      } catch {
+        // Coupon validation failure should not silently pass — re-throw to caller
+        throw new BadRequestException(`Invalid coupon: ${dto.couponCode}`);
       }
     }
-    const discount = (subtotal * discountPercent) / 100;
 
     // 4. Compute Shipping Fee
     const shippingFee = dto.shippingMethod === 'express' ? 500 : 0;
@@ -103,7 +105,12 @@ export class OrdersService {
 
     const savedOrder = await order.save();
 
-    // 8. Clear Cart
+    // 8. Redeem Coupon (increment usedCount atomically)
+    if (dto.couponCode) {
+      await this.couponsService.redeemCoupon(dto.couponCode);
+    }
+
+    // 9. Clear Cart
     await this.cartService.clearCart(userId);
 
     return savedOrder;

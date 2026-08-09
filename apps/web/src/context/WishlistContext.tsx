@@ -42,6 +42,9 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Track if we merged the wishlist on login for the current session
   const didMergeRef = useRef<string | null>(null);
 
+  // Track product IDs currently being toggled to ignore duplicate clicks
+  const [togglingIds, setTogglingIds] = useState<string[]>([]);
+
   // Load wishlist initially
   useEffect(() => {
     async function loadWishlist() {
@@ -103,6 +106,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [user]);
 
   const toggleWishlistItem = async (productId: string, productData?: WishlistItem) => {
+    if (togglingIds.includes(productId)) {
+      return;
+    }
+    setTogglingIds((prev) => [...prev, productId]);
     setError(null);
     if (user) {
       try {
@@ -111,6 +118,8 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } catch (err: any) { // TODO(err): Use correct error type
         console.error('Failed to toggle wishlist item:', err);
         setError(err.message || 'Failed to update wishlist');
+      } finally {
+        setTogglingIds((prev) => prev.filter((id) => id !== productId));
       }
     } else {
       // Handle guest local storage toggle
@@ -133,6 +142,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const removeFromWishlist = async (productId: string) => {
+    if (togglingIds.includes(productId)) {
+      return;
+    }
+    setTogglingIds((prev) => [...prev, productId]);
     setError(null);
     if (user) {
       try {
@@ -141,6 +154,8 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } catch (err: any) { // TODO(err): Use correct error type
         console.error('Failed to remove wishlist item:', err);
         setError(err.message || 'Failed to remove from wishlist');
+      } finally {
+        setTogglingIds((prev) => prev.filter((id) => id !== productId));
       }
     } else {
       const updatedItems = items.filter((item) => item._id !== productId);
