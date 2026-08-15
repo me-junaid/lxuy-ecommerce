@@ -1,4 +1,16 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsArray, IsNumber, IsBoolean, IsMongoId, Matches, Min, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsArray,
+  IsNumber,
+  IsBoolean,
+  IsMongoId,
+  Matches,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class VariantAttributeDto {
@@ -9,6 +21,10 @@ export class VariantAttributeDto {
   @IsString()
   @IsNotEmpty()
   value: string;
+
+  @IsString()
+  @IsOptional()
+  _id?: string;
 }
 
 export class ProductVariantDto {
@@ -65,7 +81,8 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message: 'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
+    message:
+      'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
   })
   slug: string;
 
@@ -113,6 +130,10 @@ export class CreateProductDto {
   @Type(() => ProductVariantDto)
   @IsOptional()
   variants?: ProductVariantDto[];
+
+  @IsBoolean()
+  @IsOptional()
+  isCurated?: boolean;
 }
 
 export class UpdateProductDto {
@@ -123,7 +144,8 @@ export class UpdateProductDto {
   @IsString()
   @IsOptional()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message: 'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
+    message:
+      'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
   })
   slug?: string;
 
@@ -171,6 +193,10 @@ export class UpdateProductDto {
   @Type(() => ProductVariantDto)
   @IsOptional()
   variants?: ProductVariantDto[];
+
+  @IsBoolean()
+  @IsOptional()
+  isCurated?: boolean;
 }
 
 export class ProductQueryDto {
@@ -205,4 +231,8 @@ export class ProductQueryDto {
   @IsString()
   @IsOptional()
   limit?: string;
+
+  @IsString()
+  @IsOptional()
+  curated?: string;
 }

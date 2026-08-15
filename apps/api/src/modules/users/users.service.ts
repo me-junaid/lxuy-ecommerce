@@ -2,7 +2,6 @@ import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument, UserSession } from './user.schema';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -16,10 +15,12 @@ export class UsersService {
       throw new ConflictException('Email already registered');
     }
     if (userData.phoneNumber) {
-      const existingPhone = await this.userModel.findOne({
-        phoneNumber: userData.phoneNumber,
-        isActive: true,
-      }).exec();
+      const existingPhone = await this.userModel
+        .findOne({
+          phoneNumber: userData.phoneNumber,
+          isActive: true,
+        })
+        .exec();
       if (existingPhone) {
         throw new ConflictException('Phone number already registered');
       }
@@ -47,7 +48,10 @@ export class UsersService {
    * This prevents deleted / banned accounts from accessing protected routes.
    */
   async findById(id: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ _id: id, isActive: true }).select('+sessions').exec();
+    return this.userModel
+      .findOne({ _id: id, isActive: true })
+      .select('+sessions')
+      .exec();
   }
 
   /**
@@ -64,10 +68,7 @@ export class UsersService {
    * Appends a session to the user's active sessions list.
    * Evicts the oldest session if total active sessions exceed 5.
    */
-  async addSession(
-    userId: string,
-    session: UserSession,
-  ): Promise<void> {
+  async addSession(userId: string, session: UserSession): Promise<void> {
     const user = await this.findByIdWithSessions(userId);
     if (!user) return;
 
@@ -79,7 +80,9 @@ export class UsersService {
 
     // Limit to max 5 sessions. Evict oldest by lastActive if exceeded.
     if (user.sessions.length > 5) {
-      user.sessions.sort((a, b) => a.lastActive.getTime() - b.lastActive.getTime());
+      user.sessions.sort(
+        (a, b) => a.lastActive.getTime() - b.lastActive.getTime(),
+      );
       user.sessions.shift(); // Evict oldest
     }
 
@@ -103,7 +106,8 @@ export class UsersService {
       setFields['sessions.$.refreshTokenHash'] = update.refreshTokenHash;
     }
     if (update.prevRefreshTokenHash !== undefined) {
-      setFields['sessions.$.prevRefreshTokenHash'] = update.prevRefreshTokenHash;
+      setFields['sessions.$.prevRefreshTokenHash'] =
+        update.prevRefreshTokenHash;
     }
     if (update.prevTokenExpiresAt !== undefined) {
       setFields['sessions.$.prevTokenExpiresAt'] = update.prevTokenExpiresAt;
@@ -131,10 +135,7 @@ export class UsersService {
    */
   async removeSession(userId: string, tokenId: string): Promise<void> {
     await this.userModel
-      .updateOne(
-        { _id: userId },
-        { $pull: { sessions: { tokenId } } },
-      )
+      .updateOne({ _id: userId }, { $pull: { sessions: { tokenId } } })
       .exec();
   }
 
@@ -143,10 +144,7 @@ export class UsersService {
    */
   async clearAllSessions(userId: string): Promise<void> {
     await this.userModel
-      .updateOne(
-        { _id: userId },
-        { $set: { sessions: [] } },
-      )
+      .updateOne({ _id: userId }, { $set: { sessions: [] } })
       .exec();
   }
 

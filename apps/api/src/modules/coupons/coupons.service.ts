@@ -56,7 +56,9 @@ export class CouponsService implements OnModuleInit {
     ];
 
     for (const coupon of defaults) {
-      const exists = await this.couponModel.findOne({ code: coupon.code }).exec();
+      const exists = await this.couponModel
+        .findOne({ code: coupon.code })
+        .exec();
       if (!exists) {
         await this.couponModel.create(coupon);
         this.logger.log(`Seeded coupon: ${coupon.code}`);
@@ -73,7 +75,9 @@ export class CouponsService implements OnModuleInit {
     cartSubtotal: number,
   ): Promise<CouponValidationResult> {
     const normalised = code.toUpperCase().trim();
-    const coupon = await this.couponModel.findOne({ code: normalised, isActive: true }).exec();
+    const coupon = await this.couponModel
+      .findOne({ code: normalised, isActive: true })
+      .exec();
 
     if (!coupon) {
       throw new BadRequestException('Invalid or inactive promo code.');
@@ -84,7 +88,9 @@ export class CouponsService implements OnModuleInit {
     }
 
     if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
-      throw new BadRequestException('This promo code has reached its usage limit.');
+      throw new BadRequestException(
+        'This promo code has reached its usage limit.',
+      );
     }
 
     if (cartSubtotal < coupon.minOrderAmount) {

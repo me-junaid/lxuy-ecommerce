@@ -56,7 +56,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     // Verify session is active (AUTH-088, AUTH-089, AUTH-090 immediate invalidation)
     if (payload.tokenId && user.sessions) {
-      const isSessionActive = user.sessions.some(s => s.tokenId === payload.tokenId);
+      const isSessionActive = user.sessions.some(
+        (s) => s.tokenId === payload.tokenId,
+      );
       if (!isSessionActive) {
         throw new UnauthorizedException('Session has been terminated');
       }

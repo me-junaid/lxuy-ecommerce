@@ -1,10 +1,15 @@
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { OrdersService } from './orders.service';
 import { Order } from './order.schema';
 import { CartService } from '../cart/cart.service';
 import { ProductsService } from '../products/products.service';
-import { BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 describe('OrdersService', () => {
   let ordersService: OrdersService;
@@ -95,7 +100,11 @@ describe('OrdersService', () => {
 
   describe('createOrder', () => {
     it('should throw BadRequestException if cart is empty', async () => {
-      cartService.getCart.mockResolvedValueOnce({ _id: mockCartId, user: mockUserId, items: [] } as any);
+      cartService.getCart.mockResolvedValueOnce({
+        _id: mockCartId,
+        user: mockUserId,
+        items: [],
+      } as any);
 
       await expect(
         ordersService.createOrder(mockUserId, {
@@ -194,7 +203,11 @@ describe('OrdersService', () => {
       const result = await ordersService.createOrder(mockUserId, orderDto);
 
       expect(result).toBeDefined();
-      expect(productsService.decrementStock).toHaveBeenCalledWith(mockProductId, 'SKU-COAT-M', 2);
+      expect(productsService.decrementStock).toHaveBeenCalledWith(
+        mockProductId,
+        'SKU-COAT-M',
+        2,
+      );
       expect(cartService.clearCart).toHaveBeenCalledWith(mockUserId);
       expect(result.pricing.subtotal).toBe(2000); // 1000 * 2
       expect(result.pricing.discount).toBe(400); // 20% of 2000
@@ -203,7 +216,9 @@ describe('OrdersService', () => {
 
   describe('getOrderDetails', () => {
     it('should throw NotFoundException if order is not found', async () => {
-      await expect(ordersService.getOrderDetails(mockUserId, '60d0fe4f5311236168a109cb')).rejects.toThrow(NotFoundException);
+      await expect(
+        ordersService.getOrderDetails(mockUserId, '60d0fe4f5311236168a109cb'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ForbiddenException if order belongs to another user and requester is a customer', async () => {
@@ -218,7 +233,11 @@ describe('OrdersService', () => {
       });
 
       await expect(
-        ordersService.getOrderDetails(mockUserId, '60d0fe4f5311236168a109cb', 'customer'),
+        ordersService.getOrderDetails(
+          mockUserId,
+          '60d0fe4f5311236168a109cb',
+          'customer',
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -233,7 +252,11 @@ describe('OrdersService', () => {
         }),
       });
 
-      const result = await ordersService.getOrderDetails(mockUserId, '60d0fe4f5311236168a109cb', 'customer');
+      const result = await ordersService.getOrderDetails(
+        mockUserId,
+        '60d0fe4f5311236168a109cb',
+        'customer',
+      );
       expect(result).toEqual(ownedOrder);
     });
 
@@ -248,7 +271,11 @@ describe('OrdersService', () => {
         }),
       });
 
-      const result = await ordersService.getOrderDetails(mockUserId, '60d0fe4f5311236168a109cb', 'admin');
+      const result = await ordersService.getOrderDetails(
+        mockUserId,
+        '60d0fe4f5311236168a109cb',
+        'admin',
+      );
       expect(result).toEqual(anotherUserOrder);
     });
   });

@@ -54,9 +54,12 @@ export class AuthService {
     this.jwtRefreshExpiration =
       this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d';
 
-    this.googleClientId = this.configService.get<string>('GOOGLE_CLIENT_ID') ?? '';
-    this.googleClientSecret = this.configService.get<string>('GOOGLE_CLIENT_SECRET') ?? '';
-    this.backendUrl = this.configService.get<string>('BACKEND_URL') ?? 'http://localhost:3001';
+    this.googleClientId =
+      this.configService.get<string>('GOOGLE_CLIENT_ID') ?? '';
+    this.googleClientSecret =
+      this.configService.get<string>('GOOGLE_CLIENT_SECRET') ?? '';
+    this.backendUrl =
+      this.configService.get<string>('BACKEND_URL') ?? 'http://localhost:3001';
 
     if (!this.googleClientId || !this.googleClientSecret) {
       this.logger.warn(
@@ -71,7 +74,10 @@ export class AuthService {
     // Generate a cryptographically secure 32-byte random token.
     // Only the SHA-256 hash is persisted; the raw token goes in the email link.
     const rawToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     await this.usersService.setEmailVerificationToken(
@@ -164,7 +170,7 @@ export class AuthService {
     }
 
     // Locate the specific session
-    const session = user.sessions.find(s => s.tokenId === tokenId);
+    const session = user.sessions.find((s) => s.tokenId === tokenId);
     if (!session) {
       throw new UnauthorizedException('Access denied');
     }
@@ -173,7 +179,9 @@ export class AuthService {
     if (new Date() > session.expiresAt) {
       // Clean up expired session
       await this.usersService.removeSession(userId, tokenId);
-      throw new UnauthorizedException('Session has expired. Please sign in again.');
+      throw new UnauthorizedException(
+        'Session has expired. Please sign in again.',
+      );
     }
 
     // Check the current hash first (normal case).
@@ -194,11 +202,19 @@ export class AuthService {
     }
 
     // Grace-window check for parallel refresh requests
-    if (!isValid && session.prevRefreshTokenHash && session.prevTokenExpiresAt) {
-      const isGraceWindowActive = new Date() < new Date(session.prevTokenExpiresAt);
+    if (
+      !isValid &&
+      session.prevRefreshTokenHash &&
+      session.prevTokenExpiresAt
+    ) {
+      const isGraceWindowActive =
+        new Date() < new Date(session.prevTokenExpiresAt);
       if (isGraceWindowActive) {
         try {
-          isValid = await bcrypt.compare(refreshToken, session.prevRefreshTokenHash);
+          isValid = await bcrypt.compare(
+            refreshToken,
+            session.prevRefreshTokenHash,
+          );
           if (isValid) matchedPrev = true;
         } catch (err) {
           this.logger.error(
@@ -291,9 +307,13 @@ export class AuthService {
    * Looks up the user by the SHA-256 hash; errors if token is invalid/expired/already used.
    */
   async verifyEmail(rawToken: string): Promise<{ message: string }> {
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
 
-    const user = await this.usersService.findByEmailVerificationToken(hashedToken);
+    const user =
+      await this.usersService.findByEmailVerificationToken(hashedToken);
 
     if (!user) {
       // Token not found or expired. Check if maybe the email is already verified
@@ -305,7 +325,9 @@ export class AuthService {
 
     if (user.isEmailVerified) {
       // Already verified — idempotent response (AUTH-021).
-      return { message: 'Your email address is already verified. You can log in.' };
+      return {
+        message: 'Your email address is already verified. You can log in.',
+      };
     }
 
     await this.usersService.markEmailVerified(user._id.toString());
@@ -321,7 +343,10 @@ export class AuthService {
 
     if (!user) {
       // Don't reveal whether the email exists — prevents user enumeration.
-      return { message: 'If this email is registered, a new verification link has been sent.' };
+      return {
+        message:
+          'If this email is registered, a new verification link has been sent.',
+      };
     }
 
     if (user.isEmailVerified) {
@@ -329,7 +354,10 @@ export class AuthService {
     }
 
     const rawToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     await this.usersService.setEmailVerificationToken(
@@ -338,9 +366,16 @@ export class AuthService {
       expires,
     );
 
-    await this.emailService.sendVerificationEmail(user.email, user.firstName, rawToken);
+    await this.emailService.sendVerificationEmail(
+      user.email,
+      user.firstName,
+      rawToken,
+    );
 
-    return { message: 'If this email is registered, a new verification link has been sent.' };
+    return {
+      message:
+        'If this email is registered, a new verification link has been sent.',
+    };
   }
 
   /**
@@ -348,7 +383,9 @@ export class AuthService {
    */
   getGoogleAuthUrl(): string {
     if (!this.googleClientId) {
-      throw new BadRequestException('Google Client ID is not configured on the server.');
+      throw new BadRequestException(
+        'Google Client ID is not configured on the server.',
+      );
     }
     const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const options = {
@@ -374,7 +411,9 @@ export class AuthService {
    */
   async handleGoogleCallback(code: string) {
     if (!this.googleClientId || !this.googleClientSecret) {
-      throw new InternalServerErrorException('Google OAuth configurations are missing on the server.');
+      throw new InternalServerErrorException(
+        'Google OAuth configurations are missing on the server.',
+      );
     }
 
     let tokenData: { access_token: string };
@@ -394,12 +433,16 @@ export class AuthService {
       if (!response.ok) {
         const errorText = await response.text();
         this.logger.error(`Google token exchange failed: ${errorText}`);
-        throw new BadRequestException('Failed to exchange authorization code for tokens.');
+        throw new BadRequestException(
+          'Failed to exchange authorization code for tokens.',
+        );
       }
 
       tokenData = (await response.json()) as { access_token: string };
     } catch (err: unknown) {
-      this.logger.error(`Error during Google token exchange: ${err instanceof Error ? err.message : String(err)}`);
+      this.logger.error(
+        `Error during Google token exchange: ${err instanceof Error ? err.message : String(err)}`,
+      );
       throw new BadRequestException('Token exchange failed.');
     }
 
@@ -412,22 +455,31 @@ export class AuthService {
     };
 
     try {
-      const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: { Authorization: `Bearer ${tokenData.access_token}` },
-      });
+      const response = await fetch(
+        'https://www.googleapis.com/oauth2/v2/userinfo',
+        {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` },
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to retrieve user profile information from Google.');
+        throw new Error(
+          'Failed to retrieve user profile information from Google.',
+        );
       }
 
       googleProfile = (await response.json()) as typeof googleProfile;
     } catch (err: unknown) {
-      this.logger.error(`Error fetching Google user profile: ${err instanceof Error ? err.message : String(err)}`);
+      this.logger.error(
+        `Error fetching Google user profile: ${err instanceof Error ? err.message : String(err)}`,
+      );
       throw new BadRequestException('Failed to retrieve user profile.');
     }
 
     if (!googleProfile.verified_email) {
-      throw new BadRequestException('Your Google account email is not verified.');
+      throw new BadRequestException(
+        'Your Google account email is not verified.',
+      );
     }
 
     // Sign in / sync the user
@@ -488,12 +540,16 @@ export class AuthService {
     if (!user) {
       // Return generic message to prevent user enumeration (AUTH-069)
       return {
-        message: 'If this email is registered, a password reset link has been sent.',
+        message:
+          'If this email is registered, a password reset link has been sent.',
       };
     }
 
     const rawToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
     const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     await this.usersService.setPasswordResetToken(
@@ -514,7 +570,8 @@ export class AuthService {
       });
 
     return {
-      message: 'If this email is registered, a password reset link has been sent.',
+      message:
+        'If this email is registered, a password reset link has been sent.',
     };
   }
 
@@ -531,7 +588,10 @@ export class AuthService {
    * Completes the password reset process.
    * Fulfills AUTH-070 to AUTH-076.
    */
-  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
     const user = await this.usersService.findByPasswordResetToken(hashedToken);
 
@@ -562,7 +622,8 @@ export class AuthService {
     await this.usersService.clearAllSessions(user._id.toString());
 
     return {
-      message: 'Your password has been successfully reset. Please sign in with your new password.',
+      message:
+        'Your password has been successfully reset. Please sign in with your new password.',
     };
   }
 }

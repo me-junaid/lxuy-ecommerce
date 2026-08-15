@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import { api } from "../lib/api";
 import {
   Header,
   Footer,
@@ -146,6 +147,20 @@ const RECOMMENDED_PRODUCTS = [
   },
 ];
 
+interface CuratedDbProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  brand: string | { _id: string; name: string };
+  price?: number;
+  images?: string[];
+  variants?: Array<{
+    sku: string;
+    price: number;
+    attributes: Array<{ name: string; value: string }>;
+  }>;
+}
+
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
@@ -157,6 +172,21 @@ export default function Home() {
   const [error, setError] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [curatedProducts, setCuratedProducts] = useState<CuratedDbProduct[]>([]);
+
+  useEffect(() => {
+    async function loadCurated() {
+      try {
+        const res = await api.get<{ data: CuratedDbProduct[] }>("/api/v1/products?curated=true&limit=4");
+        if (res && res.data && res.data.length > 0) {
+          setCuratedProducts(res.data);
+        }
+      } catch (err) {
+        console.error("Failed to load curated products:", err);
+      }
+    }
+    loadCurated();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -176,12 +206,20 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleAddToCart = (product: typeof DUMMY_PRODUCTS[0]) => {
+  const handleAddToCart = (product: {
+    id: string;
+    name: string;
+    brand: string;
+    price: number;
+    imageUrl: string;
+    sku: string;
+    slug?: string;
+  }) => {
     addItemToCart(
       {
         _id: product.id,
         name: product.name,
-        slug: product.name.toLowerCase().replace(/ /g, "-"),
+        slug: product.slug || product.name.toLowerCase().replace(/ /g, "-"),
         images: [product.imageUrl],
         brand: product.brand,
         price: product.price,
@@ -436,7 +474,19 @@ export default function Home() {
           </AnimatedReveal>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-8">
-            {DUMMY_PRODUCTS.map((product, index) => (
+            {(curatedProducts.length > 0
+              ? curatedProducts.map((p) => ({
+                  id: p._id,
+                  name: p.name,
+                  brand: typeof p.brand === 'object' && p.brand !== null ? p.brand.name : String(p.brand),
+                  price: p.variants && p.variants.length > 0 ? p.variants[0].price : p.price || 0,
+                  imageUrl: p.images && p.images.length > 0 ? p.images[0] : '/images/models/modules1.jpeg',
+                  badge: undefined as string | undefined,
+                  sku: p.variants && p.variants.length > 0 ? p.variants[0].sku : '',
+                  slug: p.slug
+                }))
+              : DUMMY_PRODUCTS.map((p) => ({ ...p, slug: p.name.toLowerCase().replace(/ /g, "-") }))
+            ).map((product, index) => (
               <AnimatedReveal
                 key={product.id}
                 direction="up"
@@ -456,12 +506,12 @@ export default function Home() {
                     toggleWishlistItem(product.id, {
                       _id: product.id,
                       name: product.name,
-                      slug: product.name.toLowerCase().replace(/ /g, "-"),
+                      slug: product.slug || product.name.toLowerCase().replace(/ /g, "-"),
                       images: [product.imageUrl],
                     });
                   }}
                   onClick={() => {
-                    const slug = product.name.toLowerCase().replace(/ /g, "-");
+                    const slug = product.slug || product.name.toLowerCase().replace(/ /g, "-");
                     router.push(`/products/${slug}`);
                   }}
                   onAddToCart={() => handleAddToCart(product)}

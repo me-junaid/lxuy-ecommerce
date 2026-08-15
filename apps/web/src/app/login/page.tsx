@@ -27,57 +27,59 @@ function LoginPageContent() {
 
   // Set message based on verification query params or social login query params
   useEffect(() => {
-    const verified = searchParams.get("verified");
-    const reason = searchParams.get("reason");
-    const socialLogin = searchParams.get("social_login");
+    setTimeout(() => {
+      const verified = searchParams.get("verified");
+      const reason = searchParams.get("reason");
+      const socialLogin = searchParams.get("social_login");
 
-    if (socialLogin === "success") {
-      setInfoType("success");
-      setInfoMessage("Signed in successfully. Redirecting you to your account...");
-      if (typeof window !== "undefined") {
-        localStorage.setItem("lxuy_logged_in", "true");
-      }
-      refreshUser().then(() => {
-        router.replace("/profile");
-      });
-    } else if (socialLogin === "error") {
-      setInfoType("error");
-      if (reason === "missing_code") {
-        setInfoMessage("Google authorization code was missing.");
-      } else {
-        setInfoMessage("Failed to authenticate with Google. Please try again.");
-      }
-    } else if (verified === "true") {
-      setInfoType("success");
-      setInfoMessage("Your email address has been verified successfully. Please sign in.");
-    } else if (verified === "false") {
-      if (reason === "expired") {
+      if (socialLogin === "success") {
+        setInfoType("success");
+        setInfoMessage("Signed in successfully. Redirecting you to your account...");
+        if (typeof window !== "undefined") {
+          localStorage.setItem("lxuy_logged_in", "true");
+        }
+        refreshUser().then(() => {
+          router.replace("/profile");
+        });
+      } else if (socialLogin === "error") {
         setInfoType("error");
-        setInfoMessage("This verification link has expired. Please sign in and request a new link.");
-      } else if (reason === "already_verified") {
-        setInfoType("info");
-        setInfoMessage("Your email address is already verified. You can sign in.");
-      } else if (reason === "missing_token") {
+        if (reason === "missing_code") {
+          setInfoMessage("Google authorization code was missing.");
+        } else {
+          setInfoMessage("Failed to authenticate with Google. Please try again.");
+        }
+      } else if (verified === "true") {
+        setInfoType("success");
+        setInfoMessage("Your email address has been verified successfully. Please sign in.");
+      } else if (verified === "false") {
+        if (reason === "expired") {
+          setInfoType("error");
+          setInfoMessage("This verification link has expired. Please sign in and request a new link.");
+        } else if (reason === "already_verified") {
+          setInfoType("info");
+          setInfoMessage("Your email address is already verified. You can sign in.");
+        } else if (reason === "missing_token") {
+          setInfoType("error");
+          setInfoMessage("The email verification link is missing the token.");
+        } else {
+          setInfoType("error");
+          setInfoMessage("This verification link is invalid or unrecognized.");
+        }
+      } else if (searchParams.get("reset_status") === "success") {
+        setInfoType("success");
+        setInfoMessage("Your password has been successfully reset. Please sign in with your new password.");
+      } else if (searchParams.get("reset_status") === "error") {
+        const resetReason = searchParams.get("reason");
         setInfoType("error");
-        setInfoMessage("The email verification link is missing the token.");
-      } else {
-        setInfoType("error");
-        setInfoMessage("This verification link is invalid or unrecognized.");
+        if (resetReason === "expired" || resetReason === "invalid_token") {
+          setInfoMessage("The password reset link is invalid or has expired. Please request a new one.");
+        } else if (resetReason === "missing_token") {
+          setInfoMessage("The password reset link is missing the required token.");
+        } else {
+          setInfoMessage("Failed to reset password. Please try requesting a new link.");
+        }
       }
-    } else if (searchParams.get("reset_status") === "success") {
-      setInfoType("success");
-      setInfoMessage("Your password has been successfully reset. Please sign in with your new password.");
-    } else if (searchParams.get("reset_status") === "error") {
-      const resetReason = searchParams.get("reason");
-      setInfoType("error");
-      if (resetReason === "expired" || resetReason === "invalid_token") {
-        setInfoMessage("The password reset link is invalid or has expired. Please request a new one.");
-      } else if (resetReason === "missing_token") {
-        setInfoMessage("The password reset link is missing the required token.");
-      } else {
-        setInfoMessage("Failed to reset password. Please try requesting a new link.");
-      }
-    }
+    }, 0);
   }, [searchParams, router, refreshUser]);
 
   // Wait until session restore is done before deciding to redirect.

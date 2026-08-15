@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsUrl, IsMongoId, Matches } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  IsMongoId,
+  IsEnum,
+  Matches,
+} from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
@@ -8,7 +16,8 @@ export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message: 'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
+    message:
+      'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
   })
   slug: string;
 
@@ -23,6 +32,10 @@ export class CreateCategoryDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsEnum(['active', 'inactive', 'archived'])
+  @IsOptional()
+  status?: string;
 
   @IsString()
   @IsOptional()
@@ -45,7 +58,8 @@ export class UpdateCategoryDto {
   @IsString()
   @IsOptional()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message: 'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
+    message:
+      'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
   })
   slug?: string;
 
@@ -60,6 +74,10 @@ export class UpdateCategoryDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsEnum(['active', 'inactive', 'archived'])
+  @IsOptional()
+  status?: string;
 
   @IsString()
   @IsOptional()

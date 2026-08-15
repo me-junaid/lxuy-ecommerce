@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, useRef } from "react";
+import React, { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Header, Footer, ProductCard, Button } from "@repo/ui";
 import { useAuth } from "../../context/AuthContext";
@@ -20,6 +20,13 @@ interface Category {
   slug: string;
 }
 
+interface ProductVariant {
+  sku: string;
+  price: number;
+  stock: number;
+  attributes?: Array<{ name: string; value: string }>;
+}
+
 interface Product {
   _id: string;
   name: string;
@@ -28,7 +35,8 @@ interface Product {
   brand: Brand | string;
   category: Category | string;
   images: string[];
-  variants?: any[];
+  variants?: ProductVariant[];
+  createdAt?: string;
   ratings?: {
     average: number;
     count: number;
@@ -55,7 +63,7 @@ function SearchPageContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
-  const [totalProducts, setTotalProducts] = useState(0);
+  const [, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -75,7 +83,22 @@ function SearchPageContent() {
 
   // Pre-configured Luxury options
   const sizeOptions = ["S", "M", "L", "XL"];
-  const colorOptions = ["Black", "White", "Navy", "Beige", "Grey"];
+
+  // Apply filters via URL updates
+  const updateUrl = useCallback((updates: Record<string, string | null>) => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    Object.entries(updates).forEach(([key, val]) => {
+      if (val === null || val === "") {
+        current.delete(key);
+      } else {
+        current.set(key, val);
+      }
+    });
+    if (!updates.page) {
+      current.set("page", "1");
+    }
+    router.push(`/search?${current.toString()}`);
+  }, [searchParams, router]);
 
   // Fetch filter metadata on mount
   useEffect(() => {
@@ -102,7 +125,9 @@ function SearchPageContent() {
 
   // Sync local searchVal when query param changes
   useEffect(() => {
-    setSearchVal(query);
+    setTimeout(() => {
+      setSearchVal(query);
+    }, 0);
   }, [query]);
 
   // Debounce search value and update URL query dynamically
@@ -114,7 +139,7 @@ function SearchPageContent() {
     }, 400);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchVal, query]);
+  }, [searchVal, query, updateUrl]);
 
   // Fetch dynamic products based on URL parameters
   useEffect(() => {
@@ -140,8 +165,9 @@ function SearchPageContent() {
         setProducts(data.data || []);
         setTotalProducts(data.total || 0);
         setTotalPages(data.pages || 1);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong.");
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Something went wrong.");
       } finally {
         setLoading(false);
       }
@@ -149,21 +175,7 @@ function SearchPageContent() {
     fetchProducts();
   }, [query, initialCategory, initialBrand, initialMinPrice, initialMaxPrice, initialPage]);
 
-  // Apply filters via URL updates
-  const updateUrl = (updates: Record<string, string | null>) => {
-    const current = new URLSearchParams(Array.from(searchParams.entries()));
-    Object.entries(updates).forEach(([key, val]) => {
-      if (val === null || val === "") {
-        current.delete(key);
-      } else {
-        current.set(key, val);
-      }
-    });
-    if (!updates.page) {
-      current.set("page", "1");
-    }
-    router.push(`/search?${current.toString()}`);
-  };
+
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,7 +204,7 @@ function SearchPageContent() {
     // 2. Size filter
     if (selectedSize) {
       const hasSize = p.variants?.some((v) =>
-        v.attributes?.some((a: any) => a.name.toLowerCase() === "size" && a.value.toUpperCase() === selectedSize.toUpperCase())
+        v.attributes?.some((a) => a.name.toLowerCase() === "size" && a.value.toUpperCase() === selectedSize.toUpperCase())
       );
       if (!hasSize) return false;
     }
@@ -200,7 +212,7 @@ function SearchPageContent() {
     // 3. Color filter
     if (selectedColor) {
       const hasColor = p.variants?.some((v) =>
-        v.attributes?.some((a: any) => a.name.toLowerCase() === "color" && a.value.toLowerCase() === selectedColor.toLowerCase())
+        v.attributes?.some((a) => a.name.toLowerCase() === "color" && a.value.toLowerCase() === selectedColor.toLowerCase())
       );
       if (!hasColor) return false;
     }
@@ -216,8 +228,8 @@ function SearchPageContent() {
     if (initialSort === "price-asc") return priceA - priceB;
     if (initialSort === "price-desc") return priceB - priceA;
     if (initialSort === "newest") {
-      const timeA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : parseInt(a._id.substring(0, 8), 16);
-      const timeB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : parseInt(b._id.substring(0, 8), 16);
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : parseInt(a._id.substring(0, 8), 16);
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : parseInt(b._id.substring(0, 8), 16);
       return timeB - timeA;
     }
     return 0; // Default: Featured / Best Selling

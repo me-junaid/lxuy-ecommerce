@@ -71,9 +71,12 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     const updateLogo = (latestScroll: number) => {
       if (activeMenu) {
-        animate(logoY, 0, { duration: 0.3, ease: [0.16, 1, 0.3, 1] });
-        animate(logoScale, 1.0, { duration: 0.3, ease: [0.16, 1, 0.3, 1] });
-        animate(logoColor, 'rgba(17, 17, 17, 1)', { duration: 0.3, ease: [0.16, 1, 0.3, 1] });
+        logoY.stop();
+        logoScale.stop();
+        logoColor.stop();
+        logoY.set(0);
+        logoScale.set(1.0);
+        logoColor.set('rgba(17, 17, 17, 1)');
       } else {
         const pct = Math.min(Math.max(latestScroll / scrollYTarget, 0), 1);
         const targetY = initialY * (1 - pct);
@@ -84,6 +87,9 @@ export const Header: React.FC<HeaderProps> = ({
           ? (colorPct > 0.5 ? 'rgba(17, 17, 17, 1)' : 'rgba(255, 255, 255, 1)')
           : 'rgba(17, 17, 17, 1)';
 
+        logoY.stop();
+        logoScale.stop();
+        logoColor.stop();
         logoY.set(targetY);
         logoScale.set(targetScale);
         logoColor.set(targetColor);
@@ -185,7 +191,10 @@ export const Header: React.FC<HeaderProps> = ({
       >
 
         {/* Row 1: Top Bar (Logo & Actions) */}
-        <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between relative">
+        <div
+          className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between relative"
+          onMouseEnter={() => setActiveMenu(null)}
+        >
 
           {/* Left: Hamburger on Mobile, Support Links on Desktop */}
           <div className="flex flex-1 items-center">
@@ -415,7 +424,7 @@ export const Header: React.FC<HeaderProps> = ({
             {categories.map((cat) => (
               <div
                 key={cat.label}
-                onMouseEnter={() => cat.menuKey && setActiveMenu(cat.menuKey)}
+                onMouseEnter={() => setActiveMenu(cat.menuKey || null)}
                 className="h-full flex items-center"
               >
                 <MotionLink

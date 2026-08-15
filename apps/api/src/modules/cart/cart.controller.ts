@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Delete, Param, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Delete,
+  Param,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { CartService } from './cart.service';
 import { AddCartItemDto, UpdateCartItemDto, MergeCartDto } from './cart.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -15,7 +25,10 @@ export class CartController {
   }
 
   @Post('items')
-  async addItem(@CurrentUser('id') userId: string, @Body() dto: AddCartItemDto) {
+  async addItem(
+    @CurrentUser('id') userId: string,
+    @Body() dto: AddCartItemDto,
+  ) {
     return this.cartService.addItem(userId, dto);
   }
 
@@ -45,7 +58,10 @@ export class CartController {
   }
 
   @Post('merge')
-  async mergeCart(@CurrentUser('id') userId: string, @Body() dto: MergeCartDto) {
+  async mergeCart(
+    @CurrentUser('id') userId: string,
+    @Body() dto: MergeCartDto,
+  ) {
     return this.cartService.mergeCart(userId, dto.items);
   }
 }

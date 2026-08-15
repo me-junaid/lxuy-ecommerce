@@ -2,7 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Cart, CartDocument } from './cart.schema';
-import { AddCartItemDto, UpdateCartItemDto, GuestCartItemDto } from './cart.dto';
+import {
+  AddCartItemDto,
+  UpdateCartItemDto,
+  GuestCartItemDto,
+} from './cart.dto';
 
 @Injectable()
 export class CartService {
@@ -41,7 +45,8 @@ export class CartService {
     }
 
     const existingItemIdx = cart.items.findIndex(
-      (item) => item.product.toString() === dto.productId && item.sku === dto.sku,
+      (item) =>
+        item.product.toString() === dto.productId && item.sku === dto.sku,
     );
 
     if (existingItemIdx > -1) {
@@ -64,7 +69,9 @@ export class CartService {
     sku: string,
     dto: UpdateCartItemDto,
   ): Promise<CartDocument> {
-    const cart = await this.cartModel.findOne({ user: new Types.ObjectId(userId) }).exec();
+    const cart = await this.cartModel
+      .findOne({ user: new Types.ObjectId(userId) })
+      .exec();
     if (!cart) {
       throw new NotFoundException('Cart not found');
     }
@@ -87,8 +94,14 @@ export class CartService {
     return this.getCart(userId);
   }
 
-  async removeItem(userId: string, productId: string, sku: string): Promise<CartDocument> {
-    const cart = await this.cartModel.findOne({ user: new Types.ObjectId(userId) }).exec();
+  async removeItem(
+    userId: string,
+    productId: string,
+    sku: string,
+  ): Promise<CartDocument> {
+    const cart = await this.cartModel
+      .findOne({ user: new Types.ObjectId(userId) })
+      .exec();
     if (!cart) {
       throw new NotFoundException('Cart not found');
     }
@@ -106,7 +119,9 @@ export class CartService {
   }
 
   async clearCart(userId: string): Promise<CartDocument> {
-    const cart = await this.cartModel.findOne({ user: new Types.ObjectId(userId) }).exec();
+    const cart = await this.cartModel
+      .findOne({ user: new Types.ObjectId(userId) })
+      .exec();
     if (cart) {
       cart.items = [];
       await cart.save();
@@ -114,7 +129,10 @@ export class CartService {
     return this.getCart(userId);
   }
 
-  async mergeCart(userId: string, guestItems: GuestCartItemDto[]): Promise<CartDocument> {
+  async mergeCart(
+    userId: string,
+    guestItems: GuestCartItemDto[],
+  ): Promise<CartDocument> {
     const userObjectId = new Types.ObjectId(userId);
     let cart = await this.cartModel.findOne({ user: userObjectId }).exec();
     if (!cart) {
@@ -124,7 +142,8 @@ export class CartService {
     for (const guestItem of guestItems) {
       const existingItemIdx = cart.items.findIndex(
         (item) =>
-          item.product.toString() === guestItem.productId && item.sku === guestItem.sku,
+          item.product.toString() === guestItem.productId &&
+          item.sku === guestItem.sku,
       );
 
       if (existingItemIdx > -1) {

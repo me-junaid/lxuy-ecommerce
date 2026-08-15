@@ -54,9 +54,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         try {
           const res = await api.get('/api/v1/wishlist');
           setItems(res.products || []);
-        } catch (err: any) { // TODO(err): Use correct error type after defining Axios/Fetch error classes
-          console.error('Failed to load authenticated wishlist:', err);
-          setError(err.message || 'Failed to load wishlist');
+        } catch (err) {
+          const error = err as Error;
+          console.error('Failed to load authenticated wishlist:', error);
+          setError(error.message || 'Failed to load wishlist');
         }
       } else {
         // Load from localStorage for guest
@@ -115,9 +116,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         const res = await api.post('/api/v1/wishlist/toggle', { productId });
         setItems(res.products || []);
-      } catch (err: any) { // TODO(err): Use correct error type
-        console.error('Failed to toggle wishlist item:', err);
-        setError(err.message || 'Failed to update wishlist');
+      } catch (err) {
+        const error = err as Error;
+        console.error('Failed to toggle wishlist item:', error);
+        setError(error.message || 'Failed to update wishlist');
       } finally {
         setTogglingIds((prev) => prev.filter((id) => id !== productId));
       }
@@ -151,9 +153,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         const res = await api.delete(`/api/v1/wishlist/${productId}`);
         setItems(res.products || []);
-      } catch (err: any) { // TODO(err): Use correct error type
-        console.error('Failed to remove wishlist item:', err);
-        setError(err.message || 'Failed to remove from wishlist');
+      } catch (err) {
+        const error = err as Error;
+        console.error('Failed to remove wishlist item:', error);
+        setError(error.message || 'Failed to remove from wishlist');
       } finally {
         setTogglingIds((prev) => prev.filter((id) => id !== productId));
       }

@@ -93,6 +93,7 @@ function OrderCard({ order, formatPrice }: { order: Order; formatPrice: (a: numb
             <div key={`${item.product?._id || item.product}-${item.sku}`} className="flex items-center justify-between py-3 first:pt-0 last:pb-0 text-xs">
               <div className="flex items-center space-x-4">
                 <div className="w-10 aspect-[3/4] bg-neutral-100 relative overflow-hidden flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={item.product?.images?.[0] || "/images/models/modules1.jpeg"} alt={item.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
@@ -130,7 +131,9 @@ export default function ProfilePage() {
   // Fetch orders from API
   useEffect(() => {
     if (isAuthenticated) {
-      setOrdersLoading(true);
+      setTimeout(() => {
+        setOrdersLoading(true);
+      }, 0);
       api.get("/api/v1/orders")
         .then((data) => {
           setOrders(data);

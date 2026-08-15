@@ -30,23 +30,30 @@ export class WishlistService {
     return wishlist;
   }
 
-  async toggleItem(userId: string, productId: string): Promise<WishlistDocument> {
+  async toggleItem(
+    userId: string,
+    productId: string,
+  ): Promise<WishlistDocument> {
     const userObjectId = new Types.ObjectId(userId);
     const productObjectId = new Types.ObjectId(productId);
 
     // Try pulling the item first. If it exists in the array, it will be pulled atomically.
-    const result = await this.wishlistModel.updateOne(
-      { user: userObjectId, products: productObjectId },
-      { $pull: { products: productObjectId } }
-    ).exec();
+    const result = await this.wishlistModel
+      .updateOne(
+        { user: userObjectId, products: productObjectId },
+        { $pull: { products: productObjectId } },
+      )
+      .exec();
 
     // If modifiedCount is 0, the item was not present, so we add it atomically.
     if (result.modifiedCount === 0) {
-      await this.wishlistModel.updateOne(
-        { user: userObjectId },
-        { $addToSet: { products: productObjectId } },
-        { upsert: true }
-      ).exec();
+      await this.wishlistModel
+        .updateOne(
+          { user: userObjectId },
+          { $addToSet: { products: productObjectId } },
+          { upsert: true },
+        )
+        .exec();
     }
 
     return this.getWishlist(userId);
@@ -56,36 +63,48 @@ export class WishlistService {
     const userObjectId = new Types.ObjectId(userId);
     const productObjectId = new Types.ObjectId(productId);
 
-    await this.wishlistModel.updateOne(
-      { user: userObjectId },
-      { $addToSet: { products: productObjectId } },
-      { upsert: true }
-    ).exec();
+    await this.wishlistModel
+      .updateOne(
+        { user: userObjectId },
+        { $addToSet: { products: productObjectId } },
+        { upsert: true },
+      )
+      .exec();
 
     return this.getWishlist(userId);
   }
 
-  async removeItem(userId: string, productId: string): Promise<WishlistDocument> {
+  async removeItem(
+    userId: string,
+    productId: string,
+  ): Promise<WishlistDocument> {
     const userObjectId = new Types.ObjectId(userId);
     const productObjectId = new Types.ObjectId(productId);
 
-    await this.wishlistModel.updateOne(
-      { user: userObjectId },
-      { $pull: { products: productObjectId } }
-    ).exec();
+    await this.wishlistModel
+      .updateOne(
+        { user: userObjectId },
+        { $pull: { products: productObjectId } },
+      )
+      .exec();
 
     return this.getWishlist(userId);
   }
 
-  async mergeWishlist(userId: string, productIds: string[]): Promise<WishlistDocument> {
+  async mergeWishlist(
+    userId: string,
+    productIds: string[],
+  ): Promise<WishlistDocument> {
     const userObjectId = new Types.ObjectId(userId);
-    const productObjectIds = productIds.map(id => new Types.ObjectId(id));
+    const productObjectIds = productIds.map((id) => new Types.ObjectId(id));
 
-    await this.wishlistModel.updateOne(
-      { user: userObjectId },
-      { $addToSet: { products: { $each: productObjectIds } } },
-      { upsert: true }
-    ).exec();
+    await this.wishlistModel
+      .updateOne(
+        { user: userObjectId },
+        { $addToSet: { products: { $each: productObjectIds } } },
+        { upsert: true },
+      )
+      .exec();
 
     return this.getWishlist(userId);
   }

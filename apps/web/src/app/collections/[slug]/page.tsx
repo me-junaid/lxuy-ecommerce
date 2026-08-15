@@ -29,7 +29,7 @@ interface Product {
   brand: Brand | string;
   category: Category | string;
   images: string[];
-  variants?: any[];
+  variants?: unknown[];
 }
 
 function CollectionPageContent({ slug }: { slug: string }) {
@@ -110,8 +110,9 @@ function CollectionPageContent({ slug }: { slug: string }) {
         setProducts(data.data || []);
         setTotalProducts(data.total || 0);
         setTotalPages(data.pages || 1);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong.");
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Something went wrong.");
       } finally {
         setLoading(false);
       }

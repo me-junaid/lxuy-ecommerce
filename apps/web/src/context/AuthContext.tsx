@@ -187,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("auth-logout", handleGlobalLogout);
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, []);
+  }, [router]);
 
   // ── Login ──────────────────────────────────────────────────────────────────
   const login = async (credentials: LoginCredentials): Promise<User> => {

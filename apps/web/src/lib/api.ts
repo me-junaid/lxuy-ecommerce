@@ -1,11 +1,11 @@
 interface RequestOptions extends RequestInit {
-  data?: any;
+  data?: unknown;
 }
 
 export class ApiError extends Error {
   status: number;
-  data: any;
-  constructor(message: string, status: number, data: any) {
+  data: unknown;
+  constructor(message: string, status: number, data: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -45,7 +45,7 @@ async function refreshTokens(): Promise<string | null> {
       const token = data.accessToken;
       setAccessToken(token);
       return token;
-    } catch (err) {
+    } catch {
       setAccessToken(null);
       // Dispatch a custom logout event so that context listeners can update state
       if (typeof window !== 'undefined') {
@@ -60,6 +60,8 @@ async function refreshTokens(): Promise<string | null> {
   return refreshPromise;
 }
 
+// TODO(migration): Use proper DTO/Response types instead of any when fully migrating to typed calls
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function apiRequest<T = any>(
   path: string,
   options: RequestOptions = {}
@@ -111,7 +113,7 @@ export async function apiRequest<T = any>(
         'Authorization': `Bearer ${newToken}`,
       } as Record<string, string>;
       
-      response = await fetch(path, {
+      response = await fetch(fullPath, {
         ...config,
         headers: retryHeaders,
       });
@@ -140,15 +142,17 @@ export async function apiRequest<T = any>(
   return {} as T;
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const api = {
   get: <T = any>(path: string, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'GET' }),
-  post: <T = any>(path: string, data?: any, options?: RequestOptions) =>
+  post: <T = any>(path: string, data?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'POST', data }),
-  patch: <T = any>(path: string, data?: any, options?: RequestOptions) =>
+  patch: <T = any>(path: string, data?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'PATCH', data }),
-  put: <T = any>(path: string, data?: any, options?: RequestOptions) =>
+  put: <T = any>(path: string, data?: unknown, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'PUT', data }),
   delete: <T = any>(path: string, options?: RequestOptions) =>
     apiRequest<T>(path, { ...options, method: 'DELETE' }),
 };
+/* eslint-enable @typescript-eslint/no-explicit-any */

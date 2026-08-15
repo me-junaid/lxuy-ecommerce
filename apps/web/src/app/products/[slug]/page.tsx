@@ -58,6 +58,15 @@ interface Product {
   };
 }
 
+interface RecentlyViewedProduct {
+  _id: string;
+  name: string;
+  slug: string;
+  images: string[];
+  brand: string | { _id: string; name: string };
+  price: number;
+}
+
 interface RecommendationProduct {
   id: string;
   name: string;
@@ -126,7 +135,7 @@ export default function ProductDetailPage({
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedProduct[]>([]);
 
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
@@ -156,10 +165,14 @@ export default function ProductDetailPage({
       const local = localStorage.getItem("lxuy_recently_viewed");
       if (local) {
         try {
-          const list = JSON.parse(local) as any[];
-          setRecentlyViewed(list.filter((p) => p.slug !== slug));
+          const list = JSON.parse(local) as RecentlyViewedProduct[];
+          setTimeout(() => {
+            setRecentlyViewed(list.filter((p) => p.slug !== slug));
+          }, 0);
         } catch {
-          setRecentlyViewed([]);
+          setTimeout(() => {
+            setRecentlyViewed([]);
+          }, 0);
         }
       }
     }
@@ -186,7 +199,7 @@ export default function ProductDetailPage({
         if (typeof window !== "undefined" && data) {
           const localKey = "lxuy_recently_viewed";
           const current = localStorage.getItem(localKey);
-          let list: any[] = [];
+          let list: RecentlyViewedProduct[] = [];
           if (current) {
             try {
               list = JSON.parse(current);
@@ -194,7 +207,7 @@ export default function ProductDetailPage({
               list = [];
             }
           }
-          list = list.filter((p: any) => p._id !== data._id);
+          list = list.filter((p) => p._id !== data._id);
           list.unshift({
             _id: data._id,
             name: data.name,
@@ -948,6 +961,7 @@ export default function ProductDetailPage({
                     className="group space-y-3 block"
                   >
                     <div className="aspect-[3/4] overflow-hidden bg-luxury-silver/5 relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={image}
                         alt={p.name}

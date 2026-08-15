@@ -11,7 +11,8 @@ export class VariantAttribute {
   @Prop({ required: true, trim: true })
   value: string;
 }
-export const VariantAttributeSchema = SchemaFactory.createForClass(VariantAttribute);
+export const VariantAttributeSchema =
+  SchemaFactory.createForClass(VariantAttribute);
 
 @Schema({ timestamps: true })
 export class ProductVariant {
@@ -36,7 +37,8 @@ export class ProductVariant {
   @Prop({ default: true })
   isActive: boolean;
 }
-export const ProductVariantSchema = SchemaFactory.createForClass(ProductVariant);
+export const ProductVariantSchema =
+  SchemaFactory.createForClass(ProductVariant);
 
 @Schema({ timestamps: true })
 export class Product {
@@ -52,13 +54,22 @@ export class Product {
   @Prop({ trim: true })
   summary?: string;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category', required: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Category',
+    required: true,
+  })
   category: Types.ObjectId;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Brand', required: true })
   brand: Types.ObjectId;
 
-  @Prop({ required: true, enum: ['draft', 'published', 'archived'], default: 'draft', index: true })
+  @Prop({
+    required: true,
+    enum: ['draft', 'published', 'archived'],
+    default: 'draft',
+    index: true,
+  })
   status: string;
 
   @Prop({ type: [String], required: true, default: [] })
@@ -88,6 +99,12 @@ export class Product {
     average: number;
     count: number;
   };
+
+  @Prop({ type: Boolean, default: false, index: true })
+  isCurated: boolean;
+
+  @Prop({ type: Number, default: null, index: true })
+  curatedPosition?: number | null;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
@@ -139,7 +140,10 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(null);
 
       await expect(
-        authService.login({ email: 'wrong@example.com', password: 'Password123!' }),
+        authService.login({
+          email: 'wrong@example.com',
+          password: 'Password123!',
+        }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -148,14 +152,19 @@ describe('AuthService', () => {
       mockedBcrypt.compare.mockResolvedValue(false as never);
 
       await expect(
-        authService.login({ email: 'test@example.com', password: 'WrongPassword!' }),
+        authService.login({
+          email: 'test@example.com',
+          password: 'WrongPassword!',
+        }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should succeed and return tokens + user on valid credentials', async () => {
       usersService.findByEmail.mockResolvedValue(mockUser as any);
       mockedBcrypt.compare.mockResolvedValue(true as never);
-      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
       usersService.addSession.mockResolvedValue(undefined);
       mockedBcrypt.genSalt.mockResolvedValue('salt' as never);
       mockedBcrypt.hash.mockResolvedValue('hashed-refresh-token' as never);
@@ -195,12 +204,17 @@ describe('AuthService', () => {
       jwtService.verify.mockReturnValue({ tokenId: 'session-id-123' });
       usersService.findByIdWithSessions.mockResolvedValue(mockUser as any);
       mockedBcrypt.compare.mockResolvedValue(true as never);
-      jwtService.sign.mockReturnValueOnce('new-access-token').mockReturnValueOnce('new-refresh-token');
+      jwtService.sign
+        .mockReturnValueOnce('new-access-token')
+        .mockReturnValueOnce('new-refresh-token');
       usersService.updateSession.mockResolvedValue(undefined);
       mockedBcrypt.genSalt.mockResolvedValue('salt' as never);
       mockedBcrypt.hash.mockResolvedValue('new-hash' as never);
 
-      const result = await authService.refreshTokens('user-id-123', 'valid-refresh-token');
+      const result = await authService.refreshTokens(
+        'user-id-123',
+        'valid-refresh-token',
+      );
 
       expect(usersService.updateSession).toHaveBeenCalledWith(
         'user-id-123',
@@ -223,7 +237,10 @@ describe('AuthService', () => {
       await expect(
         authService.refreshTokens('user-id-123', 'wrong-refresh-token'),
       ).rejects.toThrow(UnauthorizedException);
-      expect(usersService.removeSession).toHaveBeenCalledWith('user-id-123', 'session-id-123');
+      expect(usersService.removeSession).toHaveBeenCalledWith(
+        'user-id-123',
+        'session-id-123',
+      );
     });
   });
 
@@ -233,7 +250,10 @@ describe('AuthService', () => {
 
       await authService.logout('user-id-123', 'session-id-123');
 
-      expect(usersService.removeSession).toHaveBeenCalledWith('user-id-123', 'session-id-123');
+      expect(usersService.removeSession).toHaveBeenCalledWith(
+        'user-id-123',
+        'session-id-123',
+      );
     });
   });
 

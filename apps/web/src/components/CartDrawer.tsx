@@ -153,6 +153,7 @@ export const CartDrawer: React.FC = () => {
                       >
                         {/* Image */}
                         <div className="w-20 aspect-[3/4] bg-neutral-100 overflow-hidden relative flex-shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={image} alt={item.product.name} className="w-full h-full object-cover" />
                         </div>
 

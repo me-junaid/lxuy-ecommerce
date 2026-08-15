@@ -33,8 +33,9 @@ export default function LoginPage() {
     try {
       await login({ email: email.trim().toLowerCase(), password });
       router.replace("/");
-    } catch (err: any) {
-      setError(err.message || "Invalid administrative credentials.");
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Invalid administrative credentials.");
     } finally {
       setIsSubmitting(false);
     }

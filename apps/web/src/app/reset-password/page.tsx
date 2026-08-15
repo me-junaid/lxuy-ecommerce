@@ -5,7 +5,6 @@ import { Input, Button, Header, Footer } from "@repo/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../../lib/api";
 
@@ -25,9 +24,13 @@ function ResetPasswordContent() {
   useEffect(() => {
     const tokenParam = searchParams.get("token");
     if (!tokenParam) {
-      setError("Reset token is missing. Please request a new link.");
+      setTimeout(() => {
+        setError("Reset token is missing. Please request a new link.");
+      }, 0);
     } else {
-      setToken(tokenParam);
+      setTimeout(() => {
+        setToken(tokenParam);
+      }, 0);
     }
   }, [searchParams]);
 

@@ -14,7 +14,6 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,8 +32,8 @@ import { PromotionsModule } from './modules/promotions/promotions.module';
     // Auth endpoints override this with stricter limits via @Throttle().
     ThrottlerModule.forRoot([
       {
-        ttl: 60000,  // Window: 60 seconds
-        limit: 100,  // Default: 100 requests per window
+        ttl: 60000, // Window: 60 seconds
+        limit: 100, // Default: 100 requests per window
       },
     ]),
     UsersModule,

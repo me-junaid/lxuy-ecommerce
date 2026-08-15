@@ -36,19 +36,38 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Navigation link helper with path matching
-  const navItems = [
-    { label: "Overview", href: "/" },
-    { label: "Catalog Inventory", href: "/products" },
-    { label: "Add Product", href: "/products/create" },
+  // Navigation link groups
+  const navSections = [
+    {
+      title: null,
+      items: [
+        { label: "Overview", href: "/" },
+      ],
+    },
+    {
+      title: "Orders",
+      items: [
+        { label: "Orders", href: "/orders" },
+      ],
+    },
+    {
+      title: "Catalog Management",
+      items: [
+        { label: "Catalog Inventory", href: "/products" },
+        { label: "Curate Releases", href: "/products/curate" },
+        { label: "Add Product", href: "/products/create" },
+        { label: "Brands", href: "/brands" },
+        { label: "Categories", href: "/categories" },
+      ],
+    },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#FDFBF7] text-[#111111] font-sans selection:bg-[#B38F5F]/15 selection:text-[#B38F5F]">
+    <div className="h-screen w-screen overflow-hidden flex flex-col md:flex-row bg-[#FDFBF7] text-[#111111] font-sans selection:bg-[#B38F5F]/15 selection:text-[#B38F5F]">
       
       {/* 1. Sidebar Nav */}
-      <aside className="w-full md:w-64 bg-[#FDFBF7] border-b md:border-b-0 md:border-r border-neutral-200/80 p-6 flex flex-col justify-between shrink-0">
-        <div className="space-y-10 text-left">
+      <aside className="w-full md:w-64 md:fixed md:top-0 md:bottom-0 md:left-0 bg-[#FDFBF7] border-b md:border-b-0 md:border-r border-neutral-200/80 p-6 flex flex-col justify-between shrink-0 z-40 overflow-y-auto">
+        <div className="space-y-8 text-left">
           
           {/* Logo Branding */}
           <Link href="/" className="space-y-1 block group focus:outline-none">
@@ -61,23 +80,34 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </Link>
 
           {/* Navigation Links */}
-          <nav className="flex flex-col space-y-4 pt-6 border-t border-neutral-200/60">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`text-[10px] uppercase tracking-[0.2em] font-semibold transition-all duration-300 py-1 border-l-2 pl-3 focus:outline-none ${
-                    isActive
-                      ? "text-[#B38F5F] border-[#B38F5F]"
-                      : "text-neutral-500 border-transparent hover:text-[#111111] hover:border-neutral-300"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+          <nav className="flex flex-col space-y-6 pt-4 border-t border-neutral-200/60">
+            {navSections.map((section, sIdx) => (
+              <div key={sIdx} className="space-y-2.5">
+                {section.title && (
+                  <span className="text-[8px] uppercase tracking-[0.25em] font-bold text-neutral-400 block px-3">
+                    {section.title}
+                  </span>
+                )}
+                <div className="flex flex-col space-y-1.5">
+                  {section.items.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`text-[10px] uppercase tracking-[0.2em] font-semibold transition-all duration-300 py-1.5 border-l-2 pl-3 focus:outline-none ${
+                          isActive
+                            ? "text-[#B38F5F] border-[#B38F5F]"
+                            : "text-neutral-500 border-transparent hover:text-[#111111] hover:border-neutral-300"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
         </div>
 
@@ -104,7 +134,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* 2. Main content container */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 md:pl-64 h-full overflow-y-auto bg-[#FDFBF7]">
         {children}
       </div>
 

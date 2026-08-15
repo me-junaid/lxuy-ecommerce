@@ -7,7 +7,6 @@ import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { api } from "../../lib/api";
 
 interface AddressForm {
@@ -90,13 +89,15 @@ export default function CheckoutPage() {
   // Update prefilled info when user changes
   useEffect(() => {
     if (user) {
-      setAddressForm((prev) => ({
-        ...prev,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phoneNumber || "",
-      }));
+      setTimeout(() => {
+        setAddressForm((prev) => ({
+          ...prev,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phoneNumber || "",
+        }));
+      }, 0);
     }
   }, [user]);
 
@@ -174,8 +175,9 @@ export default function CheckoutPage() {
           : `₹${result.value.toLocaleString('en-IN')} off`;
       setCouponSuccess(`Promo code ${result.code} applied — ${label}.`);
       setCouponCode("");
-    } catch (err: any) {
-      setCouponError(err.message || 'Invalid promo code. Please try again.');
+    } catch (err) {
+      const error = err as Error;
+      setCouponError(error.message || 'Invalid promo code. Please try again.');
     } finally {
       setIsApplyingCoupon(false);
     }
@@ -249,11 +251,12 @@ export default function CheckoutPage() {
       setIsSubmitting(false);
       setOrderPlaced(true);
       await clearCart();
-    } catch (err: any) {
-      console.error("Failed to place order:", err);
+    } catch (err) {
+      const error = err as Error;
+      console.error("Failed to place order:", error);
       setFormErrors((prev) => ({
         ...prev,
-        submit: err.message || "Failed to place order. Please try again.",
+        submit: error.message || "Failed to place order. Please try again.",
       }));
       setIsSubmitting(false);
     }
@@ -557,6 +560,7 @@ export default function CheckoutPage() {
                         {cartItems.map((item) => (
                           <div key={`${item.product._id}-${item.sku}`} className="flex items-center space-x-4 py-3 first:pt-0 last:pb-0">
                             <div className="w-12 aspect-[3/4] bg-neutral-100 overflow-hidden relative flex-shrink-0">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={item.product.images?.[0] || "/images/models/modules1.jpeg"} alt={item.product.name} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1 min-w-0">

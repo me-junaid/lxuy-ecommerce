@@ -1,6 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto, UpdateProductDto, ProductQueryDto } from './product.dto';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  ProductQueryDto,
+} from './product.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -9,6 +25,14 @@ import { Types } from 'mongoose';
 @Controller('api/v1/products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  @Post('curate')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'store_manager')
+  @HttpCode(HttpStatus.OK)
+  async setCurated(@Body() body: { productIds: string[] }) {
+    return this.productsService.setCurated(body.productIds);
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

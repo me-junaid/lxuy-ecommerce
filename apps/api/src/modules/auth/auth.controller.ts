@@ -83,7 +83,11 @@ export class AuthController {
   ) {
     const result = await this.authService.login(loginDto);
 
-    response.cookie('lxuy_refresh_token', result.refreshToken, this.getCookieOptions(request));
+    response.cookie(
+      'lxuy_refresh_token',
+      result.refreshToken,
+      this.getCookieOptions(request),
+    );
 
     return {
       accessToken: result.accessToken,
@@ -105,8 +109,11 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const cookies = request.cookies as Record<string, string | undefined> | undefined;
-    this.logger.log(`Incoming refresh request. Cookies: ${JSON.stringify(cookies)}`);
+    const cookies = request.cookies as
+      Record<string, string | undefined> | undefined;
+    this.logger.log(
+      `Incoming refresh request. Cookies: ${JSON.stringify(cookies)}`,
+    );
     const refreshToken = cookies?.['lxuy_refresh_token'];
 
     if (!refreshToken) {
@@ -135,9 +142,18 @@ export class AuthController {
       throw new UnauthorizedException('Invalid refresh token payload');
     }
 
-    this.logger.log(`Refresh token verified for user sub: ${payload.sub}. Fetching user...`);
-    const result = await this.authService.refreshTokens(payload.sub, refreshToken);
-    response.cookie('lxuy_refresh_token', result.refreshToken, this.getCookieOptions(request));
+    this.logger.log(
+      `Refresh token verified for user sub: ${payload.sub}. Fetching user...`,
+    );
+    const result = await this.authService.refreshTokens(
+      payload.sub,
+      refreshToken,
+    );
+    response.cookie(
+      'lxuy_refresh_token',
+      result.refreshToken,
+      this.getCookieOptions(request),
+    );
 
     return {
       accessToken: result.accessToken,
@@ -202,10 +218,7 @@ export class AuthController {
    */
   @SkipThrottle()
   @Get('verify-email')
-  async verifyEmail(
-    @Query() query: VerifyEmailDto,
-    @Res() response: Response,
-  ) {
+  async verifyEmail(@Query() query: VerifyEmailDto, @Res() response: Response) {
     const frontendUrl =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
 
@@ -237,7 +250,6 @@ export class AuthController {
     }
   }
 
-
   /**
    * Resend verification email — stricter rate limit: 3 per 10 minutes per IP (AUTH-023, AUTH-024).
    */
@@ -254,7 +266,7 @@ export class AuthController {
    */
   @SkipThrottle()
   @Get('google')
-  async googleLogin(@Res() response: Response) {
+  googleLogin(@Res() response: Response) {
     const authUrl = this.authService.getGoogleAuthUrl();
     return response.redirect(authUrl);
   }
@@ -274,7 +286,9 @@ export class AuthController {
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3000';
 
     if (!code) {
-      this.logger.warn('Google authorization code is missing from callback query.');
+      this.logger.warn(
+        'Google authorization code is missing from callback query.',
+      );
       return response.redirect(
         `${frontendUrl}/login?social_login=error&reason=missing_code`,
       );
@@ -340,7 +354,9 @@ export class AuthController {
       // Token is valid. Redirect to frontend reset form page, passing the raw token
       return response.redirect(`${frontendUrl}/reset-password?token=${token}`);
     } catch (err: unknown) {
-      this.logger.error(`Reset token validation failed: ${err instanceof Error ? err.message : String(err)}`);
+      this.logger.error(
+        `Reset token validation failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
       return response.redirect(
         `${frontendUrl}/login?reset_status=error&reason=invalid_token`,
       );

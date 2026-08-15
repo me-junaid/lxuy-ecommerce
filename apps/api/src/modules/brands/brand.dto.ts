@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, Matches } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  IsEnum,
+  Matches,
+} from 'class-validator';
 
 export class CreateBrandDto {
   @IsString()
@@ -8,7 +15,8 @@ export class CreateBrandDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message: 'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
+    message:
+      'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
   })
   slug: string;
 
@@ -28,6 +36,10 @@ export class CreateBrandDto {
   @IsOptional()
   isActive?: boolean;
 
+  @IsEnum(['active', 'inactive', 'archived'])
+  @IsOptional()
+  status?: string;
+
   @IsString()
   @IsOptional()
   metaTitle?: string;
@@ -45,7 +57,8 @@ export class UpdateBrandDto {
   @IsString()
   @IsOptional()
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-    message: 'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
+    message:
+      'Slug must contain only lowercase alphanumeric characters and dashes, and cannot start or end with a dash',
   })
   slug?: string;
 
@@ -64,6 +77,10 @@ export class UpdateBrandDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsEnum(['active', 'inactive', 'archived'])
+  @IsOptional()
+  status?: string;
 
   @IsString()
   @IsOptional()

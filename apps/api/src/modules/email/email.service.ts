@@ -1,4 +1,8 @@
-import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
@@ -17,8 +21,8 @@ export class EmailService {
       if (isDev) {
         this.logger.warn(
           'RESEND_API_KEY is not set. ' +
-          'Emails will not be sent in development. ' +
-          'Set your Resend API key in .env to enable email sending.',
+            'Emails will not be sent in development. ' +
+            'Set your Resend API key in .env to enable email sending.',
         );
       } else {
         throw new InternalServerErrorException(
@@ -43,7 +47,8 @@ export class EmailService {
     firstName: string,
     rawToken: string,
   ): Promise<void> {
-    const verifyUrl = this.backendUrl + '/api/v1/auth/verify-email?token=' + rawToken;
+    const verifyUrl =
+      this.backendUrl + '/api/v1/auth/verify-email?token=' + rawToken;
     const year = new Date().getFullYear();
 
     const body = [
@@ -60,18 +65,26 @@ export class EmailService {
       '</td></tr>',
       '<tr><td style="padding:48px;">',
       '<p style="margin:0 0 8px;font-size:11px;letter-spacing:0.2em;color:#c9a96e;text-transform:uppercase;">Welcome</p>',
-      '<h1 style="margin:0 0 24px;font-size:28px;font-weight:400;color:#1a1a1a;">Dear ' + firstName + ',</h1>',
+      '<h1 style="margin:0 0 24px;font-size:28px;font-weight:400;color:#1a1a1a;">Dear ' +
+        firstName +
+        ',</h1>',
       '<p style="margin:0 0 32px;font-size:15px;color:#555;line-height:1.8;">',
       'Thank you for joining LXUY. To complete your registration, please verify your email address.</p>',
       '<table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">',
       '<tr><td style="background:#1a1a1a;padding:14px 36px;text-align:center;">',
-      '<a href="' + verifyUrl + '" style="color:#c9a96e;font-size:11px;letter-spacing:0.25em;text-decoration:none;text-transform:uppercase;font-weight:600;">Verify Email Address</a>',
+      '<a href="' +
+        verifyUrl +
+        '" style="color:#c9a96e;font-size:11px;letter-spacing:0.25em;text-decoration:none;text-transform:uppercase;font-weight:600;">Verify Email Address</a>',
       '</td></tr></table>',
       '<p style="margin:0 0 8px;font-size:12px;color:#888;">This link expires in <strong>24 hours</strong>. If you did not create an account, you can safely ignore this email.</p>',
-      '<p style="margin:24px 0 0;font-size:11px;color:#bbb;word-break:break-all;">' + verifyUrl + '</p>',
+      '<p style="margin:24px 0 0;font-size:11px;color:#bbb;word-break:break-all;">' +
+        verifyUrl +
+        '</p>',
       '</td></tr>',
       '<tr><td style="padding:24px 48px;border-top:1px solid #e8e1d4;text-align:center;">',
-      '<p style="margin:0;font-size:11px;color:#bbb;">&copy; ' + year + ' LXUY . All rights reserved.</p>',
+      '<p style="margin:0;font-size:11px;color:#bbb;">&copy; ' +
+        year +
+        ' LXUY . All rights reserved.</p>',
       '</td></tr>',
       '</table></td></tr></table></body></html>',
     ].join('\n');
@@ -99,7 +112,8 @@ export class EmailService {
     firstName: string,
     rawToken: string,
   ): Promise<void> {
-    const resetUrl = this.backendUrl + '/api/v1/auth/reset-password?token=' + rawToken;
+    const resetUrl =
+      this.backendUrl + '/api/v1/auth/reset-password?token=' + rawToken;
     const year = new Date().getFullYear();
 
     const body = [
@@ -116,18 +130,26 @@ export class EmailService {
       '</td></tr>',
       '<tr><td style="padding:48px;">',
       '<p style="margin:0 0 8px;font-size:11px;letter-spacing:0.2em;color:#c9a96e;text-transform:uppercase;">Security</p>',
-      '<h1 style="margin:0 0 24px;font-size:28px;font-weight:400;color:#1a1a1a;">Dear ' + firstName + ',</h1>',
+      '<h1 style="margin:0 0 24px;font-size:28px;font-weight:400;color:#1a1a1a;">Dear ' +
+        firstName +
+        ',</h1>',
       '<p style="margin:0 0 32px;font-size:15px;color:#555;line-height:1.8;">',
       'We received a request to reset the password for your LXUY account. To reset your password, please click the button below.</p>',
       '<table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">',
       '<tr><td style="background:#1a1a1a;padding:14px 36px;text-align:center;">',
-      '<a href="' + resetUrl + '" style="color:#c9a96e;font-size:11px;letter-spacing:0.25em;text-decoration:none;text-transform:uppercase;font-weight:600;">Reset Password</a>',
+      '<a href="' +
+        resetUrl +
+        '" style="color:#c9a96e;font-size:11px;letter-spacing:0.25em;text-decoration:none;text-transform:uppercase;font-weight:600;">Reset Password</a>',
       '</td></tr></table>',
       '<p style="margin:0 0 8px;font-size:12px;color:#888;">This link expires in <strong>1 hour</strong>. If you did not request a password reset, you can safely ignore this email.</p>',
-      '<p style="margin:24px 0 0;font-size:11px;color:#bbb;word-break:break-all;">' + resetUrl + '</p>',
+      '<p style="margin:24px 0 0;font-size:11px;color:#bbb;word-break:break-all;">' +
+        resetUrl +
+        '</p>',
       '</td></tr>',
       '<tr><td style="padding:24px 48px;border-top:1px solid #e8e1d4;text-align:center;">',
-      '<p style="margin:0;font-size:11px;color:#bbb;">&copy; ' + year + ' LXUY. All rights reserved.</p>',
+      '<p style="margin:0;font-size:11px;color:#bbb;">&copy; ' +
+        year +
+        ' LXUY. All rights reserved.</p>',
       '</td></tr>',
       '</table></td></tr></table></body></html>',
     ].join('\n');

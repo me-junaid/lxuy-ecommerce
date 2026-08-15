@@ -23,6 +23,14 @@ export class Brand {
   @Prop({ default: true })
   isActive: boolean;
 
+  @Prop({
+    required: true,
+    enum: ['active', 'inactive', 'archived'],
+    default: 'active',
+    index: true,
+  })
+  status: string;
+
   @Prop({ trim: true })
   metaTitle?: string;
 

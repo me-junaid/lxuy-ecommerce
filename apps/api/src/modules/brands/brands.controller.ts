@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { BrandsService } from './brands.service';
 import { CreateBrandDto, UpdateBrandDto } from './brand.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,6 +27,13 @@ export class BrandsController {
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createBrandDto: CreateBrandDto) {
     return this.brandsService.create(createBrandDto);
+  }
+
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'store_manager')
+  async findAllAdmin() {
+    return this.brandsService.findAllAdmin();
   }
 
   @Get()
@@ -44,8 +62,7 @@ export class BrandsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'store_manager')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    await this.brandsService.remove(id);
+    return this.brandsService.remove(id);
   }
 }

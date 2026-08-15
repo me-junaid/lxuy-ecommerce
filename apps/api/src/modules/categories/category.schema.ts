@@ -20,6 +20,14 @@ export class Category {
   @Prop({ default: true })
   isActive: boolean;
 
+  @Prop({
+    required: true,
+    enum: ['active', 'inactive', 'archived'],
+    default: 'active',
+    index: true,
+  })
+  status: string;
+
   @Prop({ trim: true })
   image?: string;
 

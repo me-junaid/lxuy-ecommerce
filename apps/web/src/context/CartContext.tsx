@@ -19,6 +19,24 @@ export interface CartItem {
   attributes: Array<{ name: string; value: string }>;
 }
 
+interface BackendCartItem {
+  product: {
+    _id: string;
+    name: string;
+    slug: string;
+    images: string[];
+    brand: string | { _id: string; name: string };
+    variants?: Array<{
+      sku: string;
+      price: number;
+      compareAtPrice?: number;
+      attributes: Array<{ name: string; value: string }>;
+    }>;
+  };
+  sku: string;
+  quantity: number;
+}
+
 interface CartContextType {
   items: CartItem[];
   loading: boolean;
@@ -32,7 +50,12 @@ interface CartContextType {
       slug: string;
       images: string[];
       brand: string | { _id: string; name: string };
-      variants?: any[];
+      variants?: Array<{
+        sku: string;
+        price: number;
+        compareAtPrice?: number;
+        attributes: Array<{ name: string; value: string }>;
+      }>;
       price?: number;
     },
     sku: string,
@@ -61,20 +84,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Cleanup active timeouts on unmount
   useEffect(() => {
+    const timeouts = debounceTimeoutsRef.current;
     return () => {
-      Object.values(debounceTimeoutsRef.current).forEach((timeout) => {
+      Object.values(timeouts).forEach((timeout) => {
         clearTimeout(timeout);
       });
     };
   }, []);
 
   // Helper to map NestJS populated backend item to CartItem
-  const mapBackendItem = (backendItem: any): CartItem => {
+  const mapBackendItem = (backendItem: BackendCartItem): CartItem => {
     const p = backendItem.product;
     const sku = backendItem.sku;
     const qty = backendItem.quantity;
 
-    const variant = p.variants?.find((v: any) => v.sku === sku) || p.variants?.[0];
+    const variant = p.variants?.find((v) => v.sku === sku) || p.variants?.[0];
     const price = variant ? variant.price : 0;
     const compareAtPrice = variant ? variant.compareAtPrice : undefined;
     const attributes = variant ? variant.attributes : [];
@@ -105,9 +129,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const res = await api.get('/api/v1/cart');
           const mapped = (res.items || []).map(mapBackendItem);
           setItems(mapped);
-        } catch (err: any) {
-          console.error('Failed to load authenticated cart:', err);
-          setError(err.message || 'Failed to load cart');
+        } catch (err) {
+          const errorVal = err as Error;
+          console.error('Failed to load authenticated cart:', errorVal);
+          setError(errorVal.message || 'Failed to load cart');
         }
       } else {
         // Load from localStorage for guest
@@ -174,7 +199,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       slug: string;
       images: string[];
       brand: string | { _id: string; name: string };
-      variants?: any[];
+      variants?: Array<{
+        sku: string;
+        price: number;
+        compareAtPrice?: number;
+        attributes: Array<{ name: string; value: string }>;
+      }>;
       price?: number;
     },
     sku: string,
@@ -188,8 +218,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const previousItems = JSON.parse(JSON.stringify(items));
       
       // Resolve variant info for local display
-      const variant = product.variants?.find((v: any) => v.sku === sku);
-      const price = variant ? variant.price : (product as any).price || 0;
+      const variant = product.variants?.find((v) => v.sku === sku);
+      const price = variant ? variant.price : product.price || 0;
       const compareAtPrice = variant ? variant.compareAtPrice : undefined;
       const attributes = variant ? variant.attributes : [];
 
@@ -229,15 +259,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         const mapped = (res.items || []).map(mapBackendItem);
         setItems(mapped);
-      } catch (err: any) {
-        console.error('Failed to add item to cart on backend:', err);
-        setError(err.message || 'Failed to add item');
+      } catch (err) {
+        const errorVal = err as Error;
+        console.error('Failed to add item to cart on backend:', errorVal);
+        setError(errorVal.message || 'Failed to add item');
         setItems(previousItems); // Rollback on failure
       }
     } else {
       // Find variant details
-      const variant = product.variants?.find((v: any) => v.sku === sku);
-      const price = variant ? variant.price : (product as any).price || 0;
+      const variant = product.variants?.find((v) => v.sku === sku);
+      const price = variant ? variant.price : product.price || 0;
       const compareAtPrice = variant ? variant.compareAtPrice : undefined;
       const attributes = variant ? variant.attributes : [];
 
@@ -272,7 +303,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     
     // First, update React local state instantly
-    let newItems = [...items];
+    const newItems = [...items];
     const idx = newItems.findIndex((item) => item.product._id === productId && item.sku === sku);
     if (idx > -1) {
       if (quantity <= 0) {
@@ -311,9 +342,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (!pendingSyncsRef.current[key]) {
             setItems(mapped);
           }
-        } catch (err: any) {
-          console.error('Failed to update cart item quantity on backend:', err);
-          setError(err.message || 'Failed to update quantity');
+        } catch (err) {
+          const errorVal = err as Error;
+          console.error('Failed to update cart item quantity on backend:', errorVal);
+          setError(errorVal.message || 'Failed to update quantity');
           
           // Rollback to database cart items
           try {
@@ -324,15 +356,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }, 350); // 350ms debounce window
     } else {
-      let newItems = [...items];
-      const idx = newItems.findIndex((item) => item.product._id === productId && item.sku === sku);
-      if (idx > -1) {
+      const newItemsLocal = [...items];
+      const idxLocal = newItemsLocal.findIndex((item) => item.product._id === productId && item.sku === sku);
+      if (idxLocal > -1) {
         if (quantity <= 0) {
-          newItems.splice(idx, 1);
+          newItemsLocal.splice(idxLocal, 1);
         } else {
-          newItems[idx].quantity = quantity;
+          newItemsLocal[idxLocal].quantity = quantity;
         }
-        saveLocalCart(newItems);
+        saveLocalCart(newItemsLocal);
       }
     }
   };
@@ -358,9 +390,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await api.delete(`/api/v1/cart/items/${productId}?sku=${sku}`);
         const mapped = (res.items || []).map(mapBackendItem);
         setItems(mapped);
-      } catch (err: any) {
-        console.error('Failed to remove item from backend cart:', err);
-        setError(err.message || 'Failed to remove item');
+      } catch (err) {
+        const errorVal = err as Error;
+        console.error('Failed to remove item from backend cart:', errorVal);
+        setError(errorVal.message || 'Failed to remove item');
         
         // Revert to backend cart state
         try {
@@ -382,9 +415,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await api.delete('/api/v1/cart');
         const mapped = (res.items || []).map(mapBackendItem);
         setItems(mapped);
-      } catch (err: any) {
-        console.error('Failed to clear backend cart:', err);
-        setError(err.message || 'Failed to clear cart');
+      } catch (err) {
+        const errorVal = err as Error;
+        console.error('Failed to clear backend cart:', errorVal);
+        setError(errorVal.message || 'Failed to clear cart');
       }
     } else {
       saveLocalCart([]);
