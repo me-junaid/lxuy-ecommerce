@@ -181,8 +181,8 @@ export default function Home() {
         if (res && res.data && res.data.length > 0) {
           setCuratedProducts(res.data);
         }
-      } catch (err) {
-        console.error("Failed to load curated products:", err);
+      } catch {
+        // Fallback to static editorial curated items if database endpoint is not ready
       }
     }
     loadCurated();

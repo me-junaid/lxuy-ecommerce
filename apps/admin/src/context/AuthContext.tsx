@@ -73,8 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setAccessToken(null);
           setUser(null);
         }
-      } catch (err) {
-        console.error("Session restore failed:", err);
+      } catch {
         localStorage.removeItem(LS_KEY);
         setAccessToken(null);
         setUser(null);

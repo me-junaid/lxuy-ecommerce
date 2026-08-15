@@ -21,6 +21,16 @@ interface Category {
   description?: string;
 }
 
+interface ProductVariant {
+  sku: string;
+  price: number;
+  compareAtPrice?: number;
+  stock: number;
+  attributes: Array<{ name: string; value: string }>;
+  images: string[];
+  isActive: boolean;
+}
+
 interface Product {
   _id: string;
   name: string;
@@ -29,7 +39,7 @@ interface Product {
   brand: Brand | string;
   category: Category | string;
   images: string[];
-  variants?: unknown[];
+  variants?: ProductVariant[];
 }
 
 function CollectionPageContent({ slug }: { slug: string }) {

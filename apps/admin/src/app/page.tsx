@@ -26,15 +26,35 @@ export default function DashboardHome() {
     if (user) {
       async function loadMetrics() {
         try {
-          const [resProducts, resCats, resBrands] = await Promise.all([
+          const [resProducts, resCats, resBrands] = await Promise.allSettled([
             api.get("/api/v1/products?limit=1"),
             api.get("/api/v1/categories"),
             api.get("/api/v1/brands"),
           ]);
+
+          const productTotal =
+            resProducts.status === "fulfilled" && resProducts.value
+              ? resProducts.value.total ?? (Array.isArray(resProducts.value.data) ? resProducts.value.data.length : 0)
+              : 0;
+
+          const categoryTotal =
+            resCats.status === "fulfilled" && resCats.value
+              ? Array.isArray(resCats.value)
+                ? resCats.value.length
+                : resCats.value.total ?? 0
+              : 0;
+
+          const brandTotal =
+            resBrands.status === "fulfilled" && resBrands.value
+              ? Array.isArray(resBrands.value)
+                ? resBrands.value.length
+                : resBrands.value.total ?? 0
+              : 0;
+
           setMetrics({
-            products: resProducts.total || 0,
-            categories: resCats.length || 0,
-            brands: resBrands.length || 0,
+            products: productTotal,
+            categories: categoryTotal,
+            brands: brandTotal,
           });
         } catch (err) {
           console.error("Failed to load dashboard metrics:", err);

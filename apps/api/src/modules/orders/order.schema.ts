@@ -117,7 +117,6 @@ export class OrderPayment {
     required: true,
     enum: ['pending', 'paid', 'failed', 'refunded', 'partially_refunded'],
     default: 'pending',
-    index: true,
   })
   status: string;
 

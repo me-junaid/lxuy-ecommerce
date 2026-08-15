@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SearchFlyout } from './SearchFlyout';
 
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 export interface HeaderProps {
   brandName?: string;

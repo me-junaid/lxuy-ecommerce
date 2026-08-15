@@ -23,8 +23,11 @@ interface Category {
 interface ProductVariant {
   sku: string;
   price: number;
+  compareAtPrice?: number;
   stock: number;
-  attributes?: Array<{ name: string; value: string }>;
+  attributes: Array<{ name: string; value: string }>;
+  images: string[];
+  isActive: boolean;
 }
 
 interface Product {

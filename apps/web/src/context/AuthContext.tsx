@@ -112,12 +112,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
 
           if (!response.ok) {
-            const errText = await response.text();
-            console.error(`[AuthContext] Refresh failed with status ${response.status}:`, errText);
             lastError = { status: response.status };
             // 401 = definitively expired/invalid. No point retrying.
             if (response.status === 401) break;
-            // 5xx = transient — try again.
+            // 5xx = transient server startup — retry silently.
             continue;
           }
 
