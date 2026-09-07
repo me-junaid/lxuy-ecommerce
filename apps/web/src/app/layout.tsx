@@ -19,8 +19,67 @@ const serifFont = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "LXUY - Premium",
-  description: "Apple-quality experience, Gucci-inspired premium design.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://lxuy.com"
+  ),
+  title: {
+    default: "LXUY — Premium Fashion & Luxury Menswear",
+    template: "%s | LXUY",
+  },
+  description:
+    "Discover curated luxury menswear at LXUY — premium editorial fashion, exclusive collections, and timeless style delivered to your door.",
+  keywords: [
+    "luxury menswear",
+    "premium fashion",
+    "designer clothing",
+    "editorial fashion",
+    "LXUY",
+    "luxury brand",
+    "menswear India",
+  ],
+  authors: [{ name: "LXUY", url: "https://lxuy.com" }],
+  creator: "LXUY",
+  publisher: "LXUY",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: "https://lxuy.com",
+    siteName: "LXUY",
+    title: "LXUY — Premium Fashion & Luxury Menswear",
+    description:
+      "Discover curated luxury menswear at LXUY — premium editorial fashion, exclusive collections, and timeless style.",
+    images: [
+      {
+        url: "/images/hero/invetsinyo.jpg",
+        width: 1200,
+        height: 630,
+        alt: "LXUY — Premium Fashion",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@lxuy",
+    creator: "@lxuy",
+    title: "LXUY — Premium Fashion & Luxury Menswear",
+    description:
+      "Discover curated luxury menswear at LXUY — premium editorial fashion, exclusive collections, and timeless style.",
+    images: ["/images/hero/invetsinyo.jpg"],
+  },
+  alternates: {
+    canonical: "https://lxuy.com",
+  },
 };
 
 export default function RootLayout({
