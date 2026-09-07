@@ -28,7 +28,13 @@ export const getAccessToken = () => accessToken;
  */
 export function resolveApiUrl(path: string): string {
   const isServer = typeof window === 'undefined';
-  let base = (process.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
+  let base = (process.env.NEXT_PUBLIC_API_URL || '').trim().replace(/^["']|["']$/g, '').trim();
+
+  if (base && !base.startsWith('http://') && !base.startsWith('https://') && !base.startsWith('/')) {
+    base = `https://${base}`;
+  }
+
+  base = base.replace(/\/+$/, '');
 
   // In server-side environments (SSR, generateMetadata, sitemap), Node fetch
   // requires an absolute URL. Fallback to localhost:3001 if no env var is present.
