@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProductDetailClient from "./ProductDetailClient";
+import { resolveApiUrl } from "../../../lib/api";
 
 interface Brand {
   _id: string;
@@ -44,8 +45,8 @@ interface Product {
 
 async function getProduct(slug: string): Promise<Product | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-    const res = await fetch(`${apiUrl}/api/v1/products/${slug}`, {
+    const url = resolveApiUrl(`/api/v1/products/${slug}`);
+    const res = await fetch(url, {
       next: { revalidate: 300 }, // ISR: revalidate every 5 minutes
     });
     if (!res.ok) return null;

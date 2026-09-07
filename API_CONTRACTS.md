@@ -341,3 +341,21 @@ Retrieves full details of a specific order by ID. The user must be the owner of 
   * `401 Unauthorized` (Missing or invalid access token).
   * `403 Forbidden` (Trying to view another user's order).
   * `404 Not Found` (Order ID not found).
+
+---
+
+## Health Service (`/health` and `/api/v1/health`)
+
+### 1. Service Health Check
+Liveness and readiness check used by Railway deployment probes, monitoring, and frontend integration verification.
+
+* **Endpoints:** `GET /health`, `GET /api/v1/health`
+* **Auth:** None (Public, skips throttling)
+* **Success Response (`200 OK`):**
+  ```json
+  {
+    "status": "ok",
+    "timestamp": "2026-09-07T16:03:43.496Z",
+    "uptime": 8.574
+  }
+  ```

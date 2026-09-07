@@ -2,12 +2,16 @@
   "name": "next_lxuy",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "build:api": "turbo run build --filter=api",
+    "build:web": "turbo run build --filter=web",
+    "start": "pnpm --filter api start:prod",
+    "start:api": "pnpm --filter api start:prod",
+    "start:web": "pnpm --filter web start",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
   },

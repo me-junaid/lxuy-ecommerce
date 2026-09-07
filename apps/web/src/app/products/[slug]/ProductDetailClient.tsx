@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
 import { useCart } from "../../../context/CartContext";
 import { useWishlist } from "../../../context/WishlistContext";
+import { api } from "../../../lib/api";
 import {
   Header,
   Footer,
@@ -166,16 +167,20 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       const catId = typeof product.category === "object" ? product.category._id : product.category;
       if (!catId) return;
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
-        const recResponse = await fetch(`${baseUrl}/api/v1/products?category=${catId}&limit=4`);
-        if (recResponse.ok) {
-          const recData = await recResponse.json();
-          if (recData.data && recData.data.length > 0) {
-            const formattedRecs = recData.data
-              .filter((p: Product) => p.slug !== product.slug)
-              .map((p: Product) => ({ id: p._id, name: p.name, brand: typeof p.brand === "object" ? p.brand.name : "LXUY SIGNATURE", price: p.variants?.[0]?.price ?? 0, imageUrl: p.images?.[0] ?? "/images/models/modules1.jpeg" }));
-            if (formattedRecs.length > 0) setRecommendations(formattedRecs);
-          }
+        const recData = await api.get<{ data: Product[] }>(
+          `/api/v1/products?category=${catId}&limit=4`
+        );
+        if (recData.data && recData.data.length > 0) {
+          const formattedRecs = recData.data
+            .filter((p: Product) => p.slug !== product.slug)
+            .map((p: Product) => ({
+              id: p._id,
+              name: p.name,
+              brand: typeof p.brand === "object" ? p.brand.name : "LXUY SIGNATURE",
+              price: p.variants?.[0]?.price ?? 0,
+              imageUrl: p.images?.[0] ?? "/images/models/modules1.jpeg",
+            }));
+          if (formattedRecs.length > 0) setRecommendations(formattedRecs);
         }
       } catch { /* keep fallback */ }
     }

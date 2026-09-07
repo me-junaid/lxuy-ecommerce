@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const uri = 'mongodb+srv://jdasjunaid_db_user:PXoq7YgZdQLdoNV5@lxuy.zau631m.mongodb.net/test?retryWrites=true&w=majority';
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/next-ecommerce';
 
 async function run() {
   try {

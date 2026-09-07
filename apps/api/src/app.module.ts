@@ -13,6 +13,7 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
 import { PromotionsModule } from './modules/promotions/promotions.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { PromotionsModule } from './modules/promotions/promotions.module';
     OrdersModule,
     CouponsModule,
     PromotionsModule,
+    HealthModule,
   ],
   providers: [
     // Apply ThrottlerGuard globally so every route is rate-limited by default.

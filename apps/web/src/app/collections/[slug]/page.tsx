@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import CollectionClient from "./CollectionClient";
+import { resolveApiUrl } from "../../../lib/api";
 
 interface Category {
   _id: string;
@@ -10,8 +11,8 @@ interface Category {
 
 async function getCategory(slug: string): Promise<Category | null> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-    const res = await fetch(`${apiUrl}/api/v1/categories/${slug}`, {
+    const url = resolveApiUrl(`/api/v1/categories/${slug}`);
+    const res = await fetch(url, {
       next: { revalidate: 600 },
     });
     if (!res.ok) return null;

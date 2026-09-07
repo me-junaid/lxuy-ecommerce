@@ -6,6 +6,7 @@ import { Header, Footer, ProductCard, Button } from "@repo/ui";
 import { useAuth } from "../../../context/AuthContext";
 import { useCart } from "../../../context/CartContext";
 import { useWishlist } from "../../../context/WishlistContext";
+import { api } from "../../../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Brand {
@@ -69,15 +70,17 @@ function CollectionPageContent({ slug }: { slug: string }) {
   useEffect(() => {
     async function fetchMetadata() {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
-        const [resCat, resBrand] = await Promise.all([
-          fetch(`${baseUrl}/api/v1/categories/${slug}`),
-          fetch(`${baseUrl}/api/v1/brands`),
+        const [cat, brs] = await Promise.all([
+          api.get<Category>(`/api/v1/categories/${slug}`),
+          api.get<Brand[]>('/api/v1/brands'),
         ]);
-        if (resCat.ok) { const cat = await resCat.json(); setCurrentCategory(cat); }
-        else { setError("Collection not found."); }
-        if (resBrand.ok) { const brs = await resBrand.json(); setBrands(brs); }
-      } catch (err) { console.error("Error loading filter metadata:", err); }
+        if (cat) setCurrentCategory(cat);
+        else setError("Collection not found.");
+        if (brs) setBrands(brs);
+      } catch (err) {
+        console.error("Error loading filter metadata:", err);
+        setError("Collection not found.");
+      }
     }
     fetchMetadata();
   }, [slug]);
@@ -94,10 +97,9 @@ function CollectionPageContent({ slug }: { slug: string }) {
         if (initialMaxPrice) params.append("maxPrice", initialMaxPrice);
         params.append("page", initialPage.toString());
         params.append("limit", "12");
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
-        const response = await fetch(`${baseUrl}/api/v1/products?${params.toString()}`);
-        if (!response.ok) throw new Error("Failed to fetch products matching parameters.");
-        const data = await response.json();
+        const data = await api.get<{ data: Product[]; total: number; pages: number }>(
+          `/api/v1/products?${params.toString()}`
+        );
         setProducts(data.data || []);
         setTotalProducts(data.total || 0);
         setTotalPages(data.pages || 1);

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const uri = 'mongodb+srv://jdasjunaid_db_user:PXoq7YgZdQLdoNV5@lxuy.zau631m.mongodb.net/test?retryWrites=true&w=majority';
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/next-ecommerce';
 
 const CategorySchema = new mongoose.Schema({ name: String });
 const BrandSchema = new mongoose.Schema({ name: String });
