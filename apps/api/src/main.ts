@@ -9,8 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
-  const port =
-    Number(configService.get('PORT')) || Number(process.env.PORT) || 3001;
+  const port = configService.get<number>('PORT') ?? 3001;
   const nodeEnv = configService.get<string>('NODE_ENV') || 'development';
   const isProduction = nodeEnv === 'production';
 
@@ -46,49 +45,29 @@ async function bootstrap() {
   );
 
   // ─── CORS ─────────────────────────────────────────────────────────────────
-  // Supports CORS_ORIGIN and ALLOWED_ORIGINS (comma-separated list of allowed origins).
-  const rawCorsOrigins =
-    configService.get<string>('CORS_ORIGIN') ||
-    configService.get<string>('ALLOWED_ORIGINS') ||
-    process.env.CORS_ORIGIN ||
-    process.env.ALLOWED_ORIGINS ||
-    '';
-
-  const configuredOrigins = rawCorsOrigins
-    .split(',')
-    .map((o) => o.trim().replace(/\/+$/, ''))
-    .filter(Boolean);
-
-  const allowedOrigins =
-    configuredOrigins.length > 0
-      ? configuredOrigins
-      : ['http://localhost:3000', 'http://localhost:3002'];
+  // Only allow requests from the Next.js frontend. Expand this list when
+  // deploying to production (add your production domain).
+  const allowedOrigins = isProduction
+    ? (configService.get<string>('ALLOWED_ORIGINS') || '')
+        .split(',')
+        .map((o) => o.trim())
+    : ['http://localhost:3000', 'http://localhost:3002'];
 
   app.enableCors({
     origin: (
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
-      // Allow requests with no origin (e.g. Postman, curl, server-to-server calls, health checks).
+      // Allow requests with no origin (e.g. Postman, server-to-server calls).
       if (!origin) {
         callback(null, true);
         return;
       }
-      const normalizedOrigin = origin.trim().replace(/\/+$/, '');
-      if (allowedOrigins.includes(normalizedOrigin)) {
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
         return;
       }
-      // In development, allow localhost ports automatically
-      if (
-        !isProduction &&
-        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin)
-      ) {
-        callback(null, true);
-        return;
-      }
-      // Safely disallow origin without throwing an unhandled exception
-      callback(null, false);
+      callback(new Error(`CORS: origin '${origin}' is not allowed`));
     },
     credentials: true, // Required to accept cookies cross-origin.
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

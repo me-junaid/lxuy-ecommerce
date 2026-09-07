@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { resolveApiUrl } from "../lib/api";
 
 interface Product {
   slug: string;
@@ -15,6 +14,8 @@ interface Category {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL || "https://lxuy.com";
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
   // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -36,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let productRoutes: MetadataRoute.Sitemap = [];
   try {
     const res = await fetch(
-      resolveApiUrl('/api/v1/products?status=published&limit=1000'),
+      `${apiUrl}/api/v1/products?status=published&limit=1000`,
       { next: { revalidate: 3600 } }
     );
     if (res.ok) {
@@ -58,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic collection (category) routes
   let collectionRoutes: MetadataRoute.Sitemap = [];
   try {
-    const res = await fetch(resolveApiUrl('/api/v1/categories'), {
+    const res = await fetch(`${apiUrl}/api/v1/categories`, {
       next: { revalidate: 3600 },
     });
     if (res.ok) {

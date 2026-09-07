@@ -6,7 +6,6 @@ import { Header, Footer, ProductCard, Button } from "@repo/ui";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
-import { api } from "../../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Brand { _id: string; name: string; slug: string; }
@@ -55,12 +54,9 @@ function SearchPageContent() {
   useEffect(() => {
     async function fetchMetadata() {
       try {
-        const [cats, brs] = await Promise.all([
-          api.get<Category[]>("/api/v1/categories"),
-          api.get<Brand[]>("/api/v1/brands"),
-        ]);
-        if (cats) setCategories(cats);
-        if (brs) setBrands(brs);
+        const [resCat, resBrand] = await Promise.all([fetch("/api/v1/categories"), fetch("/api/v1/brands")]);
+        if (resCat.ok) { const cats = await resCat.json(); setCategories(cats); }
+        if (resBrand.ok) { const brs = await resBrand.json(); setBrands(brs); }
       } catch (err) { console.error("Error loading filter metadata:", err); }
     }
     fetchMetadata();
@@ -85,9 +81,10 @@ function SearchPageContent() {
         if (initialMaxPrice) params.append("maxPrice", initialMaxPrice);
         params.append("page", initialPage.toString());
         params.append("limit", "16");
-        const data = await api.get<{ data: Product[]; total: number; pages: number }>(
-          `/api/v1/products?${params.toString()}`
-        );
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+        const response = await fetch(`${baseUrl}/api/v1/products?${params.toString()}`);
+        if (!response.ok) throw new Error("Failed to fetch products matching parameters.");
+        const data = await response.json();
         setProducts(data.data || []); setTotalProducts(data.total || 0); setTotalPages(data.pages || 1);
       } catch (err) { const error = err as Error; setError(error.message || "Something went wrong."); }
       finally { setLoading(false); }

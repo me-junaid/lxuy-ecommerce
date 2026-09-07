@@ -50,36 +50,18 @@ export class AuthController {
   /**
    * Derives safe cookie options based on whether the request originates
    * from a localhost environment (HTTP) or a production deployment (HTTPS).
-   * In production with Vercel frontend and Railway backend (cross-site),
-   * sameSite defaults to 'none' and secure to true for cookies to be sent.
-   * Can be customized via COOKIE_SAME_SITE and COOKIE_DOMAIN.
    */
   private getCookieOptions(request?: Request) {
     const host = request?.headers['host'] || '';
     const isLocalhost =
       host.includes('localhost') || host.includes('127.0.0.1');
 
-    const sameSiteEnv = this.configService.get<string>('COOKIE_SAME_SITE');
-    const cookieDomain = this.configService.get<string>('COOKIE_DOMAIN');
-
-    let sameSite: 'lax' | 'strict' | 'none' = isLocalhost ? 'lax' : 'none';
-    if (
-      sameSiteEnv === 'lax' ||
-      sameSiteEnv === 'strict' ||
-      sameSiteEnv === 'none'
-    ) {
-      sameSite = sameSiteEnv;
-    }
-
-    const secure = isLocalhost ? false : true;
-
     return {
       httpOnly: true,
-      secure,
-      sameSite,
+      secure: isLocalhost ? false : true,
+      sameSite: isLocalhost ? ('lax' as const) : ('strict' as const),
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-      ...(cookieDomain ? { domain: cookieDomain } : {}),
     };
   }
 

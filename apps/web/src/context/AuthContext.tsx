@@ -8,7 +8,7 @@ import React, {
   useRef,
   ReactNode,
 } from "react";
-import { api, setAccessToken, resolveApiUrl } from "../lib/api";
+import { api, setAccessToken } from "../lib/api";
 import { useRouter } from "next/navigation";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -103,9 +103,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await sleep(RETRY_DELAY_MS);
           }
 
-          const response = await fetch(resolveApiUrl("/api/v1/auth/refresh"), {
+          const response = await fetch("/api/v1/auth/refresh", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            // "include" sends cookies for same-origin AND proxied cross-origin
+            // requests — required when Next.js proxies /api/* to port 3001.
             credentials: "include",
           });
 
@@ -241,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Silently no-ops if called while unauthenticated.
   const refreshUser = async (): Promise<void> => {
     try {
-      const response = await fetch(resolveApiUrl("/api/v1/auth/refresh"), {
+      const response = await fetch("/api/v1/auth/refresh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
