@@ -1,3 +1,5 @@
+"use client";
+
 import { motion, HTMLMotionProps } from 'framer-motion';
 
 export interface ButtonProps extends HTMLMotionProps<'button'> {
